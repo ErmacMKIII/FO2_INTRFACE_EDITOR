@@ -1,13 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package rs.alexanderstojanovich.fo2ie.feature;
 
-import java.io.IOException;
 import java.util.regex.Pattern;
-import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**
  *
@@ -48,11 +57,7 @@ public interface FeatureValue {
     public static FeatureValue valueOf(String string) {
         FeatureValue result = null;
         if (Pattern.matches(IMG_EXT_REGEX, string)) {
-            try {
-                result = new ImageWrapper(string);
-            } catch (IOException ex) {
-                FO2IELogger.reportError(ex.getMessage(), ex);
-            }
+            result = new ImageWrapper(string);
         } else {
             String[] split = string.split(" ");
             switch (split.length) {
@@ -60,7 +65,7 @@ public interface FeatureValue {
                     result = new SingleValue();
                     break;
                 case 4:
-                    result = new Vector4();
+                    result = new MyVector4();
                     break;
                 default:
                     result = new Array();
@@ -68,9 +73,7 @@ public interface FeatureValue {
             }
         }
         // this essetnial thing is always overriden
-        if (result != null) {
-            result.setStringValue(string);
-        }
+        result.setStringValue(string);
         return result;
     }
 }

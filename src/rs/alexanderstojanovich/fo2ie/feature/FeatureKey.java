@@ -1,9 +1,24 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package rs.alexanderstojanovich.fo2ie.feature;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -2154,65 +2169,115 @@ public interface FeatureKey {
      * @return completed feature key or null if no exists
      */
     public static FeatureKey valueOf(String string) {
-        if (string.startsWith(AIM)) {
-            return Aim.valueOf(string);
-        } else if (string.startsWith(BARTER)) {
-            return Barter.valueOf(string);
-        } else if (string.startsWith(CHARACTER)) {
-            return Character.valueOf(string);
-        } else if (string.startsWith(CHOSEN)) {
-            return Chosen.valueOf(string);
-        } else if (string.startsWith(CONSOLE)) {
-            return Console.valueOf(string);
-        } else if (string.startsWith(DIALOG_BOX)) {
-            return Dialog.valueOf(string);
-        } else if (string.startsWith(FIX_BOY)) {
-            return FixBoy.valueOf(string);
-        } else if (string.startsWith(GLOBAL_MAP)) {
-            return GlobalMap.valueOf(string);
-        } else if (string.startsWith(INPUT_BOX)) {
-            return InputBox.valueOf(string);
-        } else if (string.startsWith(INTRFACE)) {
-            return Interface.valueOf(string);
-        } else if (string.startsWith(INVENTORY)) {
-            return Inventory.valueOf(string);
-        } else if (string.startsWith(LOGIN)) {
-            return Login.valueOf(string);
-        } else if (string.startsWith(MINI_MAP)) {
-            return MiniMap.valueOf(string);
-        } else if (string.startsWith(OPTIONS)) {
-            return Options.valueOf(string);
-        } else if (string.startsWith(PERK)) {
-            return Perk.valueOf(string);
-        } else if (string.startsWith(PICK_UP)) {
-            return PickUp.valueOf(string);
-        } else if (string.startsWith(PIP_BOY)) {
-            return PipBoy.valueOf(string);
-        } else if (string.startsWith(POP_UP)) {
-            return PopUp.valueOf(string);
-        } else if (string.startsWith(PRICE_SETUP)) {
-            return PriceSetup.valueOf(string);
-        } else if (string.startsWith(RADIO)) {
-            return Radio.valueOf(string);
-        } else if (string.startsWith(REGISTRATION)) {
-            return Registration.valueOf(string);
-        } else if (string.startsWith(SAVE_LOAD)) {
-            return SaveLoad.valueOf(string);
-        } else if (string.startsWith(SAY_BOX)) {
-            return SayBox.valueOf(string);
-        } else if (string.startsWith(SKILL_BOX)) {
-            return SkillBox.valueOf(string);
-        } else if (string.startsWith(SPLIT)) {
-            return Split.valueOf(string);
-        } else if (string.startsWith(TIMER)) {
-            return Timer.valueOf(string);
-        } else if (string.startsWith(TOWN_VIEW)) {
-            return TownView.valueOf(string);
-        } else if (string.startsWith(USE)) {
-            return Use.valueOf(string);
-        } else {
-            return null;
+        for (String prefix : ABBRS) {
+            if (string.startsWith(prefix)) {
+                FeatureKey[] keys = valuesOf(prefix);
+                Arrays.sort(keys);
+
+                for (FeatureKey key : keys) {
+                    if (key.getStringValue().equals(string)) {
+                        return key;
+                    }
+                }
+
+                return null;
+            }
         }
 
+        return null;
     }
+
+    /**
+     * Gets values of this Feature Key prefix
+     *
+     * @param prefix Feature Key prefix
+     * @return array of possible keys
+     */
+    public static FeatureKey[] valuesOf(String prefix) {
+        switch (prefix) {
+            case AIM:
+                return Aim.values();
+            case BARTER:
+                return Barter.values();
+            case CHARACTER:
+                return Character.values();
+            case CHOSEN:
+                return Chosen.values();
+            case CONSOLE:
+                return Console.values();
+            case DIALOG_BOX:
+                return Dialog.values();
+            case FIX_BOY:
+                return FixBoy.values();
+            case GLOBAL_MAP:
+                return GlobalMap.values();
+            case INPUT_BOX:
+                return InputBox.values();
+            case INTRFACE:
+                return Interface.values();
+            case INVENTORY:
+                return Inventory.values();
+            case LOGIN:
+                return Login.values();
+            case MINI_MAP:
+                return MiniMap.values();
+            case OPTIONS:
+                return Options.values();
+            case PERK:
+                return Perk.values();
+            case PICK_UP:
+                return PickUp.values();
+            case PIP_BOY:
+                return PipBoy.values();
+            case POP_UP:
+                return PopUp.values();
+            case PRICE_SETUP:
+                return PriceSetup.values();
+            case RADIO:
+                return Radio.values();
+            case REGISTRATION:
+                return Registration.values();
+            case SAVE_LOAD:
+                return SaveLoad.values();
+            case SAY_BOX:
+                return SayBox.values();
+            case SKILL_BOX:
+                return SkillBox.values();
+            case SPLIT:
+                return Split.values();
+            case TIMER:
+                return Timer.values();
+            case TOWN_VIEW:
+                return TownView.values();
+            case USE:
+                return Use.values();
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Get pictures using possible picture position
+     *
+     * @param picPos picture position
+     * @return list of pictures (null if picPos isn't picture position)
+     */
+    public static List<FeatureKey> getPics(FeatureKey picPos) {
+        if (picPos.getType() == Type.PIC_POS) {
+            List<FeatureKey> result = new ArrayList<>();
+            String prefix = picPos.getPrefix();
+            FeatureKey[] keys = valuesOf(prefix);
+            for (FeatureKey key : keys) {
+                if (key.getType() == Type.PIC
+                        && key.getStringValue().contains(picPos.getStringValue())) {
+                    result.add(key);
+                }
+            }
+
+            return result;
+        }
+
+        return null;
+    }
+
 }

@@ -1,13 +1,29 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package rs.alexanderstojanovich.fo2ie.editor;
 
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.util.FPSAnimator;
 import java.awt.Image;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +35,13 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
-import rs.alexanderstojanovich.fo2ie.intrface.Component;
+import rs.alexanderstojanovich.fo2ie.frm.Palette;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.Tree;
 
 /**
  *
@@ -34,9 +49,16 @@ import rs.alexanderstojanovich.fo2ie.util.Tree;
  */
 public class GUI extends javax.swing.JFrame {
 
+    public static final GLProfile GL20 = GLProfile.get(GLProfile.GL2);
+    public static final GLCapabilities GL_CAP = new GLCapabilities(GL20);
+
+    public static final GLCanvas GL_CANVAS = new GLCanvas(GL_CAP);
+
     private static final Configuration cfg = Configuration.getInstance();
     private static final DefaultComboBoxModel<Section.SectionName> DCBM = new DefaultComboBoxModel<>(Section.SectionName.values());
     private final Intrface intrface = new Intrface();
+    private final ModuleAnimation mdlAnim = new ModuleAnimation(intrface);
+    private final FPSAnimator animator = new FPSAnimator(GL_CANVAS, 60, true);
 
     // cool it's our new logo :)
     private static final String LOGO_FILE_NAME = "fo2ie_logo.png";
@@ -46,13 +68,27 @@ public class GUI extends javax.swing.JFrame {
     public static final String RESOURCES_DIR = "/rs/alexanderstojanovich/fo2ie/res/";
     public static final String LICENSE_LOGO_FILE_NAME = "gplv3_logo.png";
 
+    // OpenGL stuff
+    public static final String PRIM_VERTEX_SHADER = "primitiveVS.glsl";
+    public static final String PRIM_FRAGMENT_SHADER = "primitiveFS.glsl";
+
+    public static final String IMG_VERTEX_SHADER = "imageVS.glsl";
+    public static final String IMG_FRAGMENT_SHADER = "imageFS.glsl";
+
+    public static final String FNT_VERTEX_SHADER = "fontVS.glsl";
+    public static final String FNT_FRAGMENT_SHADER = "fontFS.glsl";
+
+    public static final String FNT_PIC = "font.png";
+    public static final String OVERLAY_PIC = "overlay.png";
+
     /**
      * Creates new form GUI
      */
     public GUI() {
-        initComponents();
-        initFO2IELogos();
-        initPaths();
+        initComponents(); // netbeans loading components
+        initFO2IELogos(); // logos for app
+        initPaths(); // set paths from config
+        initGL(); // sets GL canvas        
     }
 
     // init both logos
@@ -84,6 +120,20 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    private void initGL() {
+        GL_CANVAS.addGLEventListener(mdlAnim);
+        GL_CANVAS.setSize(panelModule.getSize());
+        this.panelModule.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int width = e.getComponent().getWidth();
+                int height = e.getComponent().getHeight();
+                GL_CANVAS.setSize(width, height);
+            }
+        });
+        this.panelModule.add(GL_CANVAS);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -95,7 +145,7 @@ public class GUI extends javax.swing.JFrame {
 
         fileChooserInput = new javax.swing.JFileChooser();
         fileChooserOutput = new javax.swing.JFileChooser();
-        workPanel = new javax.swing.JPanel();
+        panelWork = new javax.swing.JPanel();
         pnlFilePaths = new javax.swing.JPanel();
         lblInput = new javax.swing.JLabel();
         txtFldInPath = new javax.swing.JTextField();
@@ -114,9 +164,7 @@ public class GUI extends javax.swing.JFrame {
         tblFeatures = new javax.swing.JTable();
         btnPreview = new javax.swing.JButton();
         btnBuild = new javax.swing.JButton();
-        modulePanel = new javax.swing.JPanel();
-        spMdlImg = new javax.swing.JScrollPane();
-        lblMdlImgPreview = new javax.swing.JLabel();
+        panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
         fileMenuExit = new javax.swing.JMenuItem();
@@ -133,7 +181,7 @@ public class GUI extends javax.swing.JFrame {
         setTitle("FOnline2 S3 Interface Editor");
         getContentPane().setLayout(new java.awt.GridLayout(1, 2));
 
-        workPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Work"));
+        panelWork.setBorder(javax.swing.BorderFactory.createTitledBorder("Work"));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
         pnlFilePaths.setLayout(new java.awt.GridLayout(2, 4));
@@ -283,20 +331,20 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout workPanelLayout = new javax.swing.GroupLayout(workPanel);
-        workPanel.setLayout(workPanelLayout);
-        workPanelLayout.setHorizontalGroup(
-            workPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(workPanelLayout.createSequentialGroup()
+        javax.swing.GroupLayout panelWorkLayout = new javax.swing.GroupLayout(panelWork);
+        panelWork.setLayout(panelWorkLayout);
+        panelWorkLayout.setHorizontalGroup(
+            panelWorkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelWorkLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(workPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelWorkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlIntrface, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnlFilePaths, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        workPanelLayout.setVerticalGroup(
-            workPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(workPanelLayout.createSequentialGroup()
+        panelWorkLayout.setVerticalGroup(
+            panelWorkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelWorkLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pnlFilePaths, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -304,30 +352,22 @@ public class GUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        getContentPane().add(workPanel);
+        getContentPane().add(panelWork);
 
-        modulePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Module"));
+        panelModule.setBorder(javax.swing.BorderFactory.createTitledBorder("Module"));
 
-        lblMdlImgPreview.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        spMdlImg.setViewportView(lblMdlImgPreview);
-
-        javax.swing.GroupLayout modulePanelLayout = new javax.swing.GroupLayout(modulePanel);
-        modulePanel.setLayout(modulePanelLayout);
-        modulePanelLayout.setHorizontalGroup(
-            modulePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(modulePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(spMdlImg, javax.swing.GroupLayout.DEFAULT_SIZE, 722, Short.MAX_VALUE)
-                .addContainerGap())
+        javax.swing.GroupLayout panelModuleLayout = new javax.swing.GroupLayout(panelModule);
+        panelModule.setLayout(panelModuleLayout);
+        panelModuleLayout.setHorizontalGroup(
+            panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 734, Short.MAX_VALUE)
         );
-        modulePanelLayout.setVerticalGroup(
-            modulePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(modulePanelLayout.createSequentialGroup()
-                .addComponent(spMdlImg, javax.swing.GroupLayout.DEFAULT_SIZE, 638, Short.MAX_VALUE)
-                .addContainerGap())
+        panelModuleLayout.setVerticalGroup(
+            panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 644, Short.MAX_VALUE)
         );
 
-        getContentPane().add(modulePanel);
+        getContentPane().add(panelModule);
 
         mainMenuFile.setText("File");
 
@@ -405,7 +445,6 @@ public class GUI extends javax.swing.JFrame {
             defFtTblModel.removeRow(i);
         }
 
-        lblMdlImgPreview.setIcon(null);
     }//GEN-LAST:event_btnLoadActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
@@ -463,10 +502,9 @@ public class GUI extends javax.swing.JFrame {
         }
 
         if (resolutionPragma != null) {
-            Tree<Component> module = intrface.buildModule(sectionName, resolutionPragma);
-            BufferedImage genImg = Intrface.generateImageFromModule(module);
-            ImageIcon imageIcon = new ImageIcon(genImg);
-            lblMdlImgPreview.setIcon(imageIcon);
+            intrface.setSectionName(sectionName);
+            intrface.setResolutionPragma(resolutionPragma);
+            GL_CANVAS.setSize(width, height);
         }
     }//GEN-LAST:event_btnBuildActionPerformed
 
@@ -480,11 +518,11 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.1 - BELARUS (PUBLIC BUILD reviewed on 2020-12-23 at 16:15).</b></html>\n");
+            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2020-12-27 at 10:15).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
-            sb.append("Changelog for v0.1 BELARUS:\n");
+            sb.append("Changelog for v0.2 CHINESE:\n");
             sb.append("\t- Initial pre-release.\n");
             sb.append("\n");
 //            sb.append("Changelog since V1.1 GOTHS:\n");
@@ -573,8 +611,9 @@ public class GUI extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        FO2IELogger.init(false);
+        FO2IELogger.init(args.length > 0 && args[0].equals("-debug"));
         cfg.readConfigFile();
+        Palette.load("Fallout Palette.act");
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -597,6 +636,7 @@ public class GUI extends javax.swing.JFrame {
                 GUI gui = new GUI();
                 gui.setVisible(true);
                 gui.pack();
+                gui.animator.start();
             }
         });
 
@@ -623,21 +663,19 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem infoMenuAbout;
     private javax.swing.JMenuItem infoMenuHelp;
     private javax.swing.JLabel lblInput;
-    private javax.swing.JLabel lblMdlImgPreview;
     private javax.swing.JLabel lblOutput;
     private javax.swing.JLabel lblResolution;
     private javax.swing.JLabel lblSection;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mainMenuFile;
     private javax.swing.JMenu mainMenuInfo;
-    private javax.swing.JPanel modulePanel;
+    private javax.swing.JPanel panelModule;
+    private javax.swing.JPanel panelWork;
     private javax.swing.JPanel pnlFilePaths;
     private javax.swing.JPanel pnlIntrface;
     private javax.swing.JScrollPane sbFeatures;
-    private javax.swing.JScrollPane spMdlImg;
     private javax.swing.JTable tblFeatures;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;
-    private javax.swing.JPanel workPanel;
     // End of variables declaration//GEN-END:variables
 }

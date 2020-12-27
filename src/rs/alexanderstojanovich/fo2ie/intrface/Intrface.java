@@ -1,10 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package rs.alexanderstojanovich.fo2ie.intrface;
 
+import com.jogamp.opengl.GL2;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,15 +26,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.editor.GUI;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
-import rs.alexanderstojanovich.fo2ie.feature.Vector4;
+import rs.alexanderstojanovich.fo2ie.feature.MyVector4;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
+import rs.alexanderstojanovich.fo2ie.ogl.Quad;
+import rs.alexanderstojanovich.fo2ie.ogl.Text;
+import rs.alexanderstojanovich.fo2ie.ogl.Texture;
+import rs.alexanderstojanovich.fo2ie.ogl.Vector3fColors;
+import rs.alexanderstojanovich.fo2ie.util.CoordsConverter;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.Node;
 import rs.alexanderstojanovich.fo2ie.util.Tree;
@@ -34,6 +54,7 @@ import rs.alexanderstojanovich.fo2ie.util.Tree;
 public class Intrface {
 
     public static final String INI_FILENAME = "default.ini";
+    public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?Pic(Dn|Off|Mask|Na)?";
 
     /**
      * Mode for reading {STD = standard - loading common values; RES =
@@ -43,6 +64,7 @@ public class Intrface {
         STD, RES
     }
 
+    private boolean initialized = false;
     private Mode mode = Mode.STD;
 
     private final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.values());
@@ -78,8 +100,10 @@ public class Intrface {
     private final Map<Section, String> sectionToPrefixMap = new HashMap<>();
 
     protected final Map<FeatureKey, FeatureValue> commonFeatMap = new LinkedHashMap<>();
+    private final List<ResolutionPragma> customResolutions = new ArrayList<>();
 
-    public static final String PIC_REGEX = "(Main)?Pic(Dn|Off|Mask|Na)?";
+    private SectionName sectionName;
+    private ResolutionPragma resolutionPragma;
 
     public Intrface() {
         initMap();
@@ -105,8 +129,12 @@ public class Intrface {
 
     }
 
-    private final List<ResolutionPragma> customResolutions = new ArrayList<>();
-
+    /**
+     * Reads ini file and initializes the interface (check flag initialized to
+     * see if it's successfully initialized)
+     *
+     * @return initialization ok status
+     */
     public boolean readIniFile() {
         boolean ok = false;
 
@@ -187,18 +215,22 @@ public class Intrface {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
         }
 
+        initialized = ok;
+
         return ok;
     }
 
     /**
-     * Builds image from this section
+     * Builds components tree from current section based on resolution
      *
-     * @param sectionName sectionName
-     * @param resolutionPragma resolution used to preview this module
+     * @param gl20 GL2 binding
+     * @param fntTexture font texture for text rendering
      * @return built image from all the features
+     * @throws java.io.IOException if building the module fails due to missing
+     * image
      */
-    public Tree<Component> buildModule(SectionName sectionName, ResolutionPragma resolutionPragma) {
-        Tree<Component> result = null;
+    public Tree<GLComponent> buildTree(GL2 gl20, Texture fntTexture) throws IOException {
+        Tree<GLComponent> result = null;
         Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             String prefix = this.sectionToPrefixMap.get(section);
@@ -210,31 +242,106 @@ public class Intrface {
                 FeatureKey mainPicPosKey = FeatureKey.valueOf(mainPicPosStr);
 
                 if (mainPicKey != null && resolutionPragma.customFeatMap.containsKey(mainPicKey)) {
-                    FeatureValue mainPicVal = resolutionPragma.customFeatMap.get(mainPicKey);
-                    Vector4 mainPicPos = (Vector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
-                    Component root = new ImageComponent(mainPicKey, (ImageWrapper) mainPicVal, mainPicPos);
-                    result = new Tree<>(new Node<>(root));
+                    ImageWrapper mainPic = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
+                    MyVector4 mainPicPos = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
 
-                    final Set<ImageComponent> picComps = new LinkedHashSet<>();
+                    if (mainPicPos != null) {
+                        float rposx = (mainPicPos.x + mainPicPos.z) / 2.0f;
+                        float rposy = (mainPicPos.y + mainPicPos.w) / 2.0f;
+
+                        Vector2f rootPos = new Vector2f(rposx, rposy);
+                        Vector2f rootPosGL = CoordsConverter.getOpenGLCoordinates(rootPos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
+                        int rwidth = mainPicPos.z - mainPicPos.x;
+                        int rheight = mainPicPos.w - mainPicPos.y;
+
+                        mainPic.loadImage();
+                        Texture rootTex = new Texture(gl20, mainPic.getImages()[0]);
+                        Quad root = new Quad(rwidth, rheight, rootTex, rootPosGL);
+                        result = new Tree<>(new Node<>(root));
+                    } else {
+                        mainPic.loadImage();
+                        Texture rootTex = new Texture(gl20, mainPic.getImages()[0]);
+                        Quad root = new Quad(mainPic.getImages()[0].getWidth(), mainPic.getImages()[0].getHeight(), rootTex);
+                        result = new Tree<>(new Node<>(root));
+                    }
+
                     for (FeatureKey featKey : section.keys) {
                         FeatureKey.Type fkType = featKey.getType();
                         if (fkType == FeatureKey.Type.PIC && featKey != mainPicKey) {
                             ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(featKey);
-                            ImageComponent picComp = new ImageComponent(featKey, pic);
-                            picComps.add(picComp);
-                        }
-                    }
+                            String picPosStr = featKey.getStringValue().replaceAll(PIC_REGEX, "");
+                            if (!picPosStr.equalsIgnoreCase("LogSinglePlayer")) {
+                                FeatureKey picPosKey = FeatureKey.valueOf(picPosStr);
 
-                    for (ImageComponent picComp : picComps) {
-                        FeatureKey picKey = picComp.getFeatureKey();
-                        String picPosStr = picKey.getStringValue().replaceAll(PIC_REGEX, "");
+                                if (picPosKey != null) {
+                                    MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(picPosKey);
 
-                        if (!picPosStr.equalsIgnoreCase("LogSinglePlayer")) {
-                            FeatureKey picPosKey = FeatureKey.valueOf(picPosStr);
-                            FeatureValue picPosVal = resolutionPragma.customFeatMap.get(picPosKey);
-                            picComp.setPosition((Vector4) picPosVal);
+                                    float posx = (picPosVal.x + picPosVal.z) / 2.0f;
+                                    float posy = (picPosVal.y + picPosVal.w) / 2.0f;
 
-                            result.addChild(new Node<>(picComp));
+                                    Vector2f pos = new Vector2f(posx, posy);
+                                    Vector2f posGL = CoordsConverter.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
+                                    int width = picPosVal.z - picPosVal.x;
+                                    int height = picPosVal.w - picPosVal.y;
+
+                                    pic.loadImage();
+                                    BufferedImage[] images = pic.getImages();
+
+                                    for (BufferedImage image : images) {
+                                        Texture tex = new Texture(gl20, image);
+                                        Quad imgComp = new Quad(width, height, tex, posGL);
+                                        result.addChild(new Node<>(imgComp));
+                                    }
+                                }
+                            }
+                        } else if (fkType == FeatureKey.Type.PIC_POS && featKey != mainPicPosKey) {
+                            MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
+
+                            float posx = (picPosVal.x + picPosVal.z) / 2.0f;
+                            float posy = (picPosVal.y + picPosVal.w) / 2.0f;
+
+                            Vector2f pos = new Vector2f(posx, posy);
+                            Vector2f posGL = CoordsConverter.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
+                            int width = picPosVal.z - picPosVal.x;
+                            int height = picPosVal.w - picPosVal.y;
+
+                            List<FeatureKey> pics = FeatureKey.getPics(featKey);
+                            for (FeatureKey fkPic : pics) {
+                                ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
+                                pic.loadImage();
+                                BufferedImage[] images = pic.getImages();
+                                for (BufferedImage image : images) {
+                                    Texture tex = new Texture(gl20, image);
+                                    Quad imgComp = new Quad(width, height, tex, posGL);
+                                    result.addChild(new Node<>(imgComp));
+                                }
+                            }
+
+                        } else if (fkType == FeatureKey.Type.TXT) {
+                            MyVector4 txtVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
+
+                            float posx = (txtVal.x + txtVal.z) / 2.0f;
+                            float posy = (txtVal.y + txtVal.w) / 2.0f;
+
+                            Vector2f pos = new Vector2f(posx, posy);
+                            Vector2f posGL = CoordsConverter.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
+                            int width = txtVal.z - txtVal.x;
+                            int height = txtVal.w - txtVal.y;
+
+                            String regex = featKey.getPrefix() + "|" + "Text";
+                            String text = featKey.getStringValue().replaceAll(regex, "");
+
+                            PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
+                            txtOlay.getColor().w = 0.5f;
+                            Text txtComp = new Text(fntTexture, text, new Vector4f(Vector3fColors.GREEN, 1.0f), posGL);
+                            txtComp.setAlignment(Text.ALIGNMENT_CENTER);
+
+                            result.addChild(new Node<>(txtOlay));
+                            result.addChild(new Node<>(txtComp));
                         }
                     }
 
@@ -242,18 +349,6 @@ public class Intrface {
             }
         }
 
-        return result;
-    }
-
-    public static BufferedImage generateImageFromModule(Tree<Component> comps) {
-        ImageWrapper rimgw = (ImageWrapper) comps.getRoot().getData().getFeatureValue();
-        BufferedImage result = new BufferedImage(rimgw.getImage().getWidth(), rimgw.getImage().getHeight(), BufferedImage.TYPE_INT_ARGB);
-        List<Component> preorder = comps.preorder(null, comps.getRoot());
-        for (Component component : preorder) {
-            ImageWrapper imgw = (ImageWrapper) component.getFeatureValue();
-            Vector4 pos = component.getPosition();
-            result.getGraphics().drawImage(imgw.getImage(), pos.x, pos.y, pos.z - pos.x, pos.w - pos.y, null);
-        }
         return result;
     }
 
@@ -387,6 +482,30 @@ public class Intrface {
 
     public List<ResolutionPragma> getCustomResolutions() {
         return customResolutions;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
+    public SectionName getSectionName() {
+        return sectionName;
+    }
+
+    public void setSectionName(SectionName sectionName) {
+        this.sectionName = sectionName;
+    }
+
+    public ResolutionPragma getResolutionPragma() {
+        return resolutionPragma;
+    }
+
+    public void setResolutionPragma(ResolutionPragma resolutionPragma) {
+        this.resolutionPragma = resolutionPragma;
     }
 
 }
