@@ -20,7 +20,6 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import java.io.IOException;
-import javax.imageio.ImageIO;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
@@ -43,6 +42,7 @@ public class ModuleAnimation implements GLEventListener {
     private ShaderProgram fntSProgram;
 
     protected Texture fntTexture;
+    protected Texture qmarkTexture;
 
     public ModuleAnimation(Intrface intrface) {
         this.intrface = intrface;
@@ -74,11 +74,8 @@ public class ModuleAnimation implements GLEventListener {
         Shader fntFS = new Shader(gl20, GUI.FNT_FRAGMENT_SHADER, Shader.FRAGMENT_SHADER);
         fntSProgram = new ShaderProgram(gl20, fntVS, fntFS);
 
-        try {
-            fntTexture = new Texture(gl20, ImageIO.read(this.getClass().getResourceAsStream(GUI.RESOURCES_DIR + GUI.FNT_PIC)));
-        } catch (IOException ex) {
-            FO2IELogger.reportError(ex.getMessage(), ex);
-        }
+        fntTexture = Texture.loadLocalTexture(gl20, GUI.FNT_PIC);
+        qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
     }
 
     @Override
@@ -92,7 +89,7 @@ public class ModuleAnimation implements GLEventListener {
         gl20.glViewport(0, 0, i2, i3);
 
         try {
-            Tree<GLComponent> tree = intrface.buildTree(gl20, fntTexture);
+            Tree<GLComponent> tree = intrface.buildTree(gl20, fntTexture, qmarkTexture);
             if (tree != null) {
                 module.build(tree);
             }
@@ -128,6 +125,22 @@ public class ModuleAnimation implements GLEventListener {
 
     public void setFntSProgram(ShaderProgram fntSProgram) {
         this.fntSProgram = fntSProgram;
+    }
+
+    public Intrface getIntrface() {
+        return intrface;
+    }
+
+    public ShaderProgram getPrimSProgram() {
+        return primSProgram;
+    }
+
+    public Texture getFntTexture() {
+        return fntTexture;
+    }
+
+    public Texture getQmarkTexture() {
+        return qmarkTexture;
     }
 
 }

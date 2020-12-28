@@ -79,7 +79,7 @@ public class GUI extends javax.swing.JFrame {
     public static final String FNT_FRAGMENT_SHADER = "fontFS.glsl";
 
     public static final String FNT_PIC = "font.png";
-    public static final String OVERLAY_PIC = "overlay.png";
+    public static final String QMARK_PIC = "qmark.png";
 
     /**
      * Creates new form GUI

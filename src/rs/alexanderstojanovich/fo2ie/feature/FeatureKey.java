@@ -507,9 +507,9 @@ public interface FeatureKey {
                 case FixMain:
                 case FixScrDn:
                 case FixScrUp:
+                case FixUp:
                     return Type.PIC_POS;
                 case FixNum:
-                case FixUp:
                 case FixWin:
                     return Type.TXT;
                 default:

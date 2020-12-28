@@ -32,10 +32,17 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Hashtable;
+import javax.imageio.ImageIO;
+import rs.alexanderstojanovich.fo2ie.editor.GUI;
+import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**
  *
@@ -90,6 +97,15 @@ public class Texture {
         gl20.glBindTexture(GL2.GL_TEXTURE_2D, textureID);
     }
 
+    /**
+     * Binds this texture as active for use and specifying texture unit for it
+     * (from 0 to 7)
+     *
+     * @param gl20 GL2.0 binding
+     * @param textureUnitNum texture unit number
+     * @param shaderProgram provided shader program
+     * @param textureUniformName texture uniform name in the fragment shader
+     */
     public void bind(GL2 gl20, int textureUnitNum, ShaderProgram shaderProgram, String textureUniformName) {
         if (textureUnitNum >= 0 && textureUnitNum <= 7) {
             gl20.glActiveTexture(GL2.GL_TEXTURE0 + textureUnitNum);
@@ -173,10 +189,68 @@ public class Texture {
         return imageBuffer;
     }
 
+    /**
+     * Loads Texture from the resource folder
+     *
+     * @param gl20
+     * @param filename
+     * @return loaded Texture
+     */
+    public static Texture loadLocalTexture(GL2 gl20, String filename) {
+        InputStream is = Texture.class.getResourceAsStream(GUI.RESOURCES_DIR + filename);
+        if (is != null) {
+            try {
+                BufferedImage rdImg = ImageIO.read(is);
+                return new Texture(gl20, rdImg);
+            } catch (IOException ex) {
+                FO2IELogger.reportError("Error while loading image " + filename + "!", null);
+                FO2IELogger.reportError(ex.getMessage(), ex);
+            }
+        } else {
+            FO2IELogger.reportError("Cannot load texture " + filename + "!", null);
+        }
+
+        return null;
+    }
+
+    /**
+     * Loads texture from the filesystem
+     *
+     * @param gl20 provided GL2.0 binding
+     * @param file image file {PNG, BMP or JPG}
+     * @return loaded Texture
+     */
+    public static Texture loadTexture(GL2 gl20, File file) {
+        if (file.exists()) {
+            try {
+                InputStream is = new FileInputStream(file);
+                BufferedImage rdImg = ImageIO.read(is);
+                return new Texture(gl20, rdImg);
+            } catch (IOException ex) {
+                FO2IELogger.reportError("Error while loading image " + file.getName() + "!", null);
+                FO2IELogger.reportError(ex.getMessage(), ex);
+            }
+        } else {
+            FO2IELogger.reportError("Cannot load texture " + file.getName() + "!", null);
+        }
+
+        return null;
+    }
+
+    /**
+     * Enable globally all textures
+     *
+     * @param gl20 GL2.0 binding
+     */
     public static void enable(GL2 gl20) {
         gl20.glEnable(GL2.GL_TEXTURE_2D);
     }
 
+    /**
+     * Disable globally all textures
+     *
+     * @param gl20 GL2.0 binding
+     */
     public static void disable(GL2 gl20) {
         gl20.glDisable(GL2.GL_TEXTURE_2D);
     }

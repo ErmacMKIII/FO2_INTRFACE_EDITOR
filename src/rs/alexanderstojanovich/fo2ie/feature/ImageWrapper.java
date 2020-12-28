@@ -19,8 +19,10 @@ package rs.alexanderstojanovich.fo2ie.feature;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import javax.imageio.ImageIO;
 import rs.alexanderstojanovich.fo2ie.frm.FRM;
+import rs.alexanderstojanovich.fo2ie.frm.ImageData;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 
 /**
@@ -41,13 +43,19 @@ public class ImageWrapper implements FeatureValue {
         Configuration instance = Configuration.getInstance();
         File inDir = instance.getInDir();
         final File imgFile = new File(inDir.getPath() + File.separator + value);
-        if (imgFile.exists()) {
-            if (value.matches(IMG_EXT_REGEX)) {
+        if (imgFile.exists()
+                && (value.matches(IMG_EXT_REGEX) || value.matches(IMG_EXT_REGEX_UPPERCASE))) {
+            if (value.endsWith(".png") | value.endsWith(".PNG")) {
                 images = new BufferedImage[1];
                 images[0] = ImageIO.read(imgFile);
             } else if (value.endsWith(".frm") | value.endsWith(".FRM")) {
                 frm = new FRM(imgFile);
-                images = (BufferedImage[]) frm.getFrames().toArray();
+                List<ImageData> frames = frm.getFrames();
+                images = new BufferedImage[frames.size()];
+                int index = 0;
+                for (ImageData frame : frames) {
+                    images[index++] = frame.toBufferedImage();
+                }
             }
         }
     }

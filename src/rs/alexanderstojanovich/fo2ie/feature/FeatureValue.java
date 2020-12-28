@@ -24,8 +24,10 @@ import java.util.regex.Pattern;
  */
 public interface FeatureValue {
 
-    public static final String IMG_EXT_REGEX = ".*(\\.(bmp|gif|jpe?g|png|FOFRM|FRM?))$";
+    public static final String IMG_EXT_REGEX = ".*(\\.(bmp|gif|jpe?g|png|fofrm|frm?))$";
+    public static final String IMG_EXT_REGEX_UPPERCASE = IMG_EXT_REGEX.toUpperCase();
     public static final String NUMBER_REGEX = "-?\\d+(\\.\\d+)?";
+    public static final String NUMBER_ARRAY_REGEX = "^(\\s*-?\\d+(\\.\\d+)?)(\\s*\\s\\s*-?\\d+(\\.\\d+)?)*$";
 
     public enum Type {
         IMAGE, VECTOR4, SINGLE_VALUE, ARRAY
@@ -56,9 +58,10 @@ public interface FeatureValue {
      */
     public static FeatureValue valueOf(String string) {
         FeatureValue result = null;
-        if (Pattern.matches(IMG_EXT_REGEX, string)) {
+        if (Pattern.matches(IMG_EXT_REGEX, string)
+                || Pattern.matches(IMG_EXT_REGEX_UPPERCASE, string)) {
             result = new ImageWrapper(string);
-        } else {
+        } else if (Pattern.matches(NUMBER_ARRAY_REGEX, string)) {
             String[] split = string.split(" ");
             switch (split.length) {
                 case 1:
@@ -73,7 +76,9 @@ public interface FeatureValue {
             }
         }
         // this essetnial thing is always overriden
-        result.setStringValue(string);
+        if (result != null) {
+            result.setStringValue(string);
+        }
         return result;
     }
 }

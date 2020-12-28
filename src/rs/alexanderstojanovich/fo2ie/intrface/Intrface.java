@@ -54,7 +54,7 @@ import rs.alexanderstojanovich.fo2ie.util.Tree;
 public class Intrface {
 
     public static final String INI_FILENAME = "default.ini";
-    public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?Pic(Dn|Off|Mask|Na)?";
+    public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Off|Mask|Na)?";
 
     /**
      * Mode for reading {STD = standard - loading common values; RES =
@@ -188,7 +188,7 @@ public class Intrface {
 
                 }
 
-//                FO2IELogger.reportInfo("linenum = " + ++lineNum + ":" + line, null);
+//                FO2IELogger.reportInfo("linenum = " + ++lineNum + ": " + line, null);
             }
 
             FO2IELogger.reportInfo("Loaded total common key/vals: " + commonFeatMap.size(), null);
@@ -225,11 +225,12 @@ public class Intrface {
      *
      * @param gl20 GL2 binding
      * @param fntTexture font texture for text rendering
+     * @param unusedTexture unused texture (known as question mark texture)
      * @return built image from all the features
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public Tree<GLComponent> buildTree(GL2 gl20, Texture fntTexture) throws IOException {
+    public Tree<GLComponent> buildTree(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
         Tree<GLComponent> result = null;
         Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
@@ -309,17 +310,21 @@ public class Intrface {
                             int height = picPosVal.w - picPosVal.y;
 
                             List<FeatureKey> pics = FeatureKey.getPics(featKey);
-                            for (FeatureKey fkPic : pics) {
-                                ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
-                                pic.loadImage();
-                                BufferedImage[] images = pic.getImages();
-                                for (BufferedImage image : images) {
-                                    Texture tex = new Texture(gl20, image);
-                                    Quad imgComp = new Quad(width, height, tex, posGL);
-                                    result.addChild(new Node<>(imgComp));
+                            if (!pics.isEmpty()) {
+                                for (FeatureKey fkPic : pics) {
+                                    ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
+                                    pic.loadImage();
+                                    BufferedImage[] images = pic.getImages();
+                                    for (BufferedImage image : images) {
+                                        Texture tex = new Texture(gl20, image);
+                                        Quad imgComp = new Quad(width, height, tex, posGL);
+                                        result.addChild(new Node<>(imgComp));
+                                    }
                                 }
+                            } else {
+                                Quad imgComp = new Quad(width, height, unusedTexture, posGL);
+                                result.addChild(new Node<>(imgComp));
                             }
-
                         } else if (fkType == FeatureKey.Type.TXT) {
                             MyVector4 txtVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
 
