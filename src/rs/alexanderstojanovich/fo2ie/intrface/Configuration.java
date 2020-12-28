@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.fo2ie.intrface;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,6 +38,9 @@ public class Configuration {
 
     private File inDir = new File(INPUT_DIR_PATH);
     private File outDir = new File(OUTPUT_DIR_PATH);
+    private Color txtCol = Color.GREEN;
+    private Color txtOverlayCol = new Color(128, 128, 128, 128); // gray half translucent
+    private Color qmarkCol = Color.MAGENTA;
 
     private static Configuration instance;
 
@@ -49,6 +53,20 @@ public class Configuration {
             instance = new Configuration();
         }
         return instance;
+    }
+
+    private Color readRGBA(String str) {
+        String[] split = str.trim().split("^\\(|,|\\)$");
+        int red = Integer.parseInt(split[1]);
+        int green = Integer.parseInt(split[2]);
+        int blue = Integer.parseInt(split[3]);
+        int alpha = Integer.parseInt(split[4]);
+        Color color = new Color(red, green, blue, alpha);
+        return color;
+    }
+
+    private String writeRGBA(Color color) {
+        return "(" + color.getRed() + ", " + color.getGreen() + ", " + color.getBlue() + ", " + color.getAlpha() + ")";
     }
 
     /**
@@ -71,6 +89,15 @@ public class Configuration {
                                 break;
                             case "OutputDirPath":
                                 outDir = new File(words[1].replaceAll("\"", ""));
+                                break;
+                            case "TextColor":
+                                txtCol = readRGBA(words[1]);
+                                break;
+                            case "TextOverlayColor":
+                                txtOverlayCol = readRGBA(words[1]);
+                                break;
+                            case "QMarkColor":
+                                qmarkCol = readRGBA(words[1]);
                                 break;
                         }
                     }
@@ -105,6 +132,9 @@ public class Configuration {
             pw.println("InputDirPath = " + "\"" + inDir.getPath() + "\"");
             pw.println("OutputDirPath = " + "\"" + outDir.getPath() + "\"");
             pw.println();
+            pw.println("TextColor = " + writeRGBA(txtCol));
+            pw.println("TextOverlayColor = " + writeRGBA(txtOverlayCol));
+            pw.println("QMarkColor = " + writeRGBA(qmarkCol));
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } finally {
@@ -137,6 +167,30 @@ public class Configuration {
 
     public void setOutDir(File outDir) {
         this.outDir = outDir;
+    }
+
+    public Color getTxtCol() {
+        return txtCol;
+    }
+
+    public void setTxtCol(Color txtCol) {
+        this.txtCol = txtCol;
+    }
+
+    public Color getQmarkCol() {
+        return qmarkCol;
+    }
+
+    public void setQmarkCol(Color qmarkCol) {
+        this.qmarkCol = qmarkCol;
+    }
+
+    public Color getTxtOverlayCol() {
+        return txtOverlayCol;
+    }
+
+    public void setTxtOverlayCol(Color txtOverlayCol) {
+        this.txtOverlayCol = txtOverlayCol;
     }
 
 }

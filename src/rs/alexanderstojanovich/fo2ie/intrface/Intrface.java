@@ -17,6 +17,7 @@
 package rs.alexanderstojanovich.fo2ie.intrface;
 
 import com.jogamp.opengl.GL2;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,6 +45,7 @@ import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.ogl.Vector3fColors;
 import rs.alexanderstojanovich.fo2ie.util.CoordsConverter;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.Node;
 import rs.alexanderstojanovich.fo2ie.util.Tree;
 
@@ -53,8 +55,14 @@ import rs.alexanderstojanovich.fo2ie.util.Tree;
  */
 public class Intrface {
 
+    private final Configuration config = Configuration.getInstance();
+
     public static final String INI_FILENAME = "default.ini";
     public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Off|Mask|Na)?";
+
+    private final Vector4f textColor = GLColor.awtColorToVec4(config.getTxtCol());
+    private final Vector4f textOverlayColor = GLColor.awtColorToVec4(config.getTxtOverlayCol());
+    private final Vector4f qmarkColor = GLColor.awtColorToVec4(config.getQmarkCol());
 
     /**
      * Mode for reading {STD = standard - loading common values; RES =
@@ -263,7 +271,7 @@ public class Intrface {
                     } else {
                         mainPic.loadImage();
                         Texture rootTex = new Texture(gl20, mainPic.getImages()[0]);
-                        Quad root = new Quad(mainPic.getImages()[0].getWidth(), mainPic.getImages()[0].getHeight(), rootTex);
+                        Quad root = new Quad(rootTex);
                         result = new Tree<>(new Node<>(root));
                     }
 
@@ -323,6 +331,7 @@ public class Intrface {
                                 }
                             } else {
                                 Quad imgComp = new Quad(width, height, unusedTexture, posGL);
+                                imgComp.setColor(qmarkColor);
                                 result.addChild(new Node<>(imgComp));
                             }
                         } else if (fkType == FeatureKey.Type.TXT) {
@@ -341,7 +350,7 @@ public class Intrface {
                             String text = featKey.getStringValue().replaceAll(regex, "");
 
                             PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
-                            txtOlay.getColor().w = 0.5f;
+                            txtOlay.setColor(textOverlayColor);
                             Text txtComp = new Text(fntTexture, text, new Vector4f(Vector3fColors.GREEN, 1.0f), posGL);
                             txtComp.setAlignment(Text.ALIGNMENT_CENTER);
 
@@ -511,6 +520,10 @@ public class Intrface {
 
     public void setResolutionPragma(ResolutionPragma resolutionPragma) {
         this.resolutionPragma = resolutionPragma;
+    }
+
+    public Configuration getConfig() {
+        return config;
     }
 
 }
