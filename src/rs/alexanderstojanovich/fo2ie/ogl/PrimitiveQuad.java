@@ -20,8 +20,8 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.editor.GUI;
 
@@ -74,6 +74,7 @@ public class PrimitiveQuad implements GLComponent {
     public PrimitiveQuad(int width, int height) {
         this.width = width;
         this.height = height;
+        smartScaling();
     }
 
     /**
@@ -87,6 +88,25 @@ public class PrimitiveQuad implements GLComponent {
         this.width = width;
         this.height = height;
         this.pos = pos;
+        smartScaling();
+    }
+
+    // smart scaling feature
+    private void smartScaling() {
+//        float fx = 1.0f / (1.0f + Math.abs(width - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
+//        float fy = 1.0f / (1.0f + Math.abs(height - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
+//        scale = (fx + fy) / 2.0f;
+    }
+
+    /**
+     * Perform smart scaling. Component scale will be set to fit the canvas
+     * properly
+     */
+    @Override
+    public void performSmartScaling() {
+//        float fx = 1.0f / (1.0f + Math.abs(width - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
+//        float fy = 1.0f / (1.0f + Math.abs(height - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
+//        scale = (fx + fy) / 2.0f;
     }
 
     /**
@@ -126,6 +146,19 @@ public class PrimitiveQuad implements GLComponent {
         buffered = true;
     }
 
+    private Matrix4f calcModelMatrix() {
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
+        Matrix4f rotationMatrix = new Matrix4f().identity();
+
+        float rx = giveRelativeWidth();
+        float ry = giveRelativeHeight();
+        Matrix4f scaleMatrix = new Matrix4f().scaleXY(rx, ry);
+
+        Matrix4f temp = new Matrix4f();
+        Matrix4f modelMatrix = translationMatrix.mul(rotationMatrix.mul(scaleMatrix, temp), temp);
+        return modelMatrix;
+    }
+
     /**
      * Render image
      *
@@ -135,9 +168,6 @@ public class PrimitiveQuad implements GLComponent {
     @Override
     public void render(GL2 gl20, ShaderProgram program) {
         if (enabled && buffered) {
-            float relWidth = giveRelativeWidth();
-            float relHeight = giveRelativeHeight();
-
             program.bind(gl20);
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -146,10 +176,8 @@ public class PrimitiveQuad implements GLComponent {
             gl20.glVertexAttribPointer(0, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 0); // this is for font pos
             program.bindAttribute(gl20, 0, "pos");
 
-            program.updateUniform(gl20, pos, "trans");
-            program.updateUniform(gl20, relWidth, "width");
-            program.updateUniform(gl20, relHeight, "height");
-            program.updateUniform(gl20, scale, "scale");
+            Matrix4f modelMat4 = calcModelMatrix();
+            program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
 
@@ -167,13 +195,14 @@ public class PrimitiveQuad implements GLComponent {
     }
 
     public float giveRelativeWidth() {
-        return width / (float) GUI.GL_CANVAS.getWidth();
+        return scale * width / (float) GUI.GL_CANVAS.getWidth();
     }
 
     public float giveRelativeHeight() {
-        return height / (float) GUI.GL_CANVAS.getHeight();
+        return scale * height / (float) GUI.GL_CANVAS.getHeight();
     }
 
+    @Override
     public int getWidth() {
         return width;
     }
@@ -182,6 +211,7 @@ public class PrimitiveQuad implements GLComponent {
         this.width = width;
     }
 
+    @Override
     public int getHeight() {
         return height;
     }
@@ -225,10 +255,6 @@ public class PrimitiveQuad implements GLComponent {
 
     public void setPos(Vector2f pos) {
         this.pos = pos;
-    }
-
-    public void setBuffered(boolean buffered) {
-        this.buffered = buffered;
     }
 
     public Vector4f getColor() {

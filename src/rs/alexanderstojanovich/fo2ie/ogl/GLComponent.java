@@ -32,6 +32,25 @@ public interface GLComponent {
     }
 
     /**
+     * Get real width of this component
+     *
+     * @return real component width
+     */
+    public int getWidth();
+
+    /**
+     * Get real height of this component
+     *
+     * @return real component height
+     */
+    public int getHeight();
+
+    /**
+     * Perform smart scaling for this component. Scale will be set accordingly.
+     */
+    public void performSmartScaling();
+
+    /**
      * Gets buffered status of this component. If it's not buffered, requires to
      * be buffered prior to any rendering
      *

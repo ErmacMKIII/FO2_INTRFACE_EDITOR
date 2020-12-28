@@ -18,7 +18,6 @@ package rs.alexanderstojanovich.fo2ie.ogl;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
-import com.jogamp.opengl.util.glsl.ShaderUtil;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -134,7 +133,7 @@ public class ShaderProgram {
     }
 
     public void updateUniform(GL2 gl20, Matrix4f mat, String name) {
-        FloatBuffer fb = FloatBuffer.allocate(4 * 4);
+        FloatBuffer fb = GLBuffers.newDirectFloatBuffer(4 * 4);
         mat.get(fb);
         int uniformLocation = gl20.glGetUniformLocation(programId, name);
         gl20.glUniformMatrix4fv(uniformLocation, 1, false, fb);

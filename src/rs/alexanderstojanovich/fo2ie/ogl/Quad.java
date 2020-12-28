@@ -20,8 +20,8 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.editor.GUI;
 
@@ -68,6 +68,36 @@ public class Quad implements GLComponent {
     }
 
     /**
+     * Create new quad with resize factor with the default size. Default size is
+     * the size of the texture.
+     *
+     * @param texture parsed texture
+     */
+    public Quad(Texture texture) {
+        this.width = texture.getImage().getWidth();
+        this.height = texture.getImage().getHeight();
+        this.texture = texture;
+        initUVs();
+        smartScaling();
+    }
+
+    /**
+     * Create new quad with resize factor with the default size. Default size is
+     * the size of the texture.
+     *
+     * @param texture parsed texture
+     * @param pos position of the quad center
+     */
+    public Quad(Texture texture, Vector2f pos) {
+        this.width = texture.getImage().getWidth();
+        this.height = texture.getImage().getHeight();
+        this.texture = texture;
+        this.pos = pos;
+        initUVs();
+        smartScaling();
+    }
+
+    /**
      * Create new quad with resize factor
      *
      * @param width quad width
@@ -79,6 +109,7 @@ public class Quad implements GLComponent {
         this.height = height;
         this.texture = texture;
         initUVs();
+        smartScaling();
     }
 
     /**
@@ -95,6 +126,7 @@ public class Quad implements GLComponent {
         this.texture = texture;
         this.pos = pos;
         initUVs();
+        smartScaling();
     }
 
     private void initUVs() {
@@ -102,6 +134,24 @@ public class Quad implements GLComponent {
         uvs[1] = new Vector2f(1.0f, 1.0f); // (1.0f, -1.0f)
         uvs[2] = new Vector2f(1.0f, 0.0f); // (1.0f, 1.0f)
         uvs[3] = new Vector2f(0.0f, 0.0f); // (-1.0f, 1.0f)
+    }
+
+    // smart scaling feature
+    private void smartScaling() {
+//        float fx = 1.0f / (1.0f + Math.abs(width - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
+//        float fy = 1.0f / (1.0f + Math.abs(height - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
+//        scale = (fx + fy) / 2.0f;
+    }
+
+    /**
+     * Perform smart scaling. Component scale will be set to fit the canvas
+     * properly
+     */
+    @Override
+    public void performSmartScaling() {
+//        float fx = 1.0f / (1.0f + Math.abs(width - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
+//        float fy = 1.0f / (1.0f + Math.abs(height - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
+//        scale = (fx + fy) / 2.0f;
     }
 
     /**
@@ -143,6 +193,19 @@ public class Quad implements GLComponent {
         buffered = true;
     }
 
+    private Matrix4f calcModelMatrix() {
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
+        Matrix4f rotationMatrix = new Matrix4f().identity();
+
+        float rx = giveRelativeWidth();
+        float ry = giveRelativeHeight();
+        Matrix4f scaleMatrix = new Matrix4f().scaleXY(rx, ry);
+
+        Matrix4f temp = new Matrix4f();
+        Matrix4f modelMatrix = translationMatrix.mul(rotationMatrix.mul(scaleMatrix, temp), temp);
+        return modelMatrix;
+    }
+
     /**
      * Render image
      *
@@ -152,9 +215,6 @@ public class Quad implements GLComponent {
     @Override
     public void render(GL2 gl20, ShaderProgram program) {
         if (enabled && buffered) {
-            float relWidth = giveRelativeWidth();
-            float relHeight = giveRelativeHeight();
-
             program.bind(gl20);
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -166,10 +226,8 @@ public class Quad implements GLComponent {
             program.bindAttribute(gl20, 0, "pos");
             program.bindAttribute(gl20, 1, "uv");
 
-            program.updateUniform(gl20, pos, "trans");
-            program.updateUniform(gl20, relWidth, "width");
-            program.updateUniform(gl20, relHeight, "height");
-            program.updateUniform(gl20, scale, "scale");
+            Matrix4f modelMat4 = calcModelMatrix();
+            program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
             texture.bind(gl20, 0, program, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
@@ -185,6 +243,19 @@ public class Quad implements GLComponent {
         }
     }
 
+    private Matrix4f calcModelMatrix(float xinc, float ydec) {
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x + xinc, pos.y + ydec, 0.0f);
+        Matrix4f rotationMatrix = new Matrix4f().identity();
+
+        float rx = giveRelativeWidth();
+        float ry = giveRelativeHeight();
+        Matrix4f scaleMatrix = new Matrix4f().scaleXY(rx, ry);
+
+        Matrix4f temp = new Matrix4f();
+        Matrix4f modelMatrix = translationMatrix.mul(rotationMatrix.mul(scaleMatrix, temp), temp);
+        return modelMatrix;
+    }
+
     /**
      * Render font
      *
@@ -195,9 +266,6 @@ public class Quad implements GLComponent {
      */
     public void render(GL2 gl20, float xinc, float ydec, ShaderProgram program) { // used for fonts
         if (enabled && buffered) {
-            float relWidth = giveRelativeWidth();
-            float relHeight = giveRelativeHeight();
-
             program.bind(gl20);
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -209,13 +277,9 @@ public class Quad implements GLComponent {
             program.bindAttribute(gl20, 0, "pos");
             program.bindAttribute(gl20, 1, "uv");
 
-            program.updateUniform(gl20, pos, "trans");
-            program.updateUniform(gl20, relWidth, "width");
-            program.updateUniform(gl20, relHeight, "height");
-            program.updateUniform(gl20, scale, "scale");
+            Matrix4f modelMat4 = calcModelMatrix(xinc, ydec);
+            program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
-            program.updateUniform(gl20, xinc, "xinc");
-            program.updateUniform(gl20, ydec, "ydec");
             texture.bind(gl20, 0, program, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
 
@@ -236,13 +300,14 @@ public class Quad implements GLComponent {
     }
 
     public float giveRelativeWidth() {
-        return width / (float) GUI.GL_CANVAS.getWidth();
+        return scale * width / (float) GUI.GL_CANVAS.getWidth();
     }
 
     public float giveRelativeHeight() {
-        return height / (float) GUI.GL_CANVAS.getHeight();
+        return scale * height / (float) GUI.GL_CANVAS.getHeight();
     }
 
+    @Override
     public int getWidth() {
         return width;
     }
@@ -251,6 +316,7 @@ public class Quad implements GLComponent {
         this.width = width;
     }
 
+    @Override
     public int getHeight() {
         return height;
     }
@@ -306,10 +372,6 @@ public class Quad implements GLComponent {
 
     public void setPos(Vector2f pos) {
         this.pos = pos;
-    }
-
-    public void setBuffered(boolean buffered) {
-        this.buffered = buffered;
     }
 
     public Vector4f getColor() {

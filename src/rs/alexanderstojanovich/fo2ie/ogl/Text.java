@@ -66,6 +66,7 @@ public class Text implements GLComponent {
         this.texture = texture;
         this.content = content;
         this.enabled = true;
+        smartScaling();
     }
 
     public Text(Texture texture, String content, Vector4f color, Vector2f pos) {
@@ -74,6 +75,7 @@ public class Text implements GLComponent {
         this.color = color;
         this.pos = pos;
         this.enabled = true;
+        smartScaling();
     }
 
     public Text(Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
@@ -82,6 +84,7 @@ public class Text implements GLComponent {
         this.enabled = true;
         this.charWidth = charWidth;
         this.charHeight = charHeight;
+        smartScaling();
     }
 
     private void init(GL2 gl20) {
@@ -97,8 +100,8 @@ public class Text implements GLComponent {
                 float cellU = (asciiCode % GRID_SIZE) * CELL_SIZE;
                 float cellV = (asciiCode / GRID_SIZE) * CELL_SIZE;
 
-                float xinc = j - content.length() * alignment;
-                float ydec = k + l * LINE_SPACING;
+                float xinc = (j - content.length() * alignment) * getRelativeCharWidth();
+                float ydec = (k + l * LINE_SPACING) * getRelativeCharHeight();
 
                 pairList.add(new Pair<>(xinc, ydec));
 
@@ -137,6 +140,30 @@ public class Text implements GLComponent {
         buffered = true;
     }
 
+    // smart scaling feature
+    private void smartScaling() {
+//        float fx = 1.0f / (1.0f + Math.abs(charWidth - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
+//        float fy = 1.0f / (1.0f + Math.abs(charHeight - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
+//        scale = (fx + fy) / 2.0f;
+//        for (Quad quad : quadList) {
+//            quad.setScale(scale);
+//        }
+    }
+
+    /**
+     * Perform smart scaling. Component scale will be set to fit the canvas
+     * properly
+     */
+    @Override
+    public void performSmartScaling() {
+//        float fx = 1.0f / (1.0f + Math.abs(charWidth - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
+//        float fy = 1.0f / (1.0f + Math.abs(charHeight - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
+//        scale = (fx + fy) / 2.0f;
+//        for (Quad quad : quadList) {
+//            quad.setScale(scale);
+//        }
+    }
+
     /**
      * Render this text with given shader program
      *
@@ -157,16 +184,26 @@ public class Text implements GLComponent {
         }
     }
 
+    @Override
+    public int getWidth() {
+        return charWidth;
+    }
+
+    @Override
+    public int getHeight() {
+        return charHeight;
+    }
+
     public float getRelativeCharWidth() {
-        return charWidth / (float) GUI.GL_CANVAS.getWidth();
+        return scale * charWidth / (float) GUI.GL_CANVAS.getWidth();
     }
 
     public float getRelativeWidth() {
-        return charWidth * content.length() / (float) GUI.GL_CANVAS.getWidth();
+        return scale * charWidth * content.length() / (float) GUI.GL_CANVAS.getWidth();
     }
 
     public float getRelativeCharHeight() {
-        return charHeight / (float) GUI.GL_CANVAS.getHeight();
+        return scale * charHeight / (float) GUI.GL_CANVAS.getHeight();
     }
 
     /**
@@ -233,10 +270,6 @@ public class Text implements GLComponent {
     @Override
     public boolean isBuffered() {
         return buffered;
-    }
-
-    public void setBuffered(boolean buffered) {
-        this.buffered = buffered;
     }
 
     public int getCharWidth() {

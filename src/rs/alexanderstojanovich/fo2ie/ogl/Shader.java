@@ -16,7 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.ogl;
 
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderUtil;
