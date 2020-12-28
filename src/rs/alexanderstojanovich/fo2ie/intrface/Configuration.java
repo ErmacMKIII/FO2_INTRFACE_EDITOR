@@ -41,6 +41,7 @@ public class Configuration {
     private Color txtCol = Color.GREEN;
     private Color txtOverlayCol = new Color(128, 128, 128, 128); // gray half translucent
     private Color qmarkCol = Color.MAGENTA;
+    private int textureSize = 1024;
 
     private static Configuration instance;
 
@@ -99,6 +100,13 @@ public class Configuration {
                             case "QMarkColor":
                                 qmarkCol = readRGBA(words[1]);
                                 break;
+                            case "TextureSize":
+                                int number = Integer.parseInt(words[1]);
+                                // if tex size is a non-zero power of two
+                                if (number != 0 && (number & (number - 1)) == 0) {
+                                    textureSize = number;
+                                }
+                                break;
                         }
                     }
                 }
@@ -135,6 +143,7 @@ public class Configuration {
             pw.println("TextColor = " + writeRGBA(txtCol));
             pw.println("TextOverlayColor = " + writeRGBA(txtOverlayCol));
             pw.println("QMarkColor = " + writeRGBA(qmarkCol));
+            pw.println("TextureSize = " + textureSize);
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } finally {
@@ -191,6 +200,10 @@ public class Configuration {
 
     public void setTxtOverlayCol(Color txtOverlayCol) {
         this.txtOverlayCol = txtOverlayCol;
+    }
+
+    public int getTextureSize() {
+        return textureSize;
     }
 
 }

@@ -42,6 +42,7 @@ import java.nio.IntBuffer;
 import java.util.Hashtable;
 import javax.imageio.ImageIO;
 import rs.alexanderstojanovich.fo2ie.editor.GUI;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**
@@ -53,7 +54,7 @@ public class Texture {
     private final BufferedImage image;
     private int textureID = 0;
 
-    public static final int TEX_SIZE = 1024;
+    public static final int TEX_SIZE = Configuration.getInstance().getTextureSize();
 
     /**
      * Creates a texture based on the image

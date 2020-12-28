@@ -16,10 +16,12 @@
  */
 package rs.alexanderstojanovich.fo2ie.editor;
 
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -49,9 +51,13 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
  */
 public class GUI extends javax.swing.JFrame {
 
+    public static final int DEF_WIDTH = 960;
+    public static final int DEF_HEIGHT = 540;
+
     public static final GLProfile GL20 = GLProfile.get(GLProfile.GL2);
     public static final GLCapabilities GL_CAP = new GLCapabilities(GL20);
 
+    public static final GLWindow GL_WINDOW = GLWindow.create(GL_CAP);
     public static final GLCanvas GL_CANVAS = new GLCanvas(GL_CAP);
 
     private static final Configuration cfg = Configuration.getInstance();
@@ -88,7 +94,8 @@ public class GUI extends javax.swing.JFrame {
         initComponents(); // netbeans loading components
         initFO2IELogos(); // logos for app
         initPaths(); // set paths from config
-        initGL(); // sets GL canvas        
+        initGL(); // sets GL canvas 
+        initIntEn(); // init enable intrface panel components {comboxes, build module, preview values etc}
     }
 
     // init both logos
@@ -122,7 +129,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void initGL() {
         GL_CANVAS.addGLEventListener(mdlAnim);
-        GL_CANVAS.setSize(panelModule.getSize());
+        GL_CANVAS.setPreferredSize(panelModule.getPreferredSize());
         this.panelModule.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -132,6 +139,23 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         this.panelModule.add(GL_CANVAS);
+
+        GL_WINDOW.setTitle("Module preview");
+        GL_WINDOW.addGLEventListener(mdlAnim);
+        GL_WINDOW.setSize(DEF_WIDTH, DEF_HEIGHT);
+    }
+
+    private void initIntEn() {
+
+        boolean initialized = intrface.isInitialized();
+
+        for (int i = 0; i < this.pnlIntBtns.getComponentCount(); i++) {
+            this.pnlIntBtns.getComponent(i).setEnabled(initialized);
+        }
+
+        for (int i = 0; i < this.pnlIntCombos.getComponentCount(); i++) {
+            this.pnlIntCombos.getComponent(i).setEnabled(initialized);
+        }
     }
 
     /**
@@ -145,7 +169,6 @@ public class GUI extends javax.swing.JFrame {
 
         fileChooserInput = new javax.swing.JFileChooser();
         fileChooserOutput = new javax.swing.JFileChooser();
-        panelWork = new javax.swing.JPanel();
         pnlFilePaths = new javax.swing.JPanel();
         lblInput = new javax.swing.JLabel();
         txtFldInPath = new javax.swing.JTextField();
@@ -156,14 +179,18 @@ public class GUI extends javax.swing.JFrame {
         btnChoosePathOut = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
         pnlIntrface = new javax.swing.JPanel();
+        pnlIntCombos = new javax.swing.JPanel();
         lblSection = new javax.swing.JLabel();
-        cmbBoxSection = new javax.swing.JComboBox<>();
         lblResolution = new javax.swing.JLabel();
         cmbBoxResolution = new javax.swing.JComboBox<>();
+        cmbBoxSection = new javax.swing.JComboBox<>();
+        pnlIntBtns = new javax.swing.JPanel();
+        btnTblePreview = new javax.swing.JButton();
+        btnBuild = new javax.swing.JButton();
+        btnMdlePreview = new javax.swing.JButton();
+        pnlTable = new javax.swing.JPanel();
         sbFeatures = new javax.swing.JScrollPane();
         tblFeatures = new javax.swing.JTable();
-        btnPreview = new javax.swing.JButton();
-        btnBuild = new javax.swing.JButton();
         panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
@@ -179,24 +206,23 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor");
-        getContentPane().setLayout(new java.awt.GridLayout(1, 2));
-
-        panelWork.setBorder(javax.swing.BorderFactory.createTitledBorder("Work"));
+        setResizable(false);
+        getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
-        pnlFilePaths.setLayout(new java.awt.GridLayout(2, 4));
+        pnlFilePaths.setLayout(new java.awt.GridLayout(4, 2));
 
         lblInput.setText("Input data directory:");
         pnlFilePaths.add(lblInput);
 
         txtFldInPath.setEditable(false);
-        txtFldInPath.setColumns(25);
+        txtFldInPath.setColumns(15);
         pnlFilePaths.add(txtFldInPath);
 
         btnChooseInPath.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChooseInPath.setText("Input dir...");
         btnChooseInPath.setToolTipText("Choose input directory");
-        btnChooseInPath.setIconTextGap(16);
+        btnChooseInPath.setIconTextGap(5);
         btnChooseInPath.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnChooseInPathActionPerformed(evt);
@@ -220,12 +246,13 @@ public class GUI extends javax.swing.JFrame {
         pnlFilePaths.add(lblOutput);
 
         txtFldOutPath.setEditable(false);
-        txtFldOutPath.setColumns(25);
+        txtFldOutPath.setColumns(15);
         pnlFilePaths.add(txtFldOutPath);
 
         btnChoosePathOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChoosePathOut.setText("Output dir...");
         btnChoosePathOut.setToolTipText("Choose output directory");
+        btnChoosePathOut.setIconTextGap(5);
         btnChoosePathOut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnChoosePathOutActionPerformed(evt);
@@ -245,13 +272,68 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnSave);
 
+        getContentPane().add(pnlFilePaths);
+
         pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
+        pnlIntrface.setLayout(new java.awt.GridLayout(2, 1));
+
+        pnlIntCombos.setBorder(new javax.swing.border.MatteBorder(null));
+        pnlIntCombos.setLayout(new java.awt.GridLayout(2, 1));
 
         lblSection.setText("Section:");
-
-        cmbBoxSection.setModel(DCBM);
+        pnlIntCombos.add(lblSection);
 
         lblResolution.setText("Resolution:");
+        pnlIntCombos.add(lblResolution);
+        pnlIntCombos.add(cmbBoxResolution);
+
+        cmbBoxSection.setModel(DCBM);
+        pnlIntCombos.add(cmbBoxSection);
+
+        pnlIntrface.add(pnlIntCombos);
+
+        pnlIntBtns.setBorder(new javax.swing.border.MatteBorder(null));
+        pnlIntBtns.setLayout(new java.awt.GridLayout(1, 3));
+
+        btnTblePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/table_icon.png"))); // NOI18N
+        btnTblePreview.setText("Preview Values");
+        btnTblePreview.setToolTipText("Preview features in the table");
+        btnTblePreview.setIconTextGap(5);
+        btnTblePreview.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTblePreviewActionPerformed(evt);
+            }
+        });
+        pnlIntBtns.add(btnTblePreview);
+
+        btnBuild.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/build_icon.png"))); // NOI18N
+        btnBuild.setText("Build Module");
+        btnBuild.setToolTipText("Build module");
+        btnBuild.setIconTextGap(5);
+        btnBuild.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuildActionPerformed(evt);
+            }
+        });
+        pnlIntBtns.add(btnBuild);
+
+        btnMdlePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/eye_icon.png"))); // NOI18N
+        btnMdlePreview.setText("Preview Module");
+        btnMdlePreview.setToolTipText("Preview module in window");
+        btnMdlePreview.setIconTextGap(5);
+        btnMdlePreview.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMdlePreviewActionPerformed(evt);
+            }
+        });
+        pnlIntBtns.add(btnMdlePreview);
+
+        pnlIntrface.add(pnlIntBtns);
+
+        getContentPane().add(pnlIntrface);
+
+        pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Feature Table"));
+        pnlTable.setLayout(new java.awt.BorderLayout());
 
         tblFeatures.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -263,96 +345,9 @@ public class GUI extends javax.swing.JFrame {
         ));
         sbFeatures.setViewportView(tblFeatures);
 
-        btnPreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/table_icon.png"))); // NOI18N
-        btnPreview.setText("Preview Values");
-        btnPreview.setToolTipText("Preview features in the table");
-        btnPreview.setEnabled(false);
-        btnPreview.setIconTextGap(16);
-        btnPreview.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPreviewActionPerformed(evt);
-            }
-        });
+        pnlTable.add(sbFeatures, java.awt.BorderLayout.CENTER);
 
-        btnBuild.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/build_icon.png"))); // NOI18N
-        btnBuild.setText("Build Module");
-        btnBuild.setToolTipText("Build module");
-        btnBuild.setEnabled(false);
-        btnBuild.setIconTextGap(16);
-        btnBuild.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuildActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout pnlIntrfaceLayout = new javax.swing.GroupLayout(pnlIntrface);
-        pnlIntrface.setLayout(pnlIntrfaceLayout);
-        pnlIntrfaceLayout.setHorizontalGroup(
-            pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlIntrfaceLayout.createSequentialGroup()
-                .addGroup(pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlIntrfaceLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(sbFeatures))
-                    .addGroup(pnlIntrfaceLayout.createSequentialGroup()
-                        .addGroup(pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cmbBoxSection, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblSection))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblResolution)
-                            .addGroup(pnlIntrfaceLayout.createSequentialGroup()
-                                .addComponent(cmbBoxResolution, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnPreview)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnBuild)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-
-        pnlIntrfaceLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnBuild, btnPreview});
-
-        pnlIntrfaceLayout.setVerticalGroup(
-            pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlIntrfaceLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblResolution)
-                    .addComponent(lblSection))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlIntrfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmbBoxSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbBoxResolution, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnPreview)
-                    .addComponent(btnBuild))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(sbFeatures, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout panelWorkLayout = new javax.swing.GroupLayout(panelWork);
-        panelWork.setLayout(panelWorkLayout);
-        panelWorkLayout.setHorizontalGroup(
-            panelWorkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelWorkLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panelWorkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlIntrface, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlFilePaths, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        panelWorkLayout.setVerticalGroup(
-            panelWorkLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelWorkLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlFilePaths, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlIntrface, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        getContentPane().add(panelWork);
+        getContentPane().add(pnlTable);
 
         panelModule.setBorder(javax.swing.BorderFactory.createTitledBorder("Module"));
 
@@ -360,11 +355,11 @@ public class GUI extends javax.swing.JFrame {
         panelModule.setLayout(panelModuleLayout);
         panelModuleLayout.setHorizontalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 734, Short.MAX_VALUE)
+            .addGap(0, 455, Short.MAX_VALUE)
         );
         panelModuleLayout.setVerticalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 644, Short.MAX_VALUE)
+            .addGap(0, 168, Short.MAX_VALUE)
         );
 
         getContentPane().add(panelModule);
@@ -431,12 +426,7 @@ public class GUI extends javax.swing.JFrame {
             this.cmbBoxResolution.setModel(resModel);
 
             JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface load", JOptionPane.INFORMATION_MESSAGE);
-
-            btnPreview.setEnabled(true);
-            btnBuild.setEnabled(true);
         } else {
-            btnPreview.setEnabled(false);
-            btnBuild.setEnabled(false);
             JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -445,13 +435,14 @@ public class GUI extends javax.swing.JFrame {
             defFtTblModel.removeRow(i);
         }
 
+        initIntEn();
     }//GEN-LAST:event_btnLoadActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnSaveActionPerformed
 
-    private void btnPreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPreviewActionPerformed
+    private void btnTblePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTblePreviewActionPerformed
         // TODO add your handling code here:
         String resStr = (String) cmbBoxResolution.getSelectedItem();
         String[] things = resStr.trim().split("x");
@@ -483,7 +474,7 @@ public class GUI extends javax.swing.JFrame {
             tblFeatures.setModel(ftTblMdl);
         }
 
-    }//GEN-LAST:event_btnPreviewActionPerformed
+    }//GEN-LAST:event_btnTblePreviewActionPerformed
 
     private void btnBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildActionPerformed
         // TODO add your handling code here:
@@ -504,7 +495,6 @@ public class GUI extends javax.swing.JFrame {
         if (resolutionPragma != null) {
             intrface.setSectionName(sectionName);
             intrface.setResolutionPragma(resolutionPragma);
-            GL_CANVAS.setSize(width, height);
         }
     }//GEN-LAST:event_btnBuildActionPerformed
 
@@ -568,6 +558,16 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, sb.toString(), "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
         }
     }//GEN-LAST:event_infoMenuHelpActionPerformed
+
+    private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
+        // TODO add your handling code here:                
+        if (intrface.getResolutionPragma() != null) {
+            int width = intrface.getResolutionPragma().getWidth();
+            int height = intrface.getResolutionPragma().getHeight();
+            GL_WINDOW.setSize(width, height);
+        }
+        GL_WINDOW.setVisible(true);
+    }//GEN-LAST:event_btnMdlePreviewActionPerformed
 
     private void fileInOpen() {
         int returnVal = fileChooserInput.showOpenDialog(this);
@@ -635,6 +635,7 @@ public class GUI extends javax.swing.JFrame {
             public void run() {
                 GUI gui = new GUI();
                 gui.setVisible(true);
+                gui.setPreferredSize(new Dimension(GUI.DEF_WIDTH, GUI.DEF_HEIGHT));
                 gui.pack();
                 gui.animator.start();
             }
@@ -653,8 +654,9 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;
     private javax.swing.JButton btnLoad;
-    private javax.swing.JButton btnPreview;
+    private javax.swing.JButton btnMdlePreview;
     private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnTblePreview;
     private javax.swing.JComboBox<Object> cmbBoxResolution;
     private javax.swing.JComboBox<Section.SectionName> cmbBoxSection;
     private javax.swing.JFileChooser fileChooserInput;
@@ -670,9 +672,11 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenu mainMenuFile;
     private javax.swing.JMenu mainMenuInfo;
     private javax.swing.JPanel panelModule;
-    private javax.swing.JPanel panelWork;
     private javax.swing.JPanel pnlFilePaths;
+    private javax.swing.JPanel pnlIntBtns;
+    private javax.swing.JPanel pnlIntCombos;
     private javax.swing.JPanel pnlIntrface;
+    private javax.swing.JPanel pnlTable;
     private javax.swing.JScrollPane sbFeatures;
     private javax.swing.JTable tblFeatures;
     private javax.swing.JTextField txtFldInPath;
