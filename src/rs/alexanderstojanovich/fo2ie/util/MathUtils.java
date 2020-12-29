@@ -16,17 +16,31 @@
  */
 package rs.alexanderstojanovich.fo2ie.util;
 
-import java.awt.Color;
-import org.joml.Vector4f;
-
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class GLColor {
+public class MathUtils {
 
-    public static Vector4f awtColorToVec4(Color color) {
-        return new Vector4f(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
+    /**
+     * Gets relative change
+     *
+     * @param a first argument
+     * @param b second argument, reference
+     * @return deviation percent
+     */
+    public static float relativeChange(float a, float b) {
+        return (a - b) / (float) (b);
     }
 
+    /**
+     * Gets absolute relative change
+     *
+     * @param a first argument
+     * @param b second argument, reference
+     * @return deviation percent
+     */
+    public static float absRelativeChange(float a, float b) {
+        return Math.abs(a - b) / (float) (b);
+    }
 }

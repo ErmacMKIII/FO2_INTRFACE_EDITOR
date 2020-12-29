@@ -16,24 +16,33 @@
  */
 package rs.alexanderstojanovich.fo2ie.feature;
 
+import org.joml.Vector4f;
 import org.joml.Vector4i;
+import rs.alexanderstojanovich.fo2ie.util.MathUtils;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class MyVector4 extends Vector4i implements FeatureValue {
+public class MyVector4 extends Vector4f implements FeatureValue {
 
     public MyVector4() {
 
     }
 
+    public void setScaled(int screenWidth, int screenHeight) {
+        x /= 1.0f + MathUtils.absRelativeChange(x, screenWidth);
+        y /= 1.0f + MathUtils.absRelativeChange(y, screenHeight);
+        z /= 1.0f + MathUtils.absRelativeChange(z, screenWidth);
+        w /= 1.0f + MathUtils.absRelativeChange(w, screenHeight);
+    }
+
     @Override
     public String getStringValue() {
-        return String.valueOf(x)
-                + " " + String.valueOf(y)
-                + " " + String.valueOf(z)
-                + " " + String.valueOf(w);
+        return String.valueOf(Math.round(x))
+                + " " + String.valueOf(Math.round(y))
+                + " " + String.valueOf(Math.round(z))
+                + " " + String.valueOf(Math.round(w));
     }
 
     @Override
@@ -45,10 +54,10 @@ public class MyVector4 extends Vector4i implements FeatureValue {
     public void setStringValue(String value) {
         String[] split = value.split(" ");
         if (split.length == 4) {
-            x = Integer.valueOf(split[0]);
-            y = Integer.valueOf(split[1]);
-            z = Integer.valueOf(split[2]);
-            w = Integer.valueOf(split[3]);
+            x = Float.valueOf(split[0]);
+            y = Float.valueOf(split[1]);
+            z = Float.valueOf(split[2]);
+            w = Float.valueOf(split[3]);
         }
     }
 

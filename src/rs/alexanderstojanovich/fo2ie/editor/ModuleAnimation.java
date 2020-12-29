@@ -20,6 +20,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.joml.Matrix4f;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
@@ -43,9 +46,26 @@ public class ModuleAnimation implements GLEventListener {
 
     protected Texture fntTexture;
     protected Texture qmarkTexture;
+    private final Matrix4f projMat4 = new Matrix4f().identity();
+
+    public static enum State {
+        INIT, BUILD, RENDER;
+    }
+
+    protected State state = State.INIT;
 
     public ModuleAnimation(Intrface intrface) {
         this.intrface = intrface;
+    }
+
+    /**
+     * Sets the prespective according to the GL_CANVAS dimension Call this if
+     * resizing occured
+     */
+    protected void setPerspective() {
+        float angle = (float) (Math.PI / 2.0);
+        float aspect = GUI.GL_CANVAS.getWidth() / (float) GUI.GL_CANVAS.getHeight();
+        projMat4.identity();//.setPerspectiveLH(angle, aspect, 0.0f, 1.0f);
     }
 
     @Override
@@ -76,35 +96,43 @@ public class ModuleAnimation implements GLEventListener {
 
         fntTexture = Texture.loadLocalTexture(gl20, GUI.FNT_PIC);
         qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
+
+        setPerspective();
     }
 
     @Override
     public void dispose(GLAutoDrawable glad) {
-
+        module.timerTask.cancel();
     }
 
     @Override
     public void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glViewport(0, 0, i2, i3);
-
-        try {
-            Tree<GLComponent> tree = intrface.buildTree(gl20, fntTexture, qmarkTexture);
-            if (tree != null) {
-                module.build(tree);
-            }
-        } catch (IOException ex) {
-            FO2IELogger.reportError(ex.getMessage(), ex);
-        }
-
+        setPerspective();
     }
 
     @Override
     public void display(GLAutoDrawable glad) {
-        GL2 gl20 = glad.getGL().getGL2();
-        gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+        try {
+            GL2 gl20 = glad.getGL().getGL2();
+            gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
-        module.render(gl20, primSProgram, imgSProgram, fntSProgram);
+            switch (state) {
+                case BUILD:
+                    module.components.clear();
+                    module.components.addAll(intrface.build(gl20, fntTexture, qmarkTexture));
+                    state = State.RENDER;
+                    break;
+                case RENDER:
+                    module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
+                    break;
+            }
+        } catch (IOException ex) {
+            FO2IELogger.reportError("Error occurred during during module build", null);
+            FO2IELogger.reportError(ex.getMessage(), ex);
+        }
+
     }
 
     public Module getModule() {
@@ -141,6 +169,14 @@ public class ModuleAnimation implements GLEventListener {
 
     public Texture getQmarkTexture() {
         return qmarkTexture;
+    }
+
+    public Matrix4f getProjMat4() {
+        return projMat4;
+    }
+
+    public State getState() {
+        return state;
     }
 
 }

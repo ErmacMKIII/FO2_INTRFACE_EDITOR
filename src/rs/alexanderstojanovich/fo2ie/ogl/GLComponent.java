@@ -17,6 +17,7 @@
 package rs.alexanderstojanovich.fo2ie.ogl;
 
 import com.jogamp.opengl.GL2;
+import org.joml.Matrix4f;
 
 /**
  *
@@ -46,9 +47,9 @@ public interface GLComponent {
     public int getHeight();
 
     /**
-     * Perform smart scaling for this component. Scale will be set accordingly.
+     * Gives a hint to the renderer that this component needs buffering
      */
-    public void performSmartScaling();
+    public void unbuffer();
 
     /**
      * Gets buffered status of this component. If it's not buffered, requires to
@@ -69,9 +70,10 @@ public interface GLComponent {
      * Render this component
      *
      * @param gl20 GL2 binding
+     * @param projMat4 projection matrix
      * @param program shader program for rendering
      */
-    public void render(GL2 gl20, ShaderProgram program);
+    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram program);
 
     /**
      * Gets Type of the GLComponent

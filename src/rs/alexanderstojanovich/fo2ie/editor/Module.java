@@ -18,10 +18,14 @@ package rs.alexanderstojanovich.fo2ie.editor;
 
 import com.jogamp.opengl.GL2;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import org.joml.Matrix4f;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
-import rs.alexanderstojanovich.fo2ie.util.Tree;
 
 /**
  *
@@ -29,27 +33,33 @@ import rs.alexanderstojanovich.fo2ie.util.Tree;
  */
 public class Module {
 
-    protected final List<GLComponent> components = new ArrayList<>();
+    protected final Set<GLComponent> components = new LinkedHashSet<>();
 
-    /**
-     * Builds this module from the component tree (main pic in the root)
-     *
-     * @param tree parsed component tree
-     */
-    public void build(Tree<GLComponent> tree) {
-        components.clear();
-        tree.preorder(components, tree.getRoot());
+    protected final TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            for (GLComponent component : components) {
+                component.unbuffer();
+            }
+        }
+    };
+
+    public Module() {
+        buffTimer.schedule(timerTask, 250L, 250L);
     }
+
+    protected final Timer buffTimer = new Timer("Component Buff Util");
 
     /**
      * Renders this module to the OpenGL canvas
      *
      * @param gl20 GL2.0 binding
+     * @param projMat4 projection matrix
      * @param prmSP primitive shader program
      * @param imgSP image shader program
      * @param fntSP font shader program
      */
-    public void render(GL2 gl20, ShaderProgram prmSP, ShaderProgram imgSP, ShaderProgram fntSP) {
+    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram prmSP, ShaderProgram imgSP, ShaderProgram fntSP) {
         for (GLComponent component : components) {
             if (!component.isBuffered()) {
                 component.buffer(gl20);
@@ -57,21 +67,28 @@ public class Module {
 
             switch (component.getType()) {
                 case PRIM:
-                    component.render(gl20, prmSP);
+                    component.render(gl20, projMat4, prmSP);
                     break;
                 case PIC:
-                    component.render(gl20, imgSP);
+                    component.render(gl20, projMat4, imgSP);
                     break;
                 case TXT:
-                    component.render(gl20, fntSP);
+                    component.render(gl20, projMat4, fntSP);
                     break;
             }
 
         }
     }
 
-    public List<GLComponent> getComponents() {
+    public Set<GLComponent> getComponents() {
         return components;
+    }
+
+    /**
+     * Stops timer util
+     */
+    public void stopTimer() {
+        buffTimer.cancel();
     }
 
 }

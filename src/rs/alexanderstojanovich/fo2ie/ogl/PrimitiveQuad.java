@@ -74,7 +74,6 @@ public class PrimitiveQuad implements GLComponent {
     public PrimitiveQuad(int width, int height) {
         this.width = width;
         this.height = height;
-        smartScaling();
     }
 
     /**
@@ -88,25 +87,11 @@ public class PrimitiveQuad implements GLComponent {
         this.width = width;
         this.height = height;
         this.pos = pos;
-        smartScaling();
     }
 
-    // smart scaling feature
-    private void smartScaling() {
-//        float fx = 1.0f / (1.0f + Math.abs(width - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
-//        float fy = 1.0f / (1.0f + Math.abs(height - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
-//        scale = (fx + fy) / 2.0f;
-    }
-
-    /**
-     * Perform smart scaling. Component scale will be set to fit the canvas
-     * properly
-     */
     @Override
-    public void performSmartScaling() {
-//        float fx = 1.0f / (1.0f + Math.abs(width - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
-//        float fy = 1.0f / (1.0f + Math.abs(height - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
-//        scale = (fx + fy) / 2.0f;
+    public void unbuffer() {
+        buffered = false;
     }
 
     /**
@@ -150,9 +135,9 @@ public class PrimitiveQuad implements GLComponent {
         Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
 
-        float rx = giveRelativeWidth();
-        float ry = giveRelativeHeight();
-        Matrix4f scaleMatrix = new Matrix4f().scaleXY(rx, ry);
+        float sx = giveRelativeWidth();
+        float sy = giveRelativeHeight();
+        Matrix4f scaleMatrix = new Matrix4f().scaleXY(sx, sy);
 
         Matrix4f temp = new Matrix4f();
         Matrix4f modelMatrix = translationMatrix.mul(rotationMatrix.mul(scaleMatrix, temp), temp);
@@ -166,7 +151,7 @@ public class PrimitiveQuad implements GLComponent {
      * @param program shader program for images
      */
     @Override
-    public void render(GL2 gl20, ShaderProgram program) {
+    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram program) {
         if (enabled && buffered) {
             program.bind(gl20);
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
@@ -177,6 +162,7 @@ public class PrimitiveQuad implements GLComponent {
             program.bindAttribute(gl20, 0, "pos");
 
             Matrix4f modelMat4 = calcModelMatrix();
+            program.updateUniform(gl20, projMat4, "projectionMatrix");
             program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
@@ -195,11 +181,11 @@ public class PrimitiveQuad implements GLComponent {
     }
 
     public float giveRelativeWidth() {
-        return scale * width / (float) GUI.GL_CANVAS.getWidth();
+        return scale * width / GUI.GL_CANVAS.getWidth();
     }
 
     public float giveRelativeHeight() {
-        return scale * height / (float) GUI.GL_CANVAS.getHeight();
+        return scale * height / GUI.GL_CANVAS.getHeight();
     }
 
     @Override

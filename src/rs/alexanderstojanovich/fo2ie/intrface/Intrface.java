@@ -17,7 +17,6 @@
 package rs.alexanderstojanovich.fo2ie.intrface;
 
 import com.jogamp.opengl.GL2;
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,8 +26,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.editor.GUI;
@@ -42,12 +43,9 @@ import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
 import rs.alexanderstojanovich.fo2ie.ogl.Quad;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
-import rs.alexanderstojanovich.fo2ie.ogl.Vector3fColors;
-import rs.alexanderstojanovich.fo2ie.util.CoordsConverter;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
-import rs.alexanderstojanovich.fo2ie.util.Node;
-import rs.alexanderstojanovich.fo2ie.util.Tree;
+import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
  *
@@ -238,46 +236,20 @@ public class Intrface {
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public Tree<GLComponent> buildTree(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
-        Tree<GLComponent> result = null;
+    public Set<GLComponent> build(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
+        final int screenWidth = GUI.GL_CANVAS.getWidth();
+        final int screenHeight = GUI.GL_CANVAS.getHeight();
+
+        final Set<GLComponent> result = new LinkedHashSet<>();
+
         Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             String prefix = this.sectionToPrefixMap.get(section);
             if (prefix != null) {
-                String mainPicStr = prefix + "MainPic";
-                FeatureKey mainPicKey = FeatureKey.valueOf(mainPicStr);
-
-                String mainPicPosStr = prefix + "Main";
-                FeatureKey mainPicPosKey = FeatureKey.valueOf(mainPicPosStr);
-
-                if (mainPicKey != null && resolutionPragma.customFeatMap.containsKey(mainPicKey)) {
-                    ImageWrapper mainPic = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
-                    MyVector4 mainPicPos = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
-
-                    if (mainPicPos != null) {
-                        float rposx = (mainPicPos.x + mainPicPos.z) / 2.0f;
-                        float rposy = (mainPicPos.y + mainPicPos.w) / 2.0f;
-
-                        Vector2f rootPos = new Vector2f(rposx, rposy);
-                        Vector2f rootPosGL = CoordsConverter.getOpenGLCoordinates(rootPos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
-
-                        int rwidth = mainPicPos.z - mainPicPos.x;
-                        int rheight = mainPicPos.w - mainPicPos.y;
-
-                        mainPic.loadImage();
-                        Texture rootTex = new Texture(gl20, mainPic.getImages()[0]);
-                        Quad root = new Quad(rwidth, rheight, rootTex, rootPosGL);
-                        result = new Tree<>(new Node<>(root));
-                    } else {
-                        mainPic.loadImage();
-                        Texture rootTex = new Texture(gl20, mainPic.getImages()[0]);
-                        Quad root = new Quad(rootTex);
-                        result = new Tree<>(new Node<>(root));
-                    }
-
-                    for (FeatureKey featKey : section.keys) {
-                        FeatureKey.Type fkType = featKey.getType();
-                        if (fkType == FeatureKey.Type.PIC && featKey != mainPicKey) {
+                for (FeatureKey featKey : section.keys) {
+                    FeatureKey.Type fkType = featKey.getType();
+                    switch (fkType) {
+                        case PIC:
                             ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(featKey);
                             String picPosStr = featKey.getStringValue().replaceAll(PIC_REGEX, "");
                             if (!picPosStr.equalsIgnoreCase("LogSinglePlayer")) {
@@ -285,15 +257,16 @@ public class Intrface {
 
                                 if (picPosKey != null) {
                                     MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(picPosKey);
+                                    picPosVal.setScaled(screenWidth, screenHeight);
 
                                     float posx = (picPosVal.x + picPosVal.z) / 2.0f;
                                     float posy = (picPosVal.y + picPosVal.w) / 2.0f;
 
                                     Vector2f pos = new Vector2f(posx, posy);
-                                    Vector2f posGL = CoordsConverter.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+                                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
 
-                                    int width = picPosVal.z - picPosVal.x;
-                                    int height = picPosVal.w - picPosVal.y;
+                                    int width = Math.round(picPosVal.z - picPosVal.x);
+                                    int height = Math.round(picPosVal.w - picPosVal.y);
 
                                     pic.loadImage();
                                     BufferedImage[] images = pic.getImages();
@@ -301,64 +274,61 @@ public class Intrface {
                                     for (BufferedImage image : images) {
                                         Texture tex = new Texture(gl20, image);
                                         Quad imgComp = new Quad(width, height, tex, posGL);
-                                        result.addChild(new Node<>(imgComp));
+                                        result.add(imgComp);
                                     }
                                 }
                             }
-                        } else if (fkType == FeatureKey.Type.PIC_POS && featKey != mainPicPosKey) {
+                            break;
+                        case PIC_POS:
                             MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
-
+                            picPosVal.setScaled(screenWidth, screenHeight);
                             float posx = (picPosVal.x + picPosVal.z) / 2.0f;
                             float posy = (picPosVal.y + picPosVal.w) / 2.0f;
-
                             Vector2f pos = new Vector2f(posx, posy);
-                            Vector2f posGL = CoordsConverter.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
-
-                            int width = picPosVal.z - picPosVal.x;
-                            int height = picPosVal.w - picPosVal.y;
-
+                            Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
+                            int width = Math.round(picPosVal.z - picPosVal.x);
+                            int height = Math.round(picPosVal.w - picPosVal.y);
                             List<FeatureKey> pics = FeatureKey.getPics(featKey);
                             if (!pics.isEmpty()) {
                                 for (FeatureKey fkPic : pics) {
-                                    ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
-                                    pic.loadImage();
-                                    BufferedImage[] images = pic.getImages();
+                                    ImageWrapper picx = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
+                                    picx.loadImage();
+                                    BufferedImage[] images = picx.getImages();
                                     for (BufferedImage image : images) {
                                         Texture tex = new Texture(gl20, image);
                                         Quad imgComp = new Quad(width, height, tex, posGL);
-                                        result.addChild(new Node<>(imgComp));
+                                        result.add(imgComp);
                                     }
                                 }
                             } else {
                                 Quad imgComp = new Quad(width, height, unusedTexture, posGL);
                                 imgComp.setColor(qmarkColor);
-                                result.addChild(new Node<>(imgComp));
+                                result.add(imgComp);
                             }
-                        } else if (fkType == FeatureKey.Type.TXT) {
+                            break;
+
+                        case TXT:
                             MyVector4 txtVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
-
-                            float posx = (txtVal.x + txtVal.z) / 2.0f;
-                            float posy = (txtVal.y + txtVal.w) / 2.0f;
-
-                            Vector2f pos = new Vector2f(posx, posy);
-                            Vector2f posGL = CoordsConverter.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
-
-                            int width = txtVal.z - txtVal.x;
-                            int height = txtVal.w - txtVal.y;
-
+                            txtVal.setScaled(screenWidth, screenHeight);
+                            float tposx = (txtVal.x + txtVal.z) / 2.0f;
+                            float tposy = (txtVal.y + txtVal.w) / 2.0f;
+                            Vector2f tpos = new Vector2f(tposx, tposy);
+                            Vector2f tposGL = GLCoords.getOpenGLCoordinates(tpos, screenWidth, screenHeight);
+                            int twidth = Math.round(txtVal.z - txtVal.x);
+                            int theight = Math.round(txtVal.w - txtVal.y);
                             String regex = featKey.getPrefix() + "|" + "Text";
                             String text = featKey.getStringValue().replaceAll(regex, "");
-
-                            PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
+                            PrimitiveQuad txtOlay = new PrimitiveQuad(twidth, theight, tposGL);
                             txtOlay.setColor(textOverlayColor);
-                            Text txtComp = new Text(fntTexture, text, new Vector4f(Vector3fColors.GREEN, 1.0f), posGL);
+                            Text txtComp = new Text(fntTexture, text, textColor, tposGL);
                             txtComp.setAlignment(Text.ALIGNMENT_CENTER);
+                            result.add(txtOlay);
+                            result.add(txtComp);
+                            break;
 
-                            result.addChild(new Node<>(txtOlay));
-                            result.addChild(new Node<>(txtComp));
-                        }
+                        default:
+                            break;
                     }
-
                 }
             }
         }

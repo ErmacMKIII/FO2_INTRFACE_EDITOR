@@ -129,6 +129,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void initGL() {
         GL_CANVAS.addGLEventListener(mdlAnim);
+        GL_CANVAS.setSize(panelModule.getSize());
         GL_CANVAS.setPreferredSize(panelModule.getPreferredSize());
         this.panelModule.addComponentListener(new ComponentAdapter() {
             @Override
@@ -206,7 +207,6 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor");
-        setResizable(false);
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
@@ -495,6 +495,7 @@ public class GUI extends javax.swing.JFrame {
         if (resolutionPragma != null) {
             intrface.setSectionName(sectionName);
             intrface.setResolutionPragma(resolutionPragma);
+            mdlAnim.state = ModuleAnimation.State.BUILD;
         }
     }//GEN-LAST:event_btnBuildActionPerformed
 

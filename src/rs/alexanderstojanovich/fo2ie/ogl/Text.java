@@ -19,6 +19,7 @@ package rs.alexanderstojanovich.fo2ie.ogl;
 import com.jogamp.opengl.GL2;
 import java.util.ArrayList;
 import java.util.List;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.editor.GUI;
@@ -66,7 +67,6 @@ public class Text implements GLComponent {
         this.texture = texture;
         this.content = content;
         this.enabled = true;
-        smartScaling();
     }
 
     public Text(Texture texture, String content, Vector4f color, Vector2f pos) {
@@ -75,7 +75,6 @@ public class Text implements GLComponent {
         this.color = color;
         this.pos = pos;
         this.enabled = true;
-        smartScaling();
     }
 
     public Text(Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
@@ -84,7 +83,11 @@ public class Text implements GLComponent {
         this.enabled = true;
         this.charWidth = charWidth;
         this.charHeight = charHeight;
-        smartScaling();
+    }
+
+    @Override
+    public void unbuffer() {
+        buffered = false;
     }
 
     private void init(GL2 gl20) {
@@ -100,8 +103,8 @@ public class Text implements GLComponent {
                 float cellU = (asciiCode % GRID_SIZE) * CELL_SIZE;
                 float cellV = (asciiCode / GRID_SIZE) * CELL_SIZE;
 
-                float xinc = (j - content.length() * alignment) * getRelativeCharWidth();
-                float ydec = (k + l * LINE_SPACING) * getRelativeCharHeight();
+                float xinc = (j - content.length() * alignment) * giveRelativeCharWidth();
+                float ydec = (k + l * LINE_SPACING) * giveRelativeCharHeight();
 
                 pairList.add(new Pair<>(xinc, ydec));
 
@@ -140,30 +143,6 @@ public class Text implements GLComponent {
         buffered = true;
     }
 
-    // smart scaling feature
-    private void smartScaling() {
-//        float fx = 1.0f / (1.0f + Math.abs(charWidth - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
-//        float fy = 1.0f / (1.0f + Math.abs(charHeight - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
-//        scale = (fx + fy) / 2.0f;
-//        for (Quad quad : quadList) {
-//            quad.setScale(scale);
-//        }
-    }
-
-    /**
-     * Perform smart scaling. Component scale will be set to fit the canvas
-     * properly
-     */
-    @Override
-    public void performSmartScaling() {
-//        float fx = 1.0f / (1.0f + Math.abs(charWidth - GUI.MDL_ANIM.getWidth()) / (float) GUI.MDL_ANIM.getWidth());
-//        float fy = 1.0f / (1.0f + Math.abs(charHeight - GUI.MDL_ANIM.getHeight()) / (float) GUI.MDL_ANIM.getHeight());
-//        scale = (fx + fy) / 2.0f;
-//        for (Quad quad : quadList) {
-//            quad.setScale(scale);
-//        }
-    }
-
     /**
      * Render this text with given shader program
      *
@@ -171,14 +150,14 @@ public class Text implements GLComponent {
      * @param program shader program for binding
      */
     @Override
-    public void render(GL2 gl20, ShaderProgram program) {
+    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram program) {
         if (enabled && buffered) {
             int index = 0;
             for (Quad quad : quadList) {
                 Pair<Float, Float> pair = pairList.get(index);
                 float xinc = pair.getKey();
                 float ydec = pair.getValue();
-                quad.render(gl20, xinc, ydec, program);
+                quad.render(gl20, xinc, ydec, projMat4, program);
                 index++;
             }
         }
@@ -194,16 +173,16 @@ public class Text implements GLComponent {
         return charHeight;
     }
 
-    public float getRelativeCharWidth() {
-        return scale * charWidth / (float) GUI.GL_CANVAS.getWidth();
-    }
-
     public float getRelativeWidth() {
-        return scale * charWidth * content.length() / (float) GUI.GL_CANVAS.getWidth();
+        return content.length() * getCharWidth();
     }
 
-    public float getRelativeCharHeight() {
-        return scale * charHeight / (float) GUI.GL_CANVAS.getHeight();
+    public float giveRelativeCharWidth() {
+        return scale * charWidth / GUI.GL_CANVAS.getWidth();
+    }
+
+    public float giveRelativeCharHeight() {
+        return scale * charHeight / GUI.GL_CANVAS.getHeight();
     }
 
     /**
@@ -211,8 +190,8 @@ public class Text implements GLComponent {
      * out or so) Notice - call this method only once!
      */
     public void alignToNextChar() {
-        float srw = scale * getRelativeCharWidth(); // scaled relative width
-        float srh = scale * getRelativeCharHeight(); // scaled relative height                                                                 
+        float srw = scale * giveRelativeCharWidth(); // scaled relative width
+        float srh = scale * giveRelativeCharHeight(); // scaled relative height                                                                 
 
         float xrem = pos.x % srw;
         pos.x -= (pos.x < 0.0f) ? xrem : (xrem - srw);
