@@ -65,7 +65,7 @@ public class ModuleAnimation implements GLEventListener {
     protected void setPerspective() {
         float angle = (float) (Math.PI / 2.0);
         float aspect = GUI.GL_CANVAS.getWidth() / (float) GUI.GL_CANVAS.getHeight();
-        projMat4.identity();//.setPerspectiveLH(angle, aspect, 0.0f, 1.0f);
+//        projMat4.identity().setPerspectiveLH(angle, aspect, 0.0f, 1.0f);
     }
 
     @Override
@@ -110,6 +110,7 @@ public class ModuleAnimation implements GLEventListener {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glViewport(0, 0, i2, i3);
         setPerspective();
+        state = State.BUILD;
     }
 
     @Override

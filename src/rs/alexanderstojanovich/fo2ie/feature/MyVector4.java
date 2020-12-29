@@ -17,7 +17,6 @@
 package rs.alexanderstojanovich.fo2ie.feature;
 
 import org.joml.Vector4f;
-import org.joml.Vector4i;
 import rs.alexanderstojanovich.fo2ie.util.MathUtils;
 
 /**
@@ -26,15 +25,20 @@ import rs.alexanderstojanovich.fo2ie.util.MathUtils;
  */
 public class MyVector4 extends Vector4f implements FeatureValue {
 
-    public MyVector4() {
-
-    }
-
     public void setScaled(int screenWidth, int screenHeight) {
         x /= 1.0f + MathUtils.absRelativeChange(x, screenWidth);
         y /= 1.0f + MathUtils.absRelativeChange(y, screenHeight);
         z /= 1.0f + MathUtils.absRelativeChange(z, screenWidth);
         w /= 1.0f + MathUtils.absRelativeChange(w, screenHeight);
+    }
+
+    public MyVector4 setScaled(int screenWidth, int screenHeight, MyVector4 temp) {
+        temp.x = x / (1.0f + MathUtils.absRelativeChange(x, screenWidth));
+        temp.y = y / (1.0f + MathUtils.absRelativeChange(y, screenHeight));
+        temp.z = z / (1.0f + MathUtils.absRelativeChange(z, screenWidth));
+        temp.w = w / (1.0f + MathUtils.absRelativeChange(w, screenHeight));
+
+        return temp;
     }
 
     @Override

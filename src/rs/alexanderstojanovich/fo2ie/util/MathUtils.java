@@ -27,7 +27,7 @@ public class MathUtils {
      *
      * @param a first argument
      * @param b second argument, reference
-     * @return deviation percent
+     * @return relative change in interval [0, 1]
      */
     public static float relativeChange(float a, float b) {
         return (a - b) / (float) (b);
@@ -38,9 +38,10 @@ public class MathUtils {
      *
      * @param a first argument
      * @param b second argument, reference
-     * @return deviation percent
+     * @return relative change in interval [0, 1]
      */
     public static float absRelativeChange(float a, float b) {
         return Math.abs(a - b) / (float) (b);
     }
+
 }

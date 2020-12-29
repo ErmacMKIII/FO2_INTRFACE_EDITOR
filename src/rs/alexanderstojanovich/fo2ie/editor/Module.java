@@ -17,9 +17,7 @@
 package rs.alexanderstojanovich.fo2ie.editor;
 
 import com.jogamp.opengl.GL2;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;

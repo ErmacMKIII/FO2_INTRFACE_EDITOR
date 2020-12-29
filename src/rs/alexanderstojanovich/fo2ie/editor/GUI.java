@@ -137,6 +137,7 @@ public class GUI extends javax.swing.JFrame {
                 int width = e.getComponent().getWidth();
                 int height = e.getComponent().getHeight();
                 GL_CANVAS.setSize(width, height);
+                FO2IELogger.reportInfo(GL_CANVAS.getSize().toString(), null);
             }
         });
         this.panelModule.add(GL_CANVAS);

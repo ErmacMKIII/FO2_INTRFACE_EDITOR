@@ -33,8 +33,8 @@ public class GLCoords {
      * @return OpenGL coordinates
      */
     public static Vector2f getOpenGLCoordinates(Vector2f scrnCoords, int scrnWidth, int scrnHeight) {
-        float xposGL = (float) (scrnCoords.x / scrnWidth - 0.5f) * 2.0f;
-        float yposGL = (float) (0.5f - scrnCoords.y / scrnHeight) * 2.0f;
+        float xposGL = (float) (scrnCoords.x / (float) scrnWidth - 0.5f) * 2.0f;
+        float yposGL = (float) (0.5f - scrnCoords.y / (float) scrnHeight) * 2.0f;
 
         return new Vector2f(xposGL, yposGL);
     }

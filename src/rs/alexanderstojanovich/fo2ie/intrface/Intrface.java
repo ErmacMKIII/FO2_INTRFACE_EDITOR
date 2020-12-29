@@ -257,7 +257,8 @@ public class Intrface {
 
                                 if (picPosKey != null) {
                                     MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(picPosKey);
-                                    picPosVal.setScaled(screenWidth, screenHeight);
+                                    MyVector4 temp = new MyVector4();
+                                    picPosVal = picPosVal.setScaled(screenWidth, screenHeight, temp);
 
                                     float posx = (picPosVal.x + picPosVal.z) / 2.0f;
                                     float posy = (picPosVal.y + picPosVal.w) / 2.0f;
@@ -281,7 +282,8 @@ public class Intrface {
                             break;
                         case PIC_POS:
                             MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
-                            picPosVal.setScaled(screenWidth, screenHeight);
+                            MyVector4 temp = new MyVector4();
+                            picPosVal = picPosVal.setScaled(screenWidth, screenHeight, temp);
                             float posx = (picPosVal.x + picPosVal.z) / 2.0f;
                             float posy = (picPosVal.y + picPosVal.w) / 2.0f;
                             Vector2f pos = new Vector2f(posx, posy);
@@ -309,7 +311,8 @@ public class Intrface {
 
                         case TXT:
                             MyVector4 txtVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
-                            txtVal.setScaled(screenWidth, screenHeight);
+                            MyVector4 ttemp = new MyVector4();
+                            txtVal = txtVal.setScaled(screenWidth, screenHeight, ttemp);
                             float tposx = (txtVal.x + txtVal.z) / 2.0f;
                             float tposy = (txtVal.y + txtVal.w) / 2.0f;
                             Vector2f tpos = new Vector2f(tposx, tposy);
