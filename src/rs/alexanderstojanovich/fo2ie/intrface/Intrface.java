@@ -226,24 +226,22 @@ public class Intrface {
     }
 
     /**
-     * Builds components tree from current section based on resolution
+     * Builds components list from current section based on resolution
      *
      * @param gl20 GL2 binding
      * @param fntTexture font texture for text rendering
      * @param unusedTexture unused texture (known as question mark texture)
-     * @return built image from all the features
+     * @return built list from all the features containg OpenGL components
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public Set<GLComponent> build(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
+    public List<GLComponent> build(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
         final int screenWidth = GUI.GL_CANVAS.getWidth();
         final int screenHeight = GUI.GL_CANVAS.getHeight();
 
-        final Set<GLComponent> result = new LinkedHashSet<>();
-
-        Section section = this.nameToSectionMap.get(sectionName);
+        final List<GLComponent> result = new ArrayList<>();
+        final Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
-            String prefix = this.sectionToPrefixMap.get(section);
             FeatureKey mainPicKey = section.root.getMainPic();
 
             int mainPicWidth = 800;
@@ -253,15 +251,44 @@ public class Intrface {
                 ImageWrapper mainPicVal = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
                 mainPicVal.loadImage();
 
+                Texture rootTex;
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
                     mainPicWidth = mainPicVal.getImages()[0].getWidth();
                     mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                    rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
+                } else {
+                    rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
+                }
+
+                FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
+
+                Quad root;
+                if (mainPicPosKey != null) {
+                    MyVector4 mainPicPosVal = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
+                    MyVector4 temp = new MyVector4();
+                    mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+
+                    float posx = (mainPicPosVal.x + mainPicPosVal.z) / 2.0f;
+                    float posy = (mainPicPosVal.y + mainPicPosVal.w) / 2.0f;
+
+                    Vector2f pos = new Vector2f(posx, posy);
+                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
+
+                    int width = Math.round(mainPicPosVal.z - mainPicPosVal.x);
+                    int height = Math.round(mainPicPosVal.w - mainPicPosVal.y);
+
+                    root = new Quad(width, height, rootTex, posGL);
+                    result.add(root);
                 }
             }
 
-            if (prefix != null) {
-                for (FeatureKey featKey : section.keys) {
-                    FeatureKey.Type fkType = featKey.getType();
+            final Set<GLComponent> picComps = new LinkedHashSet<>();
+            final Set<GLComponent> prmComps = new LinkedHashSet<>();
+            final Set<GLComponent> txtComps = new LinkedHashSet<>();
+
+            for (FeatureKey featKey : section.keys) {
+                FeatureKey.Type fkType = featKey.getType();
+                if (featKey != featKey.getMainPic()) {
                     switch (fkType) {
                         case PIC:
                             ImageWrapper pic = (ImageWrapper) resolutionPragma.customFeatMap.get(featKey);
@@ -286,14 +313,17 @@ public class Intrface {
                                     pic.loadImage();
                                     BufferedImage[] images = pic.getImages();
 
+                                    int index = 0;
                                     for (BufferedImage image : images) {
-                                        Texture tex = new Texture(gl20, image);
+                                        Texture tex = Texture.loadTexture(pic.getStringValue() + index, gl20, image);
                                         Quad imgComp = new Quad(width, height, tex, posGL);
-                                        result.add(imgComp);
+                                        picComps.add(imgComp);
+                                        index++;
                                     }
                                 }
                             }
                             break;
+
                         case PIC_POS:
                             MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
                             MyVector4 temp = new MyVector4();
@@ -307,19 +337,23 @@ public class Intrface {
                             List<FeatureKey> pics = FeatureKey.getPics(featKey);
                             if (!pics.isEmpty()) {
                                 for (FeatureKey fkPic : pics) {
-                                    ImageWrapper picx = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
-                                    picx.loadImage();
-                                    BufferedImage[] images = picx.getImages();
-                                    for (BufferedImage image : images) {
-                                        Texture tex = new Texture(gl20, image);
-                                        Quad imgComp = new Quad(width, height, tex, posGL);
-                                        result.add(imgComp);
+                                    if (fkPic != fkPic.getMainPic()) {
+                                        ImageWrapper picx = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
+                                        picx.loadImage();
+                                        BufferedImage[] images = picx.getImages();
+                                        int index = 0;
+                                        for (BufferedImage image : images) {
+                                            Texture tex = Texture.loadTexture(picx.getStringValue() + index, gl20, image);
+                                            Quad imgComp = new Quad(width, height, tex, posGL);
+                                            picComps.add(imgComp);
+                                            index++;
+                                        }
                                     }
                                 }
                             } else {
                                 Quad imgComp = new Quad(width, height, unusedTexture, posGL);
                                 imgComp.setColor(qmarkColor);
-                                result.add(imgComp);
+                                picComps.add(imgComp);
                             }
                             break;
 
@@ -339,8 +373,8 @@ public class Intrface {
                             txtOlay.setColor(textOverlayColor);
                             Text txtComp = new Text(fntTexture, text, textColor, tposGL);
                             txtComp.setAlignment(Text.ALIGNMENT_CENTER);
-                            result.add(txtOlay);
-                            result.add(txtComp);
+                            prmComps.add(txtOlay);
+                            txtComps.add(txtComp);
                             break;
 
                         default:
@@ -348,6 +382,10 @@ public class Intrface {
                     }
                 }
             }
+
+            result.addAll(picComps);
+            result.addAll(prmComps);
+            result.addAll(txtComps);
         }
 
         return result;

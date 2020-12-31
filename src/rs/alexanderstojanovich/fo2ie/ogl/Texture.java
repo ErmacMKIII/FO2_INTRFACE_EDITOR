@@ -39,7 +39,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import rs.alexanderstojanovich.fo2ie.editor.GUI;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
@@ -51,6 +54,9 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
  */
 public class Texture {
 
+    public static final Map<String, Texture> TEXTURE_MAP = new HashMap<>();
+
+    private final String filename;
     private final BufferedImage image;
     private int textureID = 0;
 
@@ -59,10 +65,12 @@ public class Texture {
     /**
      * Creates a texture based on the image
      *
+     * @param filename filename to identify this texture
      * @param gl20 GL20 context
      * @param image provide image to make texture
      */
-    public Texture(GL2 gl20, BufferedImage image) {
+    public Texture(String filename, GL2 gl20, BufferedImage image) {
+        this.filename = filename;
         this.image = image;
         loadToGraphicCard(gl20);
     }
@@ -198,17 +206,24 @@ public class Texture {
      * @return loaded Texture
      */
     public static Texture loadLocalTexture(GL2 gl20, String filename) {
-        InputStream is = Texture.class.getResourceAsStream(GUI.RESOURCES_DIR + filename);
-        if (is != null) {
-            try {
-                BufferedImage rdImg = ImageIO.read(is);
-                return new Texture(gl20, rdImg);
-            } catch (IOException ex) {
-                FO2IELogger.reportError("Error while loading image " + filename + "!", null);
-                FO2IELogger.reportError(ex.getMessage(), ex);
-            }
+        if (TEXTURE_MAP.containsKey(filename)) {
+            return TEXTURE_MAP.get(filename);
         } else {
-            FO2IELogger.reportError("Cannot load texture " + filename + "!", null);
+            InputStream is = Texture.class.getResourceAsStream(GUI.RESOURCES_DIR + filename);
+            if (is != null) {
+                try {
+                    BufferedImage rdImg = ImageIO.read(is);
+                    Texture tex = new Texture(filename, gl20, rdImg);
+                    TEXTURE_MAP.put(tex.filename, tex);
+                    return tex;
+                } catch (IOException ex) {
+                    FO2IELogger.reportError("Error while loading image " + filename + "!", null);
+                    FO2IELogger.reportError(ex.getMessage(), ex);
+                }
+            } else {
+                FO2IELogger.reportError("Cannot load texture " + filename + "!", null);
+            }
+
         }
 
         return null;
@@ -222,20 +237,74 @@ public class Texture {
      * @return loaded Texture
      */
     public static Texture loadTexture(GL2 gl20, File file) {
-        if (file.exists()) {
-            try {
-                InputStream is = new FileInputStream(file);
-                BufferedImage rdImg = ImageIO.read(is);
-                return new Texture(gl20, rdImg);
-            } catch (IOException ex) {
-                FO2IELogger.reportError("Error while loading image " + file.getName() + "!", null);
-                FO2IELogger.reportError(ex.getMessage(), ex);
-            }
+        if (TEXTURE_MAP.containsKey(file.getName())) {
+            return TEXTURE_MAP.get(file.getName());
         } else {
-            FO2IELogger.reportError("Cannot load texture " + file.getName() + "!", null);
+            if (file.exists()) {
+                try {
+                    InputStream is = new FileInputStream(file);
+                    BufferedImage rdImg = ImageIO.read(is);
+                    Texture tex = new Texture(file.getName(), gl20, rdImg);
+                    TEXTURE_MAP.put(tex.filename, tex);
+                    return tex;
+                } catch (IOException ex) {
+                    FO2IELogger.reportError("Error while loading image " + file.getName() + "!", null);
+                    FO2IELogger.reportError(ex.getMessage(), ex);
+                }
+            } else {
+                FO2IELogger.reportError("Cannot load texture " + file.getName() + "!", null);
+            }
         }
-
         return null;
+    }
+
+    /**
+     * Loads texture from the filesystem
+     *
+     * @param filename name for this texture (or from this image)
+     * @param gl20 provided GL2.0 binding
+     * @param image provided image for texture
+     * @return loaded Texture
+     */
+    public static Texture loadTexture(String filename, GL2 gl20, BufferedImage image) {
+        if (TEXTURE_MAP.containsKey(filename)) {
+            return TEXTURE_MAP.get(filename);
+        } else {
+            return new Texture(filename, gl20, image);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 53 * hash + Objects.hashCode(this.filename);
+        hash = 53 * hash + Objects.hashCode(this.image);
+        hash = 53 * hash + this.textureID;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Texture other = (Texture) obj;
+        if (this.textureID != other.textureID) {
+            return false;
+        }
+        if (!Objects.equals(this.filename, other.filename)) {
+            return false;
+        }
+        if (!Objects.equals(this.image, other.image)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -262,6 +331,10 @@ public class Texture {
 
     public int getTextureID() {
         return textureID;
+    }
+
+    public String getFilename() {
+        return filename;
     }
 
 }

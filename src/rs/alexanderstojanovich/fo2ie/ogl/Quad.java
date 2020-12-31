@@ -20,6 +20,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Objects;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -30,6 +31,8 @@ import rs.alexanderstojanovich.fo2ie.editor.GUI;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class Quad implements GLComponent {
+
+    private final Type type = Type.PIC;
 
     private int width;
     private int height;
@@ -282,7 +285,7 @@ public class Quad implements GLComponent {
 
     @Override
     public Type getType() {
-        return Type.PIC;
+        return type;
     }
 
     public float giveRelativeWidth() {
@@ -291,6 +294,55 @@ public class Quad implements GLComponent {
 
     public float giveRelativeHeight() {
         return scale * height / GUI.GL_CANVAS.getHeight();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 41 * hash + Objects.hashCode(this.type);
+        hash = 41 * hash + this.width;
+        hash = 41 * hash + this.height;
+        hash = 41 * hash + Objects.hashCode(this.texture);
+        hash = 41 * hash + Objects.hashCode(this.color);
+        hash = 41 * hash + Float.floatToIntBits(this.scale);
+        hash = 41 * hash + Objects.hashCode(this.pos);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Quad other = (Quad) obj;
+        if (this.width != other.width) {
+            return false;
+        }
+        if (this.height != other.height) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
+            return false;
+        }
+        if (this.type != other.type) {
+            return false;
+        }
+        if (!Objects.equals(this.texture, other.texture)) {
+            return false;
+        }
+        if (!Objects.equals(this.color, other.color)) {
+            return false;
+        }
+        if (!Objects.equals(this.pos, other.pos)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

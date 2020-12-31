@@ -20,6 +20,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Objects;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -30,6 +31,8 @@ import rs.alexanderstojanovich.fo2ie.editor.GUI;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class PrimitiveQuad implements GLComponent {
+
+    private final Type type = Type.PRIM;
 
     private int width;
     private int height;
@@ -176,8 +179,53 @@ public class PrimitiveQuad implements GLComponent {
     }
 
     @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 61 * hash + Objects.hashCode(this.type);
+        hash = 61 * hash + this.width;
+        hash = 61 * hash + this.height;
+        hash = 61 * hash + Objects.hashCode(this.color);
+        hash = 61 * hash + Float.floatToIntBits(this.scale);
+        hash = 61 * hash + Objects.hashCode(this.pos);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PrimitiveQuad other = (PrimitiveQuad) obj;
+        if (this.width != other.width) {
+            return false;
+        }
+        if (this.height != other.height) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
+            return false;
+        }
+        if (this.type != other.type) {
+            return false;
+        }
+        if (!Objects.equals(this.color, other.color)) {
+            return false;
+        }
+        if (!Objects.equals(this.pos, other.pos)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public Type getType() {
-        return Type.PRIM;
+        return type;
     }
 
     public float giveRelativeWidth() {

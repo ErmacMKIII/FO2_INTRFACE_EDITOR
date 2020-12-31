@@ -132,6 +132,7 @@ public class ModuleAnimation implements GLEventListener {
 
             switch (state) {
                 case BUILD:
+                    Texture.TEXTURE_MAP.clear();
                     module.components.clear();
                     module.components.addAll(intrface.build(gl20, fntTexture, qmarkTexture));
                     state = State.RENDER;

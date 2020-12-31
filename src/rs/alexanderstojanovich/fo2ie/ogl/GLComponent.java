@@ -18,6 +18,8 @@ package rs.alexanderstojanovich.fo2ie.ogl;
 
 import com.jogamp.opengl.GL2;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 /**
  *
@@ -31,6 +33,20 @@ public interface GLComponent {
     public enum Type {
         PRIM, PIC, TXT
     }
+
+    /**
+     * Gets color of this component
+     *
+     * @return
+     */
+    public Vector4f getColor();
+
+    /**
+     * Gets OpenGL position of this component
+     *
+     * @return
+     */
+    public Vector2f getPos();
 
     /**
      * Get real width of this component

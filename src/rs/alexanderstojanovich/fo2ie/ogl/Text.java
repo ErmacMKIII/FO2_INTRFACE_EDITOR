@@ -19,6 +19,7 @@ package rs.alexanderstojanovich.fo2ie.ogl;
 import com.jogamp.opengl.GL2;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -30,6 +31,8 @@ import rs.alexanderstojanovich.fo2ie.util.Pair;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class Text implements GLComponent {
+
+    private final Type type = Type.TXT;
 
     public static final float ALIGNMENT_LEFT = 0.0f;
     public static final float ALIGNMENT_CENTER = 0.5f;
@@ -60,8 +63,6 @@ public class Text implements GLComponent {
 
     protected int charWidth = STD_FONT_WIDTH;
     protected int charHeight = STD_FONT_HEIGHT;
-
-    protected boolean ignoreFactor = false;
 
     public Text(Texture texture, String content) {
         this.texture = texture;
@@ -202,7 +203,64 @@ public class Text implements GLComponent {
 
     @Override
     public Type getType() {
-        return Type.TXT;
+        return type;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.type);
+        hash = 37 * hash + Objects.hashCode(this.texture);
+        hash = 37 * hash + Objects.hashCode(this.content);
+        hash = 37 * hash + Float.floatToIntBits(this.alignment);
+        hash = 37 * hash + Objects.hashCode(this.pos);
+        hash = 37 * hash + Float.floatToIntBits(this.scale);
+        hash = 37 * hash + Objects.hashCode(this.color);
+        hash = 37 * hash + this.charWidth;
+        hash = 37 * hash + this.charHeight;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Text other = (Text) obj;
+        if (Float.floatToIntBits(this.alignment) != Float.floatToIntBits(other.alignment)) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
+            return false;
+        }
+        if (this.charWidth != other.charWidth) {
+            return false;
+        }
+        if (this.charHeight != other.charHeight) {
+            return false;
+        }
+        if (!Objects.equals(this.content, other.content)) {
+            return false;
+        }
+        if (this.type != other.type) {
+            return false;
+        }
+        if (!Objects.equals(this.texture, other.texture)) {
+            return false;
+        }
+        if (!Objects.equals(this.pos, other.pos)) {
+            return false;
+        }
+        if (!Objects.equals(this.color, other.color)) {
+            return false;
+        }
+        return true;
     }
 
     public Texture getTexture() {
@@ -257,14 +315,6 @@ public class Text implements GLComponent {
 
     public int getCharHeight() {
         return charHeight;
-    }
-
-    public boolean isIgnoreFactor() {
-        return ignoreFactor;
-    }
-
-    public void setIgnoreFactor(boolean ignoreFactor) {
-        this.ignoreFactor = ignoreFactor;
     }
 
     public Vector2f getPos() {

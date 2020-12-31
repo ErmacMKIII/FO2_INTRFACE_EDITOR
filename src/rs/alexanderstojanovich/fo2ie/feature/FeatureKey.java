@@ -149,6 +149,11 @@ public interface FeatureKey {
             return AimMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return AimMain;
+        }
+
     }
 
     // Barter
@@ -230,6 +235,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return BarterMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return BarterMain;
         }
 
     }
@@ -344,6 +354,11 @@ public interface FeatureKey {
             return ChaMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return ChaMain;
+        }
+
     }
 
     // Chosen Tabs
@@ -376,6 +391,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return ChosenTabPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return ChosenTab;
         }
 
     }
@@ -411,6 +431,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return ConsoleMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return null;
         }
 
     }
@@ -472,6 +497,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return DlgMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return DlgMain;
         }
 
     }
@@ -560,6 +590,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return FixMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return FixMain;
         }
 
     }
@@ -695,6 +730,11 @@ public interface FeatureKey {
             return GmapMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return GmapMain;
+        }
+
     }
 
     // Input box
@@ -749,6 +789,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return IboxMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return IboxMain;
         }
 
     }
@@ -910,6 +955,11 @@ public interface FeatureKey {
             return IntMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return IntMain;
+        }
+
     }
 
     // Inventory
@@ -985,6 +1035,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return InvMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return InvMain;
         }
 
     }
@@ -1104,6 +1159,11 @@ public interface FeatureKey {
             return null;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return null;
+        }
+
     }
 
     // Mini-map
@@ -1155,6 +1215,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return LmapMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return LmapMain;
         }
 
     }
@@ -1237,6 +1302,11 @@ public interface FeatureKey {
             return LogMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return LogMain;
+        }
+
     }
 
     // Options
@@ -1296,6 +1366,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return MoptMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return MoptMain;
         }
 
     }
@@ -1371,6 +1446,11 @@ public interface FeatureKey {
             return PSMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return null;
+        }
+
     }
 
     // Perk window
@@ -1444,6 +1524,11 @@ public interface FeatureKey {
             return PerkMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return PerkMain;
+        }
+
     }
 
     // Pip-boy
@@ -1504,6 +1589,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return PipMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return PipMain;
         }
 
     }
@@ -1599,6 +1689,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return PupMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return PupMain;
         }
 
     }
@@ -1715,6 +1810,11 @@ public interface FeatureKey {
             return RadioMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return RadioMain;
+        }
+
     }
 
     // Registration
@@ -1794,6 +1894,11 @@ public interface FeatureKey {
             return RegMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return RegMain;
+        }
+
     }
 
     // Save/Load
@@ -1859,7 +1964,12 @@ public interface FeatureKey {
 
         @Override
         public FeatureKey getMainPic() {
-            return SaveLoadPic;
+            return SaveLoadMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return SaveLoadMain;
         }
 
     }
@@ -1916,6 +2026,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return SayMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return SayMain;
         }
 
     }
@@ -2014,6 +2129,11 @@ public interface FeatureKey {
             return SboxMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return SboxMain;
+        }
+
     }
 
     // Split
@@ -2080,6 +2200,11 @@ public interface FeatureKey {
             return SplitMainPic;
         }
 
+        @Override
+        public FeatureKey getMainPicPos() {
+            return SplitMain;
+        }
+
     }
 
     // Town view
@@ -2129,6 +2254,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return TViewMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return TViewMain;
         }
 
     }
@@ -2191,6 +2321,11 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPic() {
             return TimerMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return TimerMain;
         }
 
     }
@@ -2260,6 +2395,12 @@ public interface FeatureKey {
         public FeatureKey getMainPic() {
             return UseMainPic;
         }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return UseMain;
+        }
+
     }
 
     /**
@@ -2277,9 +2418,16 @@ public interface FeatureKey {
     /**
      * Gets main picture (needed for module building)
      *
-     * @return
+     * @return main picture
      */
     public FeatureKey getMainPic();
+
+    /**
+     * Gets main picture position (needed for module building)
+     *
+     * @return main picture position
+     */
+    public FeatureKey getMainPicPos();
 
     /**
      * Gets name of this feature key
