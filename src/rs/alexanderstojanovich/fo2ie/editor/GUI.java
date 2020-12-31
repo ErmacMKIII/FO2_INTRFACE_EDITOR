@@ -21,7 +21,6 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -51,9 +50,6 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
  */
 public class GUI extends javax.swing.JFrame {
 
-    public static final int DEF_WIDTH = 960;
-    public static final int DEF_HEIGHT = 540;
-
     public static final GLProfile GL20 = GLProfile.get(GLProfile.GL2);
     public static final GLCapabilities GL_CAP = new GLCapabilities(GL20);
 
@@ -64,7 +60,7 @@ public class GUI extends javax.swing.JFrame {
     private static final DefaultComboBoxModel<Section.SectionName> DCBM = new DefaultComboBoxModel<>(Section.SectionName.values());
     private final Intrface intrface = new Intrface();
     private final ModuleAnimation mdlAnim = new ModuleAnimation(intrface);
-    private final FPSAnimator animator = new FPSAnimator(GL_CANVAS, 60, true);
+    private final FPSAnimator canvAnim = new FPSAnimator(GL_CANVAS, 60, true);
 
     // cool it's our new logo :)
     private static final String LOGO_FILE_NAME = "fo2ie_logo.png";
@@ -141,10 +137,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         this.panelModule.add(GL_CANVAS);
-
-        GL_WINDOW.setTitle("Module preview");
-        GL_WINDOW.addGLEventListener(mdlAnim);
-        GL_WINDOW.setSize(DEF_WIDTH, DEF_HEIGHT);
     }
 
     private void initIntEn() {
@@ -208,6 +200,9 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor");
+        setMinimumSize(new java.awt.Dimension(960, 540));
+        setPreferredSize(new java.awt.Dimension(930, 540));
+        setSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
@@ -275,11 +270,9 @@ public class GUI extends javax.swing.JFrame {
 
         getContentPane().add(pnlFilePaths);
 
-        pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
         pnlIntrface.setLayout(new java.awt.GridLayout(2, 1));
 
-        pnlIntCombos.setBorder(new javax.swing.border.MatteBorder(null));
-        pnlIntCombos.setLayout(new java.awt.GridLayout(2, 1));
+        pnlIntCombos.setLayout(new java.awt.GridLayout(2, 2));
 
         lblSection.setText("Section:");
         pnlIntCombos.add(lblSection);
@@ -293,7 +286,6 @@ public class GUI extends javax.swing.JFrame {
 
         pnlIntrface.add(pnlIntCombos);
 
-        pnlIntBtns.setBorder(new javax.swing.border.MatteBorder(null));
         pnlIntBtns.setLayout(new java.awt.GridLayout(1, 3));
 
         btnTblePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/table_icon.png"))); // NOI18N
@@ -356,11 +348,11 @@ public class GUI extends javax.swing.JFrame {
         panelModule.setLayout(panelModuleLayout);
         panelModuleLayout.setHorizontalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 455, Short.MAX_VALUE)
+            .addGap(0, 470, Short.MAX_VALUE)
         );
         panelModuleLayout.setVerticalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 168, Short.MAX_VALUE)
+            .addGap(0, 235, Short.MAX_VALUE)
         );
 
         getContentPane().add(panelModule);
@@ -498,6 +490,7 @@ public class GUI extends javax.swing.JFrame {
             intrface.setResolutionPragma(resolutionPragma);
             mdlAnim.state = ModuleAnimation.State.BUILD;
         }
+
     }//GEN-LAST:event_btnBuildActionPerformed
 
     private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
@@ -562,12 +555,14 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_infoMenuHelpActionPerformed
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
-        // TODO add your handling code here:                
+        // TODO add your handling code here:      
+        GL_WINDOW.setTitle("Module preview");
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();
             int height = intrface.getResolutionPragma().getHeight();
             GL_WINDOW.setSize(width, height);
         }
+        GL_WINDOW.addGLEventListener(mdlAnim);
         GL_WINDOW.setVisible(true);
     }//GEN-LAST:event_btnMdlePreviewActionPerformed
 
@@ -637,9 +632,8 @@ public class GUI extends javax.swing.JFrame {
             public void run() {
                 GUI gui = new GUI();
                 gui.setVisible(true);
-                gui.setPreferredSize(new Dimension(GUI.DEF_WIDTH, GUI.DEF_HEIGHT));
                 gui.pack();
-                gui.animator.start();
+                gui.canvAnim.start();
             }
         });
 

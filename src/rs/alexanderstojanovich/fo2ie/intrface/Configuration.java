@@ -43,6 +43,9 @@ public class Configuration {
     private Color qmarkCol = Color.MAGENTA;
     private int textureSize = 1024;
 
+    private boolean keepAspectRatio = false;
+    private String defaultIni = "default.ini";
+
     private static Configuration instance;
 
     private Configuration() {
@@ -91,6 +94,9 @@ public class Configuration {
                             case "OutputDirPath":
                                 outDir = new File(words[1].replaceAll("\"", ""));
                                 break;
+                            case "DefaultIni":
+                                defaultIni = words[1].replaceAll("\"", "");
+                                break;
                             case "TextColor":
                                 txtCol = readRGBA(words[1]);
                                 break;
@@ -106,6 +112,9 @@ public class Configuration {
                                 if (number != 0 && (number & (number - 1)) == 0) {
                                     textureSize = number;
                                 }
+                                break;
+                            case "KeepAspectRatio":
+                                keepAspectRatio = Boolean.parseBoolean(words[1]);
                                 break;
                         }
                     }
@@ -139,11 +148,13 @@ public class Configuration {
             pw = new PrintWriter(cfg);
             pw.println("InputDirPath = " + "\"" + inDir.getPath() + "\"");
             pw.println("OutputDirPath = " + "\"" + outDir.getPath() + "\"");
+            pw.println("DefaultIni = " + "\"" + defaultIni + "\"");
             pw.println();
             pw.println("TextColor = " + writeRGBA(txtCol));
             pw.println("TextOverlayColor = " + writeRGBA(txtOverlayCol));
             pw.println("QMarkColor = " + writeRGBA(qmarkCol));
             pw.println("TextureSize = " + textureSize);
+            pw.println("KeepAspectRatio = " + keepAspectRatio);
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } finally {
@@ -204,6 +215,22 @@ public class Configuration {
 
     public int getTextureSize() {
         return textureSize;
+    }
+
+    public boolean isKeepAspectRatio() {
+        return keepAspectRatio;
+    }
+
+    public void setKeepAspectRatio(boolean keepAspectRatio) {
+        this.keepAspectRatio = keepAspectRatio;
+    }
+
+    public String getDefaultIni() {
+        return defaultIni;
+    }
+
+    public void setDefaultIni(String defaultIni) {
+        this.defaultIni = defaultIni;
     }
 
 }

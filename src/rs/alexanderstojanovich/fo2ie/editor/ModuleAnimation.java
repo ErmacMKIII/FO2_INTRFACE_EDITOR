@@ -20,22 +20,25 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.joml.Matrix4f;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
-import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.Tree;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class ModuleAnimation implements GLEventListener {
+
+    private final Configuration config = Configuration.getInstance();
+
+    public static final int DEF_WIDTH = 800;
+    public static final int DEF_HEIGHT = 600;
 
     protected final Module module = new Module();
     protected final Intrface intrface;
@@ -59,13 +62,15 @@ public class ModuleAnimation implements GLEventListener {
     }
 
     /**
-     * Sets the prespective according to the GL_CANVAS dimension Call this if
+     * Sets the prespective according to the Interface pragma. Call this if
      * resizing occured
      */
     protected void setPerspective() {
-        float angle = (float) (Math.PI / 2.0);
-        float aspect = GUI.GL_CANVAS.getWidth() / (float) GUI.GL_CANVAS.getHeight();
-//        projMat4.identity().setPerspectiveLH(angle, aspect, 0.0f, 1.0f);
+        ResolutionPragma pragma = intrface.getResolutionPragma();
+        final float width = (pragma == null) ? DEF_WIDTH : pragma.getWidth();
+        final float height = (pragma == null) ? DEF_HEIGHT : pragma.getHeight();
+        final float aspect = (float) width / (float) height;
+        projMat4.identity().setOrtho2D(-aspect, aspect, -1.0f, 1.0f);
     }
 
     @Override
@@ -97,7 +102,11 @@ public class ModuleAnimation implements GLEventListener {
         fntTexture = Texture.loadLocalTexture(gl20, GUI.FNT_PIC);
         qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
 
-        setPerspective();
+        if (config.isKeepAspectRatio()) {
+            setPerspective();
+        }
+
+        state = State.BUILD;
     }
 
     @Override
@@ -109,7 +118,9 @@ public class ModuleAnimation implements GLEventListener {
     public void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glViewport(0, 0, i2, i3);
-        setPerspective();
+        if (config.isKeepAspectRatio()) {
+            setPerspective();
+        }
         state = State.BUILD;
     }
 

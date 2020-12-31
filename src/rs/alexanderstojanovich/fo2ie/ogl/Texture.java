@@ -145,22 +145,22 @@ public class Texture {
 
         raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
                 TEX_SIZE, TEX_SIZE, 4, null);
-        texImage = new BufferedImage(glAlphaColorModel, raster, true,
+        texImage = new BufferedImage(glAlphaColorModel, raster, false,
                 new Hashtable());
 
         int width = srcImg.getWidth();
         int height = srcImg.getHeight();
-        double fx = 1.0 / (1.0 + (width - TEX_SIZE) / (double) TEX_SIZE);
-        double fy = 1.0 / (1.0 + (height - TEX_SIZE) / (double) TEX_SIZE);
+        double sx = 1.0 / (1.0 + (width - TEX_SIZE) / (double) TEX_SIZE);
+        double sy = 1.0 / (1.0 + (height - TEX_SIZE) / (double) TEX_SIZE);
 
         AffineTransform xform = new AffineTransform();
-        xform.scale(fx, fy);
+        xform.scale(sx, sy);
         AffineTransformOp atOp = new AffineTransformOp(xform, null);
         final BufferedImage dstImg = atOp.filter(srcImg, null);
 
         // copy the source image into the produced image
         Graphics2D g2d = (Graphics2D) texImage.getGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);

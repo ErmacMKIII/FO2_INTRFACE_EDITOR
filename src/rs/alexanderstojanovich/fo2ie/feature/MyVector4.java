@@ -25,18 +25,36 @@ import rs.alexanderstojanovich.fo2ie.util.MathUtils;
  */
 public class MyVector4 extends Vector4f implements FeatureValue {
 
-    public void setScaled(int screenWidth, int screenHeight) {
-        x /= 1.0f + MathUtils.absRelativeChange(x, screenWidth);
-        y /= 1.0f + MathUtils.absRelativeChange(y, screenHeight);
-        z /= 1.0f + MathUtils.absRelativeChange(z, screenWidth);
-        w /= 1.0f + MathUtils.absRelativeChange(w, screenHeight);
+    /**
+     * Scale my vector so it can be rendered on the screen
+     *
+     * @param mainPicWidth main picture width
+     * @param mainPicHeight main picture height
+     * @param screenWidth rendered screen width
+     * @param screenHeight rendered screen height
+     */
+    public void setScaled(int mainPicWidth, int mainPicHeight, int screenWidth, int screenHeight) {
+        x = MathUtils.getScaled(x, 0.0f, mainPicWidth, 0.0f, screenWidth);
+        y = MathUtils.getScaled(y, 0.0f, mainPicHeight, 0.0f, screenHeight);
+        z = MathUtils.getScaled(z, 0.0f, mainPicWidth, 0.0f, screenWidth);
+        w = MathUtils.getScaled(w, 0.0f, mainPicHeight, 0.0f, screenHeight);
     }
 
-    public MyVector4 setScaled(int screenWidth, int screenHeight, MyVector4 temp) {
-        temp.x = x / (1.0f + MathUtils.absRelativeChange(x, screenWidth));
-        temp.y = y / (1.0f + MathUtils.absRelativeChange(y, screenHeight));
-        temp.z = z / (1.0f + MathUtils.absRelativeChange(z, screenWidth));
-        temp.w = w / (1.0f + MathUtils.absRelativeChange(w, screenHeight));
+    /**
+     * Scale my vector so it can be rendered on the screen
+     *
+     * @param mainPicWidth main picture width
+     * @param mainPicHeight main picture height
+     * @param screenWidth rendered screen width
+     * @param screenHeight rendered screen height
+     * @param temp temporary vector
+     * @return temp vector
+     */
+    public MyVector4 setScaled(int mainPicWidth, int mainPicHeight, int screenWidth, int screenHeight, MyVector4 temp) {
+        temp.x = MathUtils.getScaled(x, 0.0f, mainPicWidth, 0.0f, screenWidth);
+        temp.y = MathUtils.getScaled(y, 0.0f, mainPicHeight, 0.0f, screenHeight);
+        temp.z = MathUtils.getScaled(z, 0.0f, mainPicWidth, 0.0f, screenWidth);
+        temp.w = MathUtils.getScaled(w, 0.0f, mainPicHeight, 0.0f, screenHeight);
 
         return temp;
     }

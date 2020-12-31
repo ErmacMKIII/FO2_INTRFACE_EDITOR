@@ -24,6 +24,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
  */
 public class Section {
 
+    protected final FeatureKey root;
     protected final FeatureKey[] keys;
 
     public static enum SectionName {
@@ -40,10 +41,12 @@ public class Section {
      * only once unless it's resolution section.
      *
      * @param sectionName section name
+     * @param root main image of this section (can be null)
      * @param keys keys of this section
      */
-    public Section(SectionName sectionName, FeatureKey[] keys) {
+    public Section(SectionName sectionName, FeatureKey root, FeatureKey[] keys) {
         this.sectionName = sectionName;
+        this.root = root;
         this.keys = keys;
     }
 
@@ -63,6 +66,15 @@ public class Section {
      */
     public FeatureKey[] getKeys() {
         return keys;
+    }
+
+    /**
+     * Gets root of this section (aka main picture)
+     *
+     * @return section root
+     */
+    public FeatureKey getRoot() {
+        return root;
     }
 
 }

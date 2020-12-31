@@ -44,4 +44,20 @@ public class MathUtils {
         return Math.abs(a - b) / (float) (b);
     }
 
+    /**
+     * Scaling argument with changing their range where they reside
+     *
+     * @param x argument to scale
+     * @param min left bound of interval [min, max] where x is
+     * @param max right bound of interval [min, max] where x is
+     * @param minNew left bound of the new interval [minNew, maxNew] where x
+     * should be
+     * @param maxNew right bound of the new interval [minNew, maxNew] where x
+     * should be
+     * @return scaled argument
+     */
+    public static float getScaled(float x, float min, float max, float minNew, float maxNew) {
+        return ((maxNew - minNew) * (x - min) / (max - min)) + minNew;
+    }
+
 }

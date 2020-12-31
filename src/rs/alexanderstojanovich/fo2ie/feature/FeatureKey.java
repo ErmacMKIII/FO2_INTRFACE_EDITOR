@@ -144,6 +144,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return AimMainPic;
+        }
+
     }
 
     // Barter
@@ -220,6 +225,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return BarterMainPic;
         }
 
     }
@@ -329,6 +339,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return ChaMainPic;
+        }
+
     }
 
     // Chosen Tabs
@@ -356,6 +371,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return ChosenTabPic;
         }
 
     }
@@ -386,6 +406,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return ConsoleMainPic;
         }
 
     }
@@ -442,6 +467,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return DlgMainPic;
         }
 
     }
@@ -525,6 +555,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return FixMainPic;
         }
 
     }
@@ -655,6 +690,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return GmapMainPic;
+        }
+
     }
 
     // Input box
@@ -704,6 +744,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return IboxMainPic;
         }
 
     }
@@ -860,6 +905,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return IntMainPic;
+        }
+
     }
 
     // Inventory
@@ -930,6 +980,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return InvMainPic;
         }
 
     }
@@ -1044,6 +1099,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return null;
+        }
+
     }
 
     // Mini-map
@@ -1090,6 +1150,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return LmapMainPic;
         }
 
     }
@@ -1167,6 +1232,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return LogMainPic;
+        }
+
     }
 
     // Options
@@ -1221,6 +1291,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return MoptMainPic;
         }
 
     }
@@ -1291,6 +1366,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return PSMainPic;
+        }
+
     }
 
     // Perk window
@@ -1359,6 +1439,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return PerkMainPic;
+        }
+
     }
 
     // Pip-boy
@@ -1414,6 +1499,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return PipMainPic;
         }
 
     }
@@ -1504,6 +1594,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return PupMainPic;
         }
 
     }
@@ -1615,6 +1710,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return RadioMainPic;
+        }
+
     }
 
     // Registration
@@ -1689,6 +1789,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return RegMainPic;
+        }
+
     }
 
     // Save/Load
@@ -1752,6 +1857,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return SaveLoadPic;
+        }
+
     }
 
     // Say box
@@ -1801,6 +1911,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return SayMainPic;
         }
 
     }
@@ -1894,6 +2009,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return SboxMainPic;
+        }
+
     }
 
     // Split
@@ -1955,6 +2075,11 @@ public interface FeatureKey {
             return this.ordinal();
         }
 
+        @Override
+        public FeatureKey getMainPic() {
+            return SplitMainPic;
+        }
+
     }
 
     // Town view
@@ -1999,6 +2124,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return TViewMainPic;
         }
 
     }
@@ -2056,6 +2186,11 @@ public interface FeatureKey {
         @Override
         public int getNumericValue() {
             return this.ordinal();
+        }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return TimerMainPic;
         }
 
     }
@@ -2120,6 +2255,11 @@ public interface FeatureKey {
         public int getNumericValue() {
             return this.ordinal();
         }
+
+        @Override
+        public FeatureKey getMainPic() {
+            return UseMainPic;
+        }
     }
 
     /**
@@ -2134,6 +2274,13 @@ public interface FeatureKey {
 //    public static final String PREFIX_REGEX = "$(Aim|Barter|Cha|Chosen|Console"
 //            + "|Dlg|Fix|Gmap|IBox|Int|LMenu|Lmap|Log|Mopt|PS|Perk|Pip|Pup"
 //            + "|Radio|Reg|SaveLoad|Say|Sbox|Split|TView|Timer|Use)";
+    /**
+     * Gets main picture (needed for module building)
+     *
+     * @return
+     */
+    public FeatureKey getMainPic();
+
     /**
      * Gets name of this feature key
      *

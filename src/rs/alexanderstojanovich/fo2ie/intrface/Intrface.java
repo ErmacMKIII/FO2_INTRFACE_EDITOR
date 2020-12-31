@@ -55,7 +55,6 @@ public class Intrface {
 
     private final Configuration config = Configuration.getInstance();
 
-    public static final String INI_FILENAME = "default.ini";
     public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Off|Mask|Na)?";
 
     private final Vector4f textColor = GLColor.awtColorToVec4(config.getTxtCol());
@@ -73,34 +72,34 @@ public class Intrface {
     private boolean initialized = false;
     private Mode mode = Mode.STD;
 
-    private final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.values());
-    private final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.values());
-    private final Section character = new Section(Section.SectionName.Character, FeatureKey.Character.values());
-    private final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Chosen.values());
-    private final Section console = new Section(Section.SectionName.Console, FeatureKey.Console.values());
-    private final Section dialogBox = new Section(Section.SectionName.DialogBox, FeatureKey.Dialog.values());
-    private final Section fixBoy = new Section(Section.SectionName.FixBoy, FeatureKey.FixBoy.values());
-    private final Section globalMap = new Section(Section.SectionName.GlobalMap, FeatureKey.GlobalMap.values());
-    private final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.values());
-    private final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.values());
-    private final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.values());
-    private final Section popUp = new Section(Section.SectionName.PopUp, FeatureKey.PopUp.values());
-    private final Section miniMap = new Section(Section.SectionName.MiniMap, FeatureKey.MiniMap.values());
-    private final Section login = new Section(Section.SectionName.Login, FeatureKey.Login.values());
-    private final Section options = new Section(Section.SectionName.Options, FeatureKey.Options.values());
-    private final Section priceSetup = new Section(Section.SectionName.PriceSetup, FeatureKey.PriceSetup.values());
-    private final Section perk = new Section(Section.SectionName.Perk, FeatureKey.Perk.values());
-    private final Section pipBoy = new Section(Section.SectionName.PipBoy, FeatureKey.PipBoy.values());
-    private final Section pickUp = new Section(Section.SectionName.PickUp, FeatureKey.PipBoy.values());
-    private final Section radio = new Section(Section.SectionName.Radio, FeatureKey.Radio.values());
-    private final Section registration = new Section(Section.SectionName.Registration, FeatureKey.Registration.values());
-    private final Section saveLoad = new Section(Section.SectionName.SaveLoad, FeatureKey.SaveLoad.values());
-    private final Section sayBox = new Section(Section.SectionName.SayBox, FeatureKey.SayBox.values());
-    private final Section skillBox = new Section(Section.SectionName.SkillBox, FeatureKey.SkillBox.values());
-    private final Section split = new Section(Section.SectionName.Split, FeatureKey.Split.values());
-    private final Section townView = new Section(Section.SectionName.TownView, FeatureKey.TownView.values());
-    private final Section timer = new Section(Section.SectionName.Timer, FeatureKey.Timer.values());
-    private final Section use = new Section(Section.SectionName.Use, FeatureKey.Use.values());
+    private final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.AimMainPic, FeatureKey.Aim.values());
+    private final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.BarterMainPic, FeatureKey.Barter.values());
+    private final Section character = new Section(Section.SectionName.Character, FeatureKey.Character.ChaMainPic, FeatureKey.Character.values());
+    private final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Chosen.ChosenTabPic, FeatureKey.Chosen.values());
+    private final Section console = new Section(Section.SectionName.Console, FeatureKey.Console.ConsoleMainPic, FeatureKey.Console.values());
+    private final Section dialogBox = new Section(Section.SectionName.DialogBox, FeatureKey.Dialog.DlgMainPic, FeatureKey.Dialog.values());
+    private final Section fixBoy = new Section(Section.SectionName.FixBoy, FeatureKey.FixBoy.FixMainPic, FeatureKey.FixBoy.values());
+    private final Section globalMap = new Section(Section.SectionName.GlobalMap, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GlobalMap.values());
+    private final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.IboxMainPic, FeatureKey.InputBox.values());
+    private final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.IntMainPic, FeatureKey.Interface.values());
+    private final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.InvMainPic, FeatureKey.Inventory.values());
+    private final Section popUp = new Section(Section.SectionName.PopUp, FeatureKey.Radio.PriceSetup.PSMainPic, FeatureKey.PopUp.values());
+    private final Section miniMap = new Section(Section.SectionName.MiniMap, FeatureKey.MiniMap.LmapMainPic, FeatureKey.MiniMap.values());
+    private final Section login = new Section(Section.SectionName.Login, FeatureKey.Login.LogMainPic, FeatureKey.Login.values());
+    private final Section options = new Section(Section.SectionName.Options, FeatureKey.Options.MoptMainPic, FeatureKey.Options.values());
+    private final Section priceSetup = new Section(Section.SectionName.PriceSetup, FeatureKey.PriceSetup.PSMainPic, FeatureKey.PriceSetup.values());
+    private final Section perk = new Section(Section.SectionName.Perk, FeatureKey.Perk.PerkMainPic, FeatureKey.Perk.values());
+    private final Section pipBoy = new Section(Section.SectionName.PipBoy, FeatureKey.PipBoy.PipMainPic, FeatureKey.PipBoy.values());
+    private final Section pickUp = new Section(Section.SectionName.PickUp, FeatureKey.PickUp.PupMainPic, FeatureKey.PipBoy.values());
+    private final Section radio = new Section(Section.SectionName.Radio, FeatureKey.Radio.RadioMainPic, FeatureKey.Radio.values());
+    private final Section registration = new Section(Section.SectionName.Registration, FeatureKey.Registration.RegMainPic, FeatureKey.Registration.values());
+    private final Section saveLoad = new Section(Section.SectionName.SaveLoad, FeatureKey.SaveLoad.SaveLoadMainPic, FeatureKey.SaveLoad.values());
+    private final Section sayBox = new Section(Section.SectionName.SayBox, FeatureKey.SayBox.SayMainPic, FeatureKey.SayBox.values());
+    private final Section skillBox = new Section(Section.SectionName.SkillBox, FeatureKey.SkillBox.SboxMainPic, FeatureKey.SkillBox.values());
+    private final Section split = new Section(Section.SectionName.Split, FeatureKey.Split.SplitMainPic, FeatureKey.Split.values());
+    private final Section townView = new Section(Section.SectionName.TownView, FeatureKey.TownView.TViewMainPic, FeatureKey.TownView.values());
+    private final Section timer = new Section(Section.SectionName.Timer, FeatureKey.Timer.TimerMainPic, FeatureKey.Timer.values());
+    private final Section use = new Section(Section.SectionName.Use, FeatureKey.Use.UseMainPic, FeatureKey.Use.values());
 
     private final Map<SectionName, Section> nameToSectionMap = new HashMap<>();
     private final Map<Section, String> sectionToPrefixMap = new HashMap<>();
@@ -151,7 +150,7 @@ public class Intrface {
 
         FO2IELogger.reportInfo("Loading ini..", null);
         File inDir = Configuration.getInstance().getInDir();
-        final File iniFile = new File(inDir.getPath() + File.separator + INI_FILENAME);
+        final File iniFile = new File(inDir.getPath() + File.separator + config.getDefaultIni());
         BufferedReader br = null;
 
         try {
@@ -245,6 +244,21 @@ public class Intrface {
         Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             String prefix = this.sectionToPrefixMap.get(section);
+            FeatureKey mainPicKey = section.root.getMainPic();
+
+            int mainPicWidth = 800;
+            int mainPicHeight = 600;
+
+            if (mainPicKey != null) {
+                ImageWrapper mainPicVal = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
+                mainPicVal.loadImage();
+
+                if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
+                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                }
+            }
+
             if (prefix != null) {
                 for (FeatureKey featKey : section.keys) {
                     FeatureKey.Type fkType = featKey.getType();
@@ -258,7 +272,7 @@ public class Intrface {
                                 if (picPosKey != null) {
                                     MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(picPosKey);
                                     MyVector4 temp = new MyVector4();
-                                    picPosVal = picPosVal.setScaled(screenWidth, screenHeight, temp);
+                                    picPosVal = picPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
 
                                     float posx = (picPosVal.x + picPosVal.z) / 2.0f;
                                     float posy = (picPosVal.y + picPosVal.w) / 2.0f;
@@ -283,7 +297,7 @@ public class Intrface {
                         case PIC_POS:
                             MyVector4 picPosVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
                             MyVector4 temp = new MyVector4();
-                            picPosVal = picPosVal.setScaled(screenWidth, screenHeight, temp);
+                            picPosVal = picPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
                             float posx = (picPosVal.x + picPosVal.z) / 2.0f;
                             float posy = (picPosVal.y + picPosVal.w) / 2.0f;
                             Vector2f pos = new Vector2f(posx, posy);
@@ -312,7 +326,7 @@ public class Intrface {
                         case TXT:
                             MyVector4 txtVal = (MyVector4) resolutionPragma.customFeatMap.get(featKey);
                             MyVector4 ttemp = new MyVector4();
-                            txtVal = txtVal.setScaled(screenWidth, screenHeight, ttemp);
+                            txtVal = txtVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, ttemp);
                             float tposx = (txtVal.x + txtVal.z) / 2.0f;
                             float tposy = (txtVal.y + txtVal.w) / 2.0f;
                             Vector2f tpos = new Vector2f(tposx, tposy);
