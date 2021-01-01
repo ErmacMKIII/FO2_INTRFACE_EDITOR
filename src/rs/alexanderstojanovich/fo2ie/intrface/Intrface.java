@@ -194,11 +194,13 @@ public class Intrface {
 
                         FeatureKey fk = FeatureKey.valueOf(words[0]);
                         if (fk == null) {
+                            errorNum++;
                             errStrMsg.append(lineNum).append(": @").append(words[0]).append("\n");
                             FO2IELogger.reportError(lineNum + ":" + " @" + words[0], null);
                         }
                         FeatureValue fv = FeatureValue.valueOf(words[1]);
                         if (fv == null) {
+                            errorNum++;
                             errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
                             FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
                         }
@@ -242,7 +244,7 @@ public class Intrface {
         }
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
-        if (ok) {
+        if (ok && errorNum == 0) {
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);

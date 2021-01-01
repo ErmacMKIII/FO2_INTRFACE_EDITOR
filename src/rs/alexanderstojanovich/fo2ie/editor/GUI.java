@@ -133,7 +133,7 @@ public class GUI extends javax.swing.JFrame {
                 int width = e.getComponent().getWidth();
                 int height = e.getComponent().getHeight();
                 GL_CANVAS.setSize(width, height);
-                FO2IELogger.reportInfo(GL_CANVAS.getSize().toString(), null);
+//                FO2IELogger.reportInfo(GL_CANVAS.getSize().toString(), null);
             }
         });
         this.panelModule.add(GL_CANVAS);
@@ -141,10 +141,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void initIntEn() {
 
-        boolean initialized = intrface.isInitialized();
+        boolean ok = intrface.isInitialized() && intrface.getErrorNum() == 0;
 
         for (int i = 0; i < this.pnlIntrface.getComponentCount(); i++) {
-            this.pnlIntrface.getComponent(i).setEnabled(initialized);
+            this.pnlIntrface.getComponent(i).setEnabled(ok);
         }
 
     }
@@ -198,6 +198,7 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor");
         setMinimumSize(new java.awt.Dimension(960, 540));
+        setPreferredSize(new java.awt.Dimension(960, 540));
         setSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
@@ -339,6 +340,8 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Feature Table"));
         pnlTable.setLayout(new java.awt.BorderLayout());
 
+        sbFeatures.setPreferredSize(new java.awt.Dimension(240, 135));
+
         tblFeatures.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -359,11 +362,11 @@ public class GUI extends javax.swing.JFrame {
         panelModule.setLayout(panelModuleLayout);
         panelModuleLayout.setHorizontalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 378, Short.MAX_VALUE)
+            .addGap(0, 470, Short.MAX_VALUE)
         );
         panelModuleLayout.setVerticalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 168, Short.MAX_VALUE)
+            .addGap(0, 235, Short.MAX_VALUE)
         );
 
         getContentPane().add(panelModule);
@@ -429,9 +432,13 @@ public class GUI extends javax.swing.JFrame {
             final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
             this.cmbBoxResolution.setModel(resModel);
 
-            JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface load", JOptionPane.INFORMATION_MESSAGE);
+            if (intrface.getErrorNum() == 0) {
+                JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface load", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Interface Load Error", JOptionPane.ERROR_MESSAGE);
         }
 
         DefaultTableModel defFtTblModel = (DefaultTableModel) tblFeatures.getModel();
@@ -514,7 +521,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2020-12-27 at 10:15).</b></html>\n");
+            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2021-01-01 at 10:30).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -535,7 +542,7 @@ public class GUI extends javax.swing.JFrame {
 //            sb.append("\n");
 //            sb.append("\tDesignated to use primarily for FOnline 2 Season 3.\n");
             sb.append("\n");
-            sb.append("<html><b>Copyright © 2020</b></html>\n");
+            sb.append("<html><b>Copyright © 2021</b></html>\n");
             sb.append("<html><b>Alexander \"Ermac\" Stojanovich</b></html>\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JOptionPane.showMessageDialog(this, sb.toString(), "About", JOptionPane.INFORMATION_MESSAGE, icon);
@@ -586,6 +593,14 @@ public class GUI extends javax.swing.JFrame {
                 .append(intrface.getErrorNum()).append("\n");
         sb.append("\n");
         sb.append(intrface.getErrStrMsg());
+        sb.append("\n");
+        if (intrface.isInitialized() && intrface.getErrorNum() == 0 && intrface.getErrStrMsg().length() == 0) {
+            sb.append("Status: OK");
+        } else if (!intrface.isInitialized()) {
+            sb.append("Status: NOT INITIALIZED");
+        } else {
+            sb.append("Status: ERRONEOUS");
+        }
         JOptionPane.showMessageDialog(this, sb.toString(), "Interface status", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnCheckActionPerformed
 
