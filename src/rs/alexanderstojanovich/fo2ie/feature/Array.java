@@ -57,6 +57,10 @@ public class Array implements FeatureValue {
     public void setStringValue(String value) {
         String[] split = value.trim().split(" ");
         array = new float[split.length];
+        int index = 0;
+        for (String str : split) {
+            array[index++] = Float.parseFloat(str);
+        }
     }
 
     /**

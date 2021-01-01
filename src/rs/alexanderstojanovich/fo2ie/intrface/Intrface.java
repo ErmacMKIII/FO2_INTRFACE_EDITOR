@@ -318,11 +318,13 @@ public class Intrface {
                                             BufferedImage[] images = picWrap.getImages();
 
                                             int index = 0;
-                                            for (BufferedImage image : images) {
-                                                Texture tex = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
-                                                Quad imgComp = new Quad(width, height, tex, posGL);
-                                                picComps.add(imgComp);
-                                                index++;
+                                            if (images != null) {
+                                                for (BufferedImage image : images) {
+                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
+                                                    Quad imgComp = new Quad(width, height, tex, posGL);
+                                                    picComps.add(imgComp);
+                                                    index++;
+                                                }
                                             }
                                         } else if (picPosVal != null) {
                                             FO2IELogger.reportWarning("Unexisting cast for ("
@@ -353,15 +355,23 @@ public class Intrface {
                                 if (!pics.isEmpty()) {
                                     for (FeatureKey fkPic : pics) {
                                         if (fkPic != fkPic.getMainPic()) {
-                                            ImageWrapper picWrapX = (ImageWrapper) resolutionPragma.customFeatMap.get(fkPic);
-                                            picWrapX.loadImage();
-                                            BufferedImage[] images = picWrapX.getImages();
-                                            int index = 0;
-                                            for (BufferedImage image : images) {
-                                                Texture tex = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
-                                                Quad imgComp = new Quad(width, height, tex, posGL);
-                                                picComps.add(imgComp);
-                                                index++;
+                                            FeatureValue fvPic = resolutionPragma.customFeatMap.get(fkPic);
+                                            if (fvPic instanceof ImageWrapper) {
+                                                ImageWrapper picWrapX = (ImageWrapper) fvPic;
+                                                picWrapX.loadImage();
+                                                BufferedImage[] images = picWrapX.getImages();
+                                                if (images != null) {
+                                                    int index = 0;
+                                                    for (BufferedImage image : images) {
+                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
+                                                        Quad imgComp = new Quad(width, height, tex, posGL);
+                                                        picComps.add(imgComp);
+                                                        index++;
+                                                    }
+                                                }
+                                            } else if (fvPic != null) {
+                                                FO2IELogger.reportWarning("Unexisting cast for ("
+                                                        + featKey.getStringValue() + ", " + fvPic.getStringValue() + ")", null);
                                             }
                                         }
                                     }
