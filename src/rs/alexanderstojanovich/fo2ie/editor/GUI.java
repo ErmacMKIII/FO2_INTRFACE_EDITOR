@@ -34,6 +34,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
+import rs.alexanderstojanovich.fo2ie.editor.ModuleAnimation.Mode;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
@@ -91,7 +92,7 @@ public class GUI extends javax.swing.JFrame {
         initFO2IELogos(); // logos for app
         initPaths(); // set paths from config
         initGL(); // sets GL canvas 
-        initIntEn(); // init enable intrface panel components {comboxes, build module, preview values etc}
+        initIntEn(); // init enable intrface panel components {comboxes, buildTargetRes module, preview values etc}
     }
 
     // init both logos
@@ -490,25 +491,32 @@ public class GUI extends javax.swing.JFrame {
     private void btnBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildActionPerformed
         // TODO add your handling code here:
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
-        String resStr = (String) cmbBoxResolution.getSelectedItem();
-        String[] things = resStr.trim().split("x");
-        int width = Integer.parseInt(things[0]);
-        int height = Integer.parseInt(things[1]);
+        if (btnTogAllRes.isSelected()) {
+            intrface.setSectionName(sectionName);
+            intrface.setResolutionPragma(null);
+            mdlAnim.mode = Mode.ALL_RES;
+            mdlAnim.state = ModuleAnimation.State.BUILD;
+        } else {
+            String resStr = (String) cmbBoxResolution.getSelectedItem();
+            String[] things = resStr.trim().split("x");
+            int width = Integer.parseInt(things[0]);
+            int height = Integer.parseInt(things[1]);
 
-        ResolutionPragma resolutionPragma = null;
-        for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-            if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                resolutionPragma = resolution;
-                break;
+            ResolutionPragma resolutionPragma = null;
+            for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                    resolutionPragma = resolution;
+                    break;
+                }
+            }
+
+            if (resolutionPragma != null) {
+                intrface.setSectionName(sectionName);
+                intrface.setResolutionPragma(resolutionPragma);
+                mdlAnim.mode = Mode.TARGET_RES;
+                mdlAnim.state = ModuleAnimation.State.BUILD;
             }
         }
-
-        if (resolutionPragma != null) {
-            intrface.setSectionName(sectionName);
-            intrface.setResolutionPragma(resolutionPragma);
-            mdlAnim.state = ModuleAnimation.State.BUILD;
-        }
-
     }//GEN-LAST:event_btnBuildActionPerformed
 
     private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
@@ -557,15 +565,18 @@ public class GUI extends javax.swing.JFrame {
             sb.append("<html><b>- FOR THE PURPOSE ABOUT THIS PROGRAM, </b></html>\n");
             sb.append("<html><b>check About. Make sure that you checked it first.</b></html>\n");
             sb.append("\n");
-            sb.append("- Editing interface of several steps:\n");
+            sb.append("- Editing interface cnosists of several steps:\n");
             sb.append("\t1. Put (extract from archive if needed) interface to a single location.\n");
             sb.append("\t2. Choose input directory where \"art > intrface\" is,\n");
             sb.append("\t3. Choose output where modified result is gonna be stored,\n");
             sb.append("\t4. Click \"Load\" to load the interface from the input path,\n");
             sb.append("\t5. Click \"Save\" to save the interface on the output path,\n");
+            sb.append("\t6. \"Check\" if loading the interface result in errors.\n");
             sb.append("\n");
-            sb.append("\t- Feel free to take a look at table preview on \"Preview Values.\"\n");
+            sb.append("\t- By using \"All resolutions\" you're ignoring target resolution when module being built.\n");
+            sb.append("\t- Feel free to take a view or edit feature values at table preview on \"Preview Values.\"\n");
             sb.append("\t- Build module as an image with \"Build Module.\"\n");
+            sb.append("\t- Preview module in the window with \"Preview Module.\"\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JOptionPane.showMessageDialog(this, sb.toString(), "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
@@ -606,6 +617,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnTogAllResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTogAllResActionPerformed
         // TODO add your handling code here:
+        mdlAnim.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
     }//GEN-LAST:event_btnTogAllResActionPerformed
 

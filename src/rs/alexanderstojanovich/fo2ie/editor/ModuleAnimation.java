@@ -51,11 +51,23 @@ public class ModuleAnimation implements GLEventListener {
     protected Texture qmarkTexture;
     private final Matrix4f projMat4 = new Matrix4f().identity();
 
+    /**
+     * State of the machine
+     */
     public static enum State {
         INIT, BUILD, RENDER;
     }
 
     protected State state = State.INIT;
+
+    /**
+     * Build mode
+     */
+    public static enum Mode {
+        NO_ACTION, ALL_RES, TARGET_RES;
+    }
+
+    protected Mode mode = Mode.NO_ACTION;
 
     public ModuleAnimation(Intrface intrface) {
         this.intrface = intrface;
@@ -156,11 +168,15 @@ public class ModuleAnimation implements GLEventListener {
             gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
             switch (state) {
-                // invoked when user desired to build the module
+                // invoked when user desired to buildTargetRes the module
                 case BUILD:
                     Texture.TEXTURE_MAP.clear();
                     module.components.clear();
-                    module.components.addAll(intrface.build(gl20, fntTexture, qmarkTexture));
+                    if (mode == Mode.ALL_RES) {
+                        module.components.addAll(intrface.buildAllRes(gl20, fntTexture, qmarkTexture));
+                    } else if (mode == Mode.TARGET_RES) {
+                        module.components.addAll(intrface.buildTargetRes(gl20, fntTexture, qmarkTexture));
+                    }
                     state = State.RENDER;
                     break;
                 // otherwise render the module
@@ -217,6 +233,14 @@ public class ModuleAnimation implements GLEventListener {
 
     public State getState() {
         return state;
+    }
+
+    public Configuration getConfig() {
+        return config;
+    }
+
+    public Mode getMode() {
+        return mode;
     }
 
 }
