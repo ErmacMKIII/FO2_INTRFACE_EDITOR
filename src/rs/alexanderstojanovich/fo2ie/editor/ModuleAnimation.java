@@ -19,6 +19,7 @@ package rs.alexanderstojanovich.fo2ie.editor;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.util.FPSAnimator;
 import java.io.IOException;
 import org.joml.Matrix4f;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
@@ -50,6 +51,7 @@ public class ModuleAnimation implements GLEventListener {
     protected Texture fntTexture;
     protected Texture qmarkTexture;
     private final Matrix4f projMat4 = new Matrix4f().identity();
+    private final FPSAnimator animator;
 
     /**
      * State of the machine
@@ -69,7 +71,8 @@ public class ModuleAnimation implements GLEventListener {
 
     protected Mode mode = Mode.NO_ACTION;
 
-    public ModuleAnimation(Intrface intrface) {
+    public ModuleAnimation(FPSAnimator animator, Intrface intrface) {
+        this.animator = animator;
         this.intrface = intrface;
     }
 
@@ -91,7 +94,7 @@ public class ModuleAnimation implements GLEventListener {
      * @param glad drawable object from interface
      */
     @Override
-    public void init(GLAutoDrawable glad) {
+    public synchronized void init(GLAutoDrawable glad) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -123,6 +126,8 @@ public class ModuleAnimation implements GLEventListener {
             setPerspective();
         }
 
+        this.animator.start();
+
         state = State.BUILD;
     }
 
@@ -132,7 +137,7 @@ public class ModuleAnimation implements GLEventListener {
      * @param glad drawable object from interface
      */
     @Override
-    public void dispose(GLAutoDrawable glad) {
+    public synchronized void dispose(GLAutoDrawable glad) {
         // cancel unbuffer timer
         module.timerTask.cancel();
     }
@@ -147,7 +152,7 @@ public class ModuleAnimation implements GLEventListener {
      * @param i3 height
      */
     @Override
-    public void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
+    public synchronized void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glViewport(0, 0, i2, i3);
         if (config.isKeepAspectRatio()) {
@@ -162,7 +167,7 @@ public class ModuleAnimation implements GLEventListener {
      * @param glad drawable object from interface
      */
     @Override
-    public void display(GLAutoDrawable glad) {
+    public synchronized void display(GLAutoDrawable glad) {
         try {
             GL2 gl20 = glad.getGL().getGL2();
             gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
@@ -241,6 +246,10 @@ public class ModuleAnimation implements GLEventListener {
 
     public Mode getMode() {
         return mode;
+    }
+
+    public FPSAnimator getAnimator() {
+        return animator;
     }
 
 }
