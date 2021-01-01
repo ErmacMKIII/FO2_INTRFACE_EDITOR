@@ -143,13 +143,10 @@ public class GUI extends javax.swing.JFrame {
 
         boolean initialized = intrface.isInitialized();
 
-        for (int i = 0; i < this.pnlIntBtns.getComponentCount(); i++) {
-            this.pnlIntBtns.getComponent(i).setEnabled(initialized);
+        for (int i = 0; i < this.pnlIntrface.getComponentCount(); i++) {
+            this.pnlIntrface.getComponent(i).setEnabled(initialized);
         }
 
-        for (int i = 0; i < this.pnlIntCombos.getComponentCount(); i++) {
-            this.pnlIntCombos.getComponent(i).setEnabled(initialized);
-        }
     }
 
     /**
@@ -167,18 +164,18 @@ public class GUI extends javax.swing.JFrame {
         lblInput = new javax.swing.JLabel();
         txtFldInPath = new javax.swing.JTextField();
         btnChooseInPath = new javax.swing.JButton();
-        btnLoad = new javax.swing.JButton();
         lblOutput = new javax.swing.JLabel();
         txtFldOutPath = new javax.swing.JTextField();
         btnChoosePathOut = new javax.swing.JButton();
+        btnLoad = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
+        btnCheck = new javax.swing.JButton();
         pnlIntrface = new javax.swing.JPanel();
-        pnlIntCombos = new javax.swing.JPanel();
         lblSection = new javax.swing.JLabel();
-        lblResolution = new javax.swing.JLabel();
         cmbBoxResolution = new javax.swing.JComboBox<>();
+        lblResolution = new javax.swing.JLabel();
         cmbBoxSection = new javax.swing.JComboBox<>();
-        pnlIntBtns = new javax.swing.JPanel();
+        btnTogAllRes = new javax.swing.JToggleButton();
         btnTblePreview = new javax.swing.JButton();
         btnBuild = new javax.swing.JButton();
         btnMdlePreview = new javax.swing.JButton();
@@ -201,12 +198,11 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor");
         setMinimumSize(new java.awt.Dimension(960, 540));
-        setPreferredSize(new java.awt.Dimension(930, 540));
         setSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
-        pnlFilePaths.setLayout(new java.awt.GridLayout(4, 2));
+        pnlFilePaths.setLayout(new java.awt.GridLayout(3, 3));
 
         lblInput.setText("Input data directory:");
         pnlFilePaths.add(lblInput);
@@ -226,18 +222,6 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnChooseInPath);
 
-        btnLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/load_icon.png"))); // NOI18N
-        btnLoad.setText("Load");
-        btnLoad.setToolTipText("Choose input directory");
-        btnLoad.setEnabled(false);
-        btnLoad.setIconTextGap(16);
-        btnLoad.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLoadActionPerformed(evt);
-            }
-        });
-        pnlFilePaths.add(btnLoad);
-
         lblOutput.setText("Output data directory:");
         pnlFilePaths.add(lblOutput);
 
@@ -256,9 +240,21 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnChoosePathOut);
 
+        btnLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/load_icon.png"))); // NOI18N
+        btnLoad.setText("Load");
+        btnLoad.setToolTipText("Load interface from input directory");
+        btnLoad.setEnabled(false);
+        btnLoad.setIconTextGap(16);
+        btnLoad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadActionPerformed(evt);
+            }
+        });
+        pnlFilePaths.add(btnLoad);
+
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/diskette_icon.png"))); // NOI18N
         btnSave.setText("Save");
-        btnSave.setToolTipText("Choose input directory");
+        btnSave.setToolTipText("Save interface to the output directory");
         btnSave.setEnabled(false);
         btnSave.setIconTextGap(16);
         btnSave.addActionListener(new java.awt.event.ActionListener() {
@@ -268,26 +264,42 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnSave);
 
+        btnCheck.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/hashtag.png"))); // NOI18N
+        btnCheck.setText("Check");
+        btnCheck.setToolTipText("Check interface status");
+        btnCheck.setIconTextGap(5);
+        btnCheck.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCheckActionPerformed(evt);
+            }
+        });
+        pnlFilePaths.add(btnCheck);
+
         getContentPane().add(pnlFilePaths);
 
         pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
-        pnlIntrface.setLayout(new java.awt.GridLayout(2, 1));
-
-        pnlIntCombos.setLayout(new java.awt.GridLayout(2, 2));
+        pnlIntrface.setLayout(new java.awt.GridLayout(4, 3));
 
         lblSection.setText("Section:");
-        pnlIntCombos.add(lblSection);
+        pnlIntrface.add(lblSection);
+        pnlIntrface.add(cmbBoxResolution);
 
         lblResolution.setText("Resolution:");
-        pnlIntCombos.add(lblResolution);
-        pnlIntCombos.add(cmbBoxResolution);
+        pnlIntrface.add(lblResolution);
 
         cmbBoxSection.setModel(DCBM);
-        pnlIntCombos.add(cmbBoxSection);
+        pnlIntrface.add(cmbBoxSection);
 
-        pnlIntrface.add(pnlIntCombos);
-
-        pnlIntBtns.setLayout(new java.awt.GridLayout(1, 3));
+        btnTogAllRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"))); // NOI18N
+        btnTogAllRes.setText("All Resolutions");
+        btnTogAllRes.setToolTipText("Toggle All Resolutions");
+        btnTogAllRes.setIconTextGap(5);
+        btnTogAllRes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTogAllResActionPerformed(evt);
+            }
+        });
+        pnlIntrface.add(btnTogAllRes);
 
         btnTblePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/table_icon.png"))); // NOI18N
         btnTblePreview.setText("Preview Values");
@@ -298,7 +310,7 @@ public class GUI extends javax.swing.JFrame {
                 btnTblePreviewActionPerformed(evt);
             }
         });
-        pnlIntBtns.add(btnTblePreview);
+        pnlIntrface.add(btnTblePreview);
 
         btnBuild.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/build_icon.png"))); // NOI18N
         btnBuild.setText("Build Module");
@@ -309,7 +321,7 @@ public class GUI extends javax.swing.JFrame {
                 btnBuildActionPerformed(evt);
             }
         });
-        pnlIntBtns.add(btnBuild);
+        pnlIntrface.add(btnBuild);
 
         btnMdlePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/eye_icon.png"))); // NOI18N
         btnMdlePreview.setText("Preview Module");
@@ -320,9 +332,7 @@ public class GUI extends javax.swing.JFrame {
                 btnMdlePreviewActionPerformed(evt);
             }
         });
-        pnlIntBtns.add(btnMdlePreview);
-
-        pnlIntrface.add(pnlIntBtns);
+        pnlIntrface.add(btnMdlePreview);
 
         getContentPane().add(pnlIntrface);
 
@@ -349,7 +359,7 @@ public class GUI extends javax.swing.JFrame {
         panelModule.setLayout(panelModuleLayout);
         panelModuleLayout.setHorizontalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 453, Short.MAX_VALUE)
+            .addGap(0, 378, Short.MAX_VALUE)
         );
         panelModuleLayout.setVerticalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -567,6 +577,23 @@ public class GUI extends javax.swing.JFrame {
         GL_WINDOW.setVisible(true);
     }//GEN-LAST:event_btnMdlePreviewActionPerformed
 
+    private void btnCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckActionPerformed
+        // TODO add your handling code here:
+        StringBuilder sb = new StringBuilder();
+        sb.append("Interface initialized: ")
+                .append(intrface.isInitialized())
+                .append("\n").append("Number of errors: ")
+                .append(intrface.getErrorNum()).append("\n");
+        sb.append("\n");
+        sb.append(intrface.getErrStrMsg());
+        JOptionPane.showMessageDialog(this, sb.toString(), "Interface status", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_btnCheckActionPerformed
+
+    private void btnTogAllResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTogAllResActionPerformed
+        // TODO add your handling code here:
+        cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
+    }//GEN-LAST:event_btnTogAllResActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -648,12 +675,14 @@ public class GUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuild;
+    private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;
     private javax.swing.JButton btnLoad;
     private javax.swing.JButton btnMdlePreview;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnTblePreview;
+    private javax.swing.JToggleButton btnTogAllRes;
     private javax.swing.JComboBox<Object> cmbBoxResolution;
     private javax.swing.JComboBox<Section.SectionName> cmbBoxSection;
     private javax.swing.JFileChooser fileChooserInput;
@@ -670,8 +699,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenu mainMenuInfo;
     private javax.swing.JPanel panelModule;
     private javax.swing.JPanel pnlFilePaths;
-    private javax.swing.JPanel pnlIntBtns;
-    private javax.swing.JPanel pnlIntCombos;
     private javax.swing.JPanel pnlIntrface;
     private javax.swing.JPanel pnlTable;
     private javax.swing.JScrollPane sbFeatures;

@@ -17,8 +17,8 @@
 package rs.alexanderstojanovich.fo2ie.editor;
 
 import com.jogamp.opengl.GL2;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.joml.Matrix4f;
@@ -31,13 +31,13 @@ import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
  */
 public class Module {
 
-    protected final Set<GLComponent> components = new LinkedHashSet<>();
+    protected final List<GLComponent> components = new ArrayList<>();
 
     protected final TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
             for (GLComponent component : components) {
-                component.unbuffer();
+                component.unbuffer(); // hint that component should be refreshed again
             }
         }
     };
@@ -78,7 +78,7 @@ public class Module {
         }
     }
 
-    public Set<GLComponent> getComponents() {
+    public List<GLComponent> getComponents() {
         return components;
     }
 

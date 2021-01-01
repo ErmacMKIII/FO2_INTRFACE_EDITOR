@@ -228,11 +228,9 @@ public interface FeatureKey {
                 case BarterCont1ScrDnPicDn:
                 case BarterCont1oScrDnPicDn:
                 case BarterCont1oScrUpPicDn:
-                case BarterCont1Pic:
                 case BarterCont1ScrUpPicDn:
                 case BarterCont2oScrUpPicDn:
                 case BarterCont2ScrUpPicDn:
-                case BarterCont2Pic:
                 case BarterCont2ScrDnPicDn:
                 case BarterCont2oScrDnPicDn:
                 case BarterTalkPic:
@@ -261,6 +259,8 @@ public interface FeatureKey {
                 case BarterCont2oScrUp:
                 case BarterCont1ScrDn:
                 case BarterCont1ScrUp:
+                case BarterCont1Pic:
+                case BarterCont2Pic:
                 case BarterMain:
                 case BarterTalk:
                 case BarterOffer:
@@ -2674,12 +2674,12 @@ public interface FeatureKey {
      */
     public static FeatureKey valueOf(String string) {
         for (String prefix : ABBRS) {
-            if (string.startsWith(prefix)) {
+            if (string.toLowerCase().startsWith(prefix.toLowerCase())) {
                 FeatureKey[] keys = valuesOf(prefix);
                 Arrays.sort(keys);
 
                 for (FeatureKey key : keys) {
-                    if (key.getStringValue().equals(string)) {
+                    if (key.getStringValue().equalsIgnoreCase(string)) {
                         return key;
                     }
                 }

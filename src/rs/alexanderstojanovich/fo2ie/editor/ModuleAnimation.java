@@ -73,13 +73,18 @@ public class ModuleAnimation implements GLEventListener {
         projMat4.identity().setOrtho2D(-aspect, aspect, -1.0f, 1.0f);
     }
 
+    /**
+     * Initializes Module animator (essentially init stuff)
+     *
+     * @param glad drawable object from interface
+     */
     @Override
     public void init(GLAutoDrawable glad) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         gl20.glEnable(GL2.GL_DEPTH_TEST);
-        gl20.glDepthFunc(GL2.GL_LEQUAL);
+        gl20.glDepthFunc(GL2.GL_LEQUAL); // this one is important for overlapping
 
         gl20.glEnable(GL2.GL_BLEND);
         gl20.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
@@ -109,11 +114,26 @@ public class ModuleAnimation implements GLEventListener {
         state = State.BUILD;
     }
 
+    /**
+     * When about to get rid of this module animation
+     *
+     * @param glad drawable object from interface
+     */
     @Override
     public void dispose(GLAutoDrawable glad) {
+        // cancel unbuffer timer
         module.timerTask.cancel();
     }
 
+    /**
+     * When it come to resizing
+     *
+     * @param glad drawable object from interface
+     * @param i x offset from top left corner
+     * @param i1 y offset from top left corner
+     * @param i2 width
+     * @param i3 height
+     */
     @Override
     public void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
         GL2 gl20 = glad.getGL().getGL2();
@@ -124,6 +144,11 @@ public class ModuleAnimation implements GLEventListener {
         state = State.BUILD;
     }
 
+    /**
+     * Regular loop method (called by the FPS Animator)
+     *
+     * @param glad drawable object from interface
+     */
     @Override
     public void display(GLAutoDrawable glad) {
         try {
@@ -131,12 +156,14 @@ public class ModuleAnimation implements GLEventListener {
             gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
             switch (state) {
+                // invoked when user desired to build the module
                 case BUILD:
                     Texture.TEXTURE_MAP.clear();
                     module.components.clear();
                     module.components.addAll(intrface.build(gl20, fntTexture, qmarkTexture));
                     state = State.RENDER;
                     break;
+                // otherwise render the module
                 case RENDER:
                     module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
                     break;

@@ -53,9 +53,12 @@ import rs.alexanderstojanovich.fo2ie.util.GLCoords;
  */
 public class Intrface {
 
+    private final StringBuilder errStrMsg = new StringBuilder();
+    private int errorNum = 0;
+
     private final Configuration config = Configuration.getInstance();
 
-    public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Off|Mask|Na)?";
+    public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Dow|Off|Mask|Na)?";
 
     private final Vector4f textColor = GLColor.awtColorToVec4(config.getTxtCol());
     private final Vector4f textOverlayColor = GLColor.awtColorToVec4(config.getTxtOverlayCol());
@@ -143,8 +146,13 @@ public class Intrface {
     public boolean readIniFile() {
         boolean ok = false;
 
+        // set standard (default) mode
         mode = Mode.STD;
+        // reset error number
+        errorNum = 0;
+        errStrMsg.setLength(0);
 
+        // clear common and resolution sections
         commonFeatMap.clear();
         customResolutions.clear();
 
@@ -157,9 +165,15 @@ public class Intrface {
             br = new BufferedReader(new FileReader(iniFile));
             String line;
             ResolutionPragma rs = null;
-//            int lineNum = 0;
+            int lineNum = 0;
+            // whilst the last line is not reached
             while ((line = br.readLine()) != null) {
+                lineNum++;
+                // for now comments are ignored {#, ;} and so is the auto cursor
                 if (!line.isEmpty() && !line.startsWith("#") && !line.startsWith(";") && !line.startsWith("autocursor")) {
+                    // if word resolution occurs 
+                    // switch mode, add it to custom resolution
+                    // and take control over it
                     if (line.startsWith("resolution")) {
                         String[] res = line.split(" ");
                         int width = Integer.parseInt(res[1]);
@@ -172,32 +186,46 @@ public class Intrface {
                                 height
                         );
                         customResolutions.add(rs);
+                        // in other case if line starts with =
                     } else if (line.contains("=")) {
                         String[] words = line.split("=");
                         words[0] = words[0].trim();
                         words[1] = words[1].trim();
 
                         FeatureKey fk = FeatureKey.valueOf(words[0]);
+                        if (fk == null) {
+                            errStrMsg.append(lineNum).append(": @").append(words[0]).append("\n");
+                            FO2IELogger.reportError(lineNum + ":" + " @" + words[0], null);
+                        }
                         FeatureValue fv = FeatureValue.valueOf(words[1]);
-                        switch (mode) {
-                            case STD:
-                                commonFeatMap.put(fk, fv);
-                                break;
-                            case RES:
-                                if (rs != null) {
-                                    rs.getCustomFeatMap().put(fk, fv);
-                                }
-                                break;
+                        if (fv == null) {
+                            errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
+                            FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
+                        }
+
+                        if (fk != null && fv != null) {
+                            switch (mode) {
+                                case STD:
+                                    commonFeatMap.put(fk, fv);
+                                    break;
+                                case RES:
+                                    if (rs != null) {
+                                        rs.getCustomFeatMap().put(fk, fv);
+                                    }
+                                    break;
+                            }
                         }
                     }
 
                 }
 
-//                FO2IELogger.reportInfo("linenum = " + ++lineNum + ": " + line, null);
             }
 
             FO2IELogger.reportInfo("Loaded total common key/vals: " + commonFeatMap.size(), null);
             FO2IELogger.reportInfo("Total custom resolutions: " + customResolutions.size(), null);
+            FO2IELogger.reportInfo("Total lines: " + lineNum, null);
+            FO2IELogger.reportInfo("Total errors: " + errorNum, null);
+
             ok = true;
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
@@ -239,57 +267,73 @@ public class Intrface {
         final int screenWidth = GUI.GL_CANVAS.getWidth();
         final int screenHeight = GUI.GL_CANVAS.getHeight();
 
+        // final result is array list of components
         final List<GLComponent> result = new ArrayList<>();
         final Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             FeatureKey mainPicKey = section.root.getMainPic();
 
+            // it's intially assumed that picture is 800x600 unless specified otherwise
             int mainPicWidth = 800;
             int mainPicHeight = 600;
 
+            // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null) {
                 ImageWrapper mainPicVal = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
                 mainPicVal.loadImage();
 
+                // texture for main picture
                 Texture rootTex;
+                // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
                     mainPicWidth = mainPicVal.getImages()[0].getWidth();
                     mainPicHeight = mainPicVal.getImages()[0].getHeight();
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
+                    // otherwise load missing question mark texture
                 } else {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
 
+                // defining root of the module (the main image)
+                // all positions are referred to this root (image)
                 Quad root;
-                if (mainPicPosKey != null) {
+                if (mainPicPosKey != null) { // if position exists for the main (root) image
                     MyVector4 mainPicPosVal = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
                     MyVector4 temp = new MyVector4();
                     mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
 
+                    // center is the mid point (essentially that's the formula)
                     float posx = (mainPicPosVal.x + mainPicPosVal.z) / 2.0f;
                     float posy = (mainPicPosVal.y + mainPicPosVal.w) / 2.0f;
 
                     Vector2f pos = new Vector2f(posx, posy);
                     Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
 
+                    // width and height are according to the corner coodinates substraction
                     int width = Math.round(mainPicPosVal.z - mainPicPosVal.x);
                     int height = Math.round(mainPicPosVal.w - mainPicPosVal.y);
 
                     root = new Quad(width, height, rootTex, posGL);
                     result.add(root);
+                } else { // otherwise just make it size as read before and center it
+                    root = new Quad(mainPicWidth, mainPicHeight, rootTex);
+                    result.add(root);
                 }
             }
 
+            // defining mutually exclusive sets for pictures, primitives (overlays) and text
             final Set<GLComponent> picComps = new LinkedHashSet<>();
             final Set<GLComponent> prmComps = new LinkedHashSet<>();
             final Set<GLComponent> txtComps = new LinkedHashSet<>();
 
+            // iterating through the section keys (left side of assignment of features)
             for (FeatureKey featKey : section.keys) {
                 FeatureKey.Type fkType = featKey.getType();
                 if (featKey != featKey.getMainPic()) {
                     switch (fkType) {
+                        // if feat key is picture
                         case PIC:
                             FeatureValue picVal = resolutionPragma.customFeatMap.get(featKey);
                             if (picVal instanceof ImageWrapper) {
@@ -314,7 +358,10 @@ public class Intrface {
                                             int width = Math.round(picPosVec.z - picPosVec.x);
                                             int height = Math.round(picPosVec.w - picPosVec.y);
 
+                                            // load image from filesystem to the memory
                                             picWrap.loadImage();
+                                            // get array of images (in that case it's FRM) otherwise 
+                                            // and in most case it's single image (.PNG for instance)
                                             BufferedImage[] images = picWrap.getImages();
 
                                             int index = 0;
@@ -338,7 +385,7 @@ public class Intrface {
                                         + featKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
                             }
                             break;
-
+                        // if feat key is picture positon
                         case PIC_POS:
                             FeatureValue picPosVal = resolutionPragma.customFeatMap.get(featKey);
                             if (picPosVal instanceof MyVector4) {
@@ -351,6 +398,7 @@ public class Intrface {
                                 Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
                                 int width = Math.round(picPosVec.z - picPosVec.x);
                                 int height = Math.round(picPosVec.w - picPosVec.y);
+                                // gets the possible pictur keys
                                 List<FeatureKey> pics = FeatureKey.getPics(featKey);
                                 if (!pics.isEmpty()) {
                                     for (FeatureKey fkPic : pics) {
@@ -385,7 +433,7 @@ public class Intrface {
                                         + featKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
                             }
                             break;
-
+                        // if feat key is text position
                         case TXT:
                             FeatureValue txtVal = resolutionPragma.customFeatMap.get(featKey);
                             if (txtVal instanceof MyVector4) {
@@ -400,8 +448,10 @@ public class Intrface {
                                 int theight = Math.round(txtValVec.w - txtValVec.y);
                                 String regex = featKey.getPrefix() + "|" + "Text";
                                 String text = featKey.getStringValue().replaceAll(regex, "");
+                                // this is text (primitive) overlay representing the area which text is populating
                                 PrimitiveQuad txtOlay = new PrimitiveQuad(twidth, theight, tposGL);
                                 txtOlay.setColor(textOverlayColor);
+                                // text is set to the default (font) texture
                                 Text txtComp = new Text(fntTexture, text, textColor, tposGL);
                                 txtComp.setAlignment(Text.ALIGNMENT_CENTER);
                                 prmComps.add(txtOlay);
@@ -584,6 +634,30 @@ public class Intrface {
 
     public Configuration getConfig() {
         return config;
+    }
+
+    public int getErrorNum() {
+        return errorNum;
+    }
+
+    public StringBuilder getErrStrMsg() {
+        return errStrMsg;
+    }
+
+    public static String getPIC_REGEX() {
+        return PIC_REGEX;
+    }
+
+    public Vector4f getTextColor() {
+        return textColor;
+    }
+
+    public Vector4f getTextOverlayColor() {
+        return textOverlayColor;
+    }
+
+    public Vector4f getQmarkColor() {
+        return qmarkColor;
     }
 
 }

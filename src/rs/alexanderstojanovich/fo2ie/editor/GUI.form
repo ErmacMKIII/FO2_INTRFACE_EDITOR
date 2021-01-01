@@ -62,9 +62,6 @@
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[960, 540]"/>
     </Property>
-    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[930, 540]"/>
-    </Property>
     <Property name="size" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[960, 540]"/>
     </Property>
@@ -84,7 +81,7 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,-107,0,0,3,-98"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,-107,0,0,3,8"/>
   </AuxValues>
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
@@ -102,8 +99,8 @@
       </Properties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-        <Property name="columns" type="int" value="2"/>
-        <Property name="rows" type="int" value="4"/>
+        <Property name="columns" type="int" value="3"/>
+        <Property name="rows" type="int" value="3"/>
       </Layout>
       <SubComponents>
         <Component class="javax.swing.JLabel" name="lblInput">
@@ -130,20 +127,6 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnChooseInPathActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="btnLoad">
-          <Properties>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/load_icon.png"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Load"/>
-            <Property name="toolTipText" type="java.lang.String" value="Choose input directory"/>
-            <Property name="enabled" type="boolean" value="false"/>
-            <Property name="iconTextGap" type="int" value="16"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoadActionPerformed"/>
-          </Events>
-        </Component>
         <Component class="javax.swing.JLabel" name="lblOutput">
           <Properties>
             <Property name="text" type="java.lang.String" value="Output data directory:"/>
@@ -168,18 +151,45 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnChoosePathOutActionPerformed"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JButton" name="btnLoad">
+          <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/load_icon.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Load"/>
+            <Property name="toolTipText" type="java.lang.String" value="Load interface from input directory"/>
+            <Property name="enabled" type="boolean" value="false"/>
+            <Property name="iconTextGap" type="int" value="16"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoadActionPerformed"/>
+          </Events>
+        </Component>
         <Component class="javax.swing.JButton" name="btnSave">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/diskette_icon.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Save"/>
-            <Property name="toolTipText" type="java.lang.String" value="Choose input directory"/>
+            <Property name="toolTipText" type="java.lang.String" value="Save interface to the output directory"/>
             <Property name="enabled" type="boolean" value="false"/>
             <Property name="iconTextGap" type="int" value="16"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnCheck">
+          <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/hashtag.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Check"/>
+            <Property name="toolTipText" type="java.lang.String" value="Check interface status"/>
+            <Property name="iconTextGap" type="int" value="5"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCheckActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>
@@ -194,92 +204,87 @@
       </Properties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-        <Property name="columns" type="int" value="1"/>
-        <Property name="rows" type="int" value="2"/>
+        <Property name="columns" type="int" value="3"/>
+        <Property name="rows" type="int" value="4"/>
       </Layout>
       <SubComponents>
-        <Container class="javax.swing.JPanel" name="pnlIntCombos">
-
-          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-            <Property name="columns" type="int" value="2"/>
-            <Property name="rows" type="int" value="2"/>
-          </Layout>
-          <SubComponents>
-            <Component class="javax.swing.JLabel" name="lblSection">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Section:"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JLabel" name="lblResolution">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Resolution:"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JComboBox" name="cmbBoxResolution">
-              <AuxValues>
-                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
-              </AuxValues>
-            </Component>
-            <Component class="javax.swing.JComboBox" name="cmbBoxSection">
-              <Properties>
-                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="DCBM" type="code"/>
-                </Property>
-              </Properties>
-              <AuxValues>
-                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Section.SectionName&gt;"/>
-              </AuxValues>
-            </Component>
-          </SubComponents>
-        </Container>
-        <Container class="javax.swing.JPanel" name="pnlIntBtns">
-
-          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-            <Property name="columns" type="int" value="3"/>
-            <Property name="rows" type="int" value="1"/>
-          </Layout>
-          <SubComponents>
-            <Component class="javax.swing.JButton" name="btnTblePreview">
-              <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/table_icon.png"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Preview Values"/>
-                <Property name="toolTipText" type="java.lang.String" value="Preview features in the table"/>
-                <Property name="iconTextGap" type="int" value="5"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTblePreviewActionPerformed"/>
-              </Events>
-            </Component>
-            <Component class="javax.swing.JButton" name="btnBuild">
-              <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/build_icon.png"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Build Module"/>
-                <Property name="toolTipText" type="java.lang.String" value="Build module"/>
-                <Property name="iconTextGap" type="int" value="5"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBuildActionPerformed"/>
-              </Events>
-            </Component>
-            <Component class="javax.swing.JButton" name="btnMdlePreview">
-              <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/eye_icon.png"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Preview Module"/>
-                <Property name="toolTipText" type="java.lang.String" value="Preview module in window"/>
-                <Property name="iconTextGap" type="int" value="5"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnMdlePreviewActionPerformed"/>
-              </Events>
-            </Component>
-          </SubComponents>
-        </Container>
+        <Component class="javax.swing.JLabel" name="lblSection">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Section:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JComboBox" name="cmbBoxResolution">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblResolution">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Resolution:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JComboBox" name="cmbBoxSection">
+          <Properties>
+            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="DCBM" type="code"/>
+            </Property>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Section.SectionName&gt;"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JToggleButton" name="btnTogAllRes">
+          <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="All Resolutions"/>
+            <Property name="toolTipText" type="java.lang.String" value="Toggle All Resolutions"/>
+            <Property name="iconTextGap" type="int" value="5"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTogAllResActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnTblePreview">
+          <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/table_icon.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Preview Values"/>
+            <Property name="toolTipText" type="java.lang.String" value="Preview features in the table"/>
+            <Property name="iconTextGap" type="int" value="5"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTblePreviewActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnBuild">
+          <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/build_icon.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Build Module"/>
+            <Property name="toolTipText" type="java.lang.String" value="Build module"/>
+            <Property name="iconTextGap" type="int" value="5"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBuildActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnMdlePreview">
+          <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/rs/alexanderstojanovich/fo2ie/res/eye_icon.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Preview Module"/>
+            <Property name="toolTipText" type="java.lang.String" value="Preview module in window"/>
+            <Property name="iconTextGap" type="int" value="5"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnMdlePreviewActionPerformed"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="pnlTable">
@@ -328,7 +333,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="453" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="378" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
