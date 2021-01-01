@@ -219,7 +219,67 @@ public interface FeatureKey {
 
         @Override
         public Type getType() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            switch (this) {
+                case BarterButtonPic0:
+                case BarterButtonPic1:
+                case BarterButtonPic2:
+                case BarterButtonPic3:
+                case BarterButtonPic4:
+                case BarterCont1ScrDnPicDn:
+                case BarterCont1oScrDnPicDn:
+                case BarterCont1oScrUpPicDn:
+                case BarterCont1Pic:
+                case BarterCont1ScrUpPicDn:
+                case BarterCont2oScrUpPicDn:
+                case BarterCont2ScrUpPicDn:
+                case BarterCont2Pic:
+                case BarterCont2ScrDnPicDn:
+                case BarterCont2oScrDnPicDn:
+                case BarterTalkPic:
+                case BarterOfferPic:
+                case BarterMainPic:
+                    return Type.PIC;
+                case BarterButton0:
+                case BarterButton1:
+                case BarterButton2:
+                case BarterButton3:
+                case BarterButton4:
+                case BarterButtonOpponent0:
+                case BarterButtonOpponent1:
+                case BarterButtonOpponent2:
+                case BarterButtonOpponent3:
+                case BarterButtonOpponent4:
+                case BarterChosen:
+                case BarterCritter:
+                case BarterCont1:
+                case BarterCont2:
+                case BarterCont1oScrDn:
+                case BarterCont1oScrUp:
+                case BarterCont2ScrDn:
+                case BarterCont2ScrUp:
+                case BarterCont2oScrDn:
+                case BarterCont2oScrUp:
+                case BarterCont1ScrDn:
+                case BarterCont1ScrUp:
+                case BarterMain:
+                case BarterTalk:
+                case BarterOffer:
+                case BarterCont1o:
+                case BarterCont2o:
+                    return Type.PIC_POS;
+                case BarterCost1:
+                case BarterCost2:
+                case BarterOfferText:
+                case BarterTalkText:
+                    return Type.TXT;
+                case BarterCont1ItemHeight:
+                case BarterCont1oItemHeight:
+                case BarterCont2ItemHeight:
+                case BarterCont2oItemHeight:
+                    return Type.VALUE;
+                default:
+                    return Type.UNKNOWN;
+            }
         }
 
         @Override
@@ -336,7 +396,97 @@ public interface FeatureKey {
 
         @Override
         public Type getType() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            switch (this) {
+                case ChaAgeDownPicDn:
+                case ChaAgeMainPic:
+                case ChaAgePicDn:
+                case ChaAgeUpPicDn:
+                case ChaCancelPicDn:
+                case ChaMainPic:
+                case ChaNameMainPic:
+                case ChaNamePicDn:
+                case ChaOkPicDn:
+                case ChaPrintPicDn:
+                case ChaSexFemalePicDn:
+                case ChaSexMainPic:
+                case ChaSexMalePicDn:
+                case ChaSliderPic:
+                case ChaSliderMinusPicDn:
+                case ChaSliderPlusPicDn:
+                case ChaSwitchKarmaPic:
+                case ChaSwitchScrDnPic:
+                case ChaSwitchKillsPic:
+                case ChaSwitchMaskPic:
+                case ChaSwitchScrDnPicDn:
+                case ChaSwitchPerksPic:
+                case ChaSwitchScrUpPicDn:
+                case ChaSwitchScrUpPic:
+                case ChaSexPicDn:
+                    return Type.PIC;
+                case ChaAge:
+                case ChaSex:
+                case ChaName:
+                case ChaMain:
+                case ChaPrint:
+                case ChaOk:
+                case ChaCancel:
+                case ChaSliderMinus:
+                case ChaSliderPlus:
+                case ChaAgeUp:
+                case ChaAgeDown:
+                case ChaAgeMain:
+                case ChaNameMain:
+                case ChaSexFemale:
+                case ChaSexMale:
+                case ChaSexMain:
+                case ChaSwitch:
+                    return Type.PIC_POS;
+                case ChaParamPic:
+                case ChaCancelText:
+                case ChaOkText:
+                case ChaNamePassText:
+                case ChaPrintText:
+                case ChaLevel:
+                case ChaExp:
+                case ChaDmg:
+                case ChaDmgLife:
+                case ChaSpecialText:
+                case ChaSpecialValue:
+                case ChaSpecialLevel:
+                case ChaNextLevel:
+                case ChaStatsName:
+                case ChaStatsValue:
+                case ChaSwitchScrDn:
+                case ChaSwitchScrUp:
+                case ChaAgeAge:
+                case ChaNameName:
+                case ChaNameNameText:
+                case ChaNamePass:
+                case ChaSwitchText:
+                case ChaSkillText:
+                case ChaSkillValue:
+                case ChaSkillName:
+                case ChaParamDesc:
+                case ChaParamName:
+                case ChaSpecialParams:
+                case ChaUnspentSP:
+                case ChaUnspentSPText:
+                    return Type.TXT;
+                case ChaDmgNextX:
+                case ChaDmgNextY:
+                case ChaSkillNextX:
+                case ChaSkillNextY:
+                case ChaSliderX:
+                case ChaSliderY:
+                case ChaSpecialNextX:
+                case ChaSpecialNextY:
+                case ChaStatsNextX:
+                case ChaStatsNextY:
+                    return Type.VALUE;
+                default:
+                    return Type.UNKNOWN;
+
+            }
         }
 
         @Override
@@ -375,7 +525,17 @@ public interface FeatureKey {
 
         @Override
         public Type getType() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            switch (this) {
+                case ChosenTabPic:
+                    return Type.PIC;
+                case ChosenTab:
+                    return Type.PIC_POS;
+                case ChosenTabStepX:
+                case ChosenTabStepY:
+                    return Type.VALUE;
+                default:
+                    return Type.UNKNOWN;
+            }
         }
 
         @Override
@@ -415,7 +575,18 @@ public interface FeatureKey {
 
         @Override
         public Type getType() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            switch (this) {
+                case ConsoleMainPic:
+                    return Type.PIC;
+                case ConsoleTextX:
+                case ConsoleTextY:
+                    return Type.TXT;
+                case ConsoleMainPicX:
+                case ConsoleMainPicY:
+                    return Type.VALUE;
+                default:
+                    return Type.UNKNOWN;
+            }
         }
 
         @Override
@@ -481,7 +652,45 @@ public interface FeatureKey {
 
         @Override
         public Type getType() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            switch (this) {
+                case DlgAnswPic:
+                case DlgAvatar:
+                case DlgBarterPicDn:
+                case DlgMainPic:
+                case DlgSayPicDn:
+                case DlgScrDnPicDn:
+                case DlgScrUpPicDn:
+                case DlgboxButtonPicDn:
+                case DlgboxBottomPic:
+                case DlgboxMiddlePic:
+                case DlgboxTopPic:
+                    return Type.PIC;
+                case DlgAnsw:
+                case DlgBarter:
+                case DlgSay:
+                case DlgScrDn:
+                case DlgScrUp:
+                case DlgMain:
+                case DlgboxButton:
+                case DlgboxBottom:
+                case DlgboxMiddle:
+                case DlgboxTop:
+                    return Type.PIC_POS;
+                case DlgAnswText:
+                case DlgBarterText:
+                case DlgMoney:
+                case DlgSayText:
+                case DlgTimer:
+                case DlgText:
+                case DlgboxButtonText:
+                case DlgboxText:
+                    return Type.TXT;
+                case DlgNextAnswX:
+                case DlgNextAnswY:
+                    return Type.VALUE;
+                default:
+                    return Type.UNKNOWN;
+            }
         }
 
         @Override

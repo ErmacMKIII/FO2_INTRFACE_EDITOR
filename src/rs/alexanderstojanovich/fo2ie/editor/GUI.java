@@ -270,6 +270,7 @@ public class GUI extends javax.swing.JFrame {
 
         getContentPane().add(pnlFilePaths);
 
+        pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
         pnlIntrface.setLayout(new java.awt.GridLayout(2, 1));
 
         pnlIntCombos.setLayout(new java.awt.GridLayout(2, 2));
@@ -348,11 +349,11 @@ public class GUI extends javax.swing.JFrame {
         panelModule.setLayout(panelModuleLayout);
         panelModuleLayout.setHorizontalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 470, Short.MAX_VALUE)
+            .addGap(0, 453, Short.MAX_VALUE)
         );
         panelModuleLayout.setVerticalGroup(
             panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 235, Short.MAX_VALUE)
+            .addGap(0, 168, Short.MAX_VALUE)
         );
 
         getContentPane().add(panelModule);
