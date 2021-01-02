@@ -147,7 +147,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void initIntEn() {
 
-        boolean ok = intrface.isInitialized() && intrface.getErrorNum() == 0;
+        boolean ok = cfg.isIgnoreErrors() || (intrface.isInitialized() && intrface.getErrorNum() == 0);
 
         for (int i = 0; i < this.pnlIntrface.getComponentCount(); i++) {
             this.pnlIntrface.getComponent(i).setEnabled(ok);
@@ -478,6 +478,8 @@ public class GUI extends javax.swing.JFrame {
 
             if (intrface.getErrorNum() == 0) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface load", JOptionPane.INFORMATION_MESSAGE);
+            } else if (cfg.isIgnoreErrors()) {
+                JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax errors", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
             }

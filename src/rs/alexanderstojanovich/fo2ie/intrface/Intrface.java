@@ -82,8 +82,10 @@ public class Intrface {
     private final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Chosen.ChosenTabPic, FeatureKey.Chosen.values());
     private final Section console = new Section(Section.SectionName.Console, FeatureKey.Console.ConsoleMainPic, FeatureKey.Console.values());
     private final Section dialogBox = new Section(Section.SectionName.DialogBox, FeatureKey.Dialog.DlgMainPic, FeatureKey.Dialog.values());
+    private final Section faction = new Section(Section.SectionName.Faction, FeatureKey.Faction.FactionMainPic, FeatureKey.Faction.values());
     private final Section fixBoy = new Section(Section.SectionName.FixBoy, FeatureKey.FixBoy.FixMainPic, FeatureKey.FixBoy.values());
     private final Section globalMap = new Section(Section.SectionName.GlobalMap, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GlobalMap.values());
+    private final Section groundPickup = new Section(Section.SectionName.GroundPickup, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GroundPickup.values());
     private final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.IboxMainPic, FeatureKey.InputBox.values());
     private final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.IntMainPic, FeatureKey.Interface.values());
     private final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.InvMainPic, FeatureKey.Inventory.values());
@@ -123,7 +125,7 @@ public class Intrface {
      */
     private void initMap() {
         final Section[] sections = {
-            aim, barter, character, chosen, console, dialogBox, fixBoy, globalMap,
+            aim, barter, character, chosen, console, dialogBox, faction, fixBoy, globalMap, groundPickup,
             inputBox, intrface, inventory, popUp, miniMap, login, options, priceSetup, perk, pipBoy,
             pickUp, radio, registration, saveLoad, sayBox, skillBox, split,
             townView, timer, use
@@ -829,6 +831,10 @@ public class Intrface {
 
     public Section getUse() {
         return use;
+    }
+
+    public Section getGroundPickup() {
+        return groundPickup;
     }
 
     public Map<SectionName, Section> getNameToSectionMap() {

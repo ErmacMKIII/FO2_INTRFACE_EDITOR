@@ -24,8 +24,10 @@ import java.util.regex.Pattern;
  */
 public interface FeatureValue {
 
-    public static final String IMG_EXT_REGEX = ".*(\\.(bmp|gif|jpe?g|png|fofrm|frm?))$";
-    public static final String IMG_EXT_REGEX_UPPERCASE = IMG_EXT_REGEX.toUpperCase();
+    public static final String IMG_IO_REGEX = ".*(\\.(bmp|jpe?g|png))$";
+    public static final String IMG_FRM_REGEX = ".*(\\.(frm?))$";
+    public static final String IMG_FOFRM_REGEX = ".*(\\.(fofrm?))$";
+    public static final String IMG_EXT_REGEX = ".*(\\.(bmp|jpe?g|png|fofrm|frm?))$";
     public static final String NUMBER_REGEX = "-?\\d+(\\.\\d+)?";
     public static final String NUMBER_ARRAY_REGEX = "^(\\s*-?\\d+(\\.\\d+)?)(\\s*\\s\\s*-?\\d+(\\.\\d+)?)*$";
 
@@ -58,10 +60,9 @@ public interface FeatureValue {
      */
     public static FeatureValue valueOf(String string) {
         FeatureValue result = null;
-        if (Pattern.matches(IMG_EXT_REGEX, string)
-                || Pattern.matches(IMG_EXT_REGEX_UPPERCASE, string)) {
+        if (Pattern.matches(IMG_EXT_REGEX, string.toLowerCase())) {
             result = new ImageWrapper(string);
-        } else if (Pattern.matches(NUMBER_ARRAY_REGEX, string)) {
+        } else if (Pattern.matches(NUMBER_ARRAY_REGEX, string.toLowerCase())) {
             String[] split = string.split("\\s+");
             switch (split.length) {
                 case 1:

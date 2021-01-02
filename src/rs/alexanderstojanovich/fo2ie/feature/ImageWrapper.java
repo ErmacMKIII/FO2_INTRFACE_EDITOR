@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import javax.imageio.ImageIO;
+import rs.alexanderstojanovich.fo2ie.frm.FOFRM;
 import rs.alexanderstojanovich.fo2ie.frm.FRM;
 import rs.alexanderstojanovich.fo2ie.frm.ImageData;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
@@ -30,32 +31,43 @@ import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class ImageWrapper implements FeatureValue {
-
+    
+    private int fps = 0;
+    private int offsetX = 0;
+    private int offsetY = 0;
+    
     private String value; // is actually filename
     private BufferedImage[] images;
-    private FRM frm; // null if image is not FRM
-
+    
     public ImageWrapper(String value) {
         this.value = value;
     }
-
+    
     public void loadImage() throws IOException {
         Configuration instance = Configuration.getInstance();
         File inDir = instance.getInDir();
         final File imgFile = new File(inDir.getPath() + File.separator + value);
+        
         if (imgFile.exists()
-                && (value.matches(IMG_EXT_REGEX) || value.matches(IMG_EXT_REGEX_UPPERCASE))) {
-            if (value.endsWith(".png") | value.endsWith(".PNG")) {
+                && value.toLowerCase().matches(IMG_EXT_REGEX)) {
+            if (value.toLowerCase().matches(IMG_IO_REGEX)) {
                 images = new BufferedImage[1];
                 images[0] = ImageIO.read(imgFile);
-            } else if (value.endsWith(".frm") | value.endsWith(".FRM")) {
-                frm = new FRM(imgFile);
+            } else if (value.toLowerCase().matches(IMG_FRM_REGEX)) {
+                FRM frm = new FRM(imgFile);
+                fps = frm.getFps();
+                
                 List<ImageData> frames = frm.getFrames();
                 images = new BufferedImage[frames.size()];
+                offsetX = (frames.size() > 0) ? frames.get(0).getOffsetX() : 0;
+                offsetY = (frames.size() > 0) ? frames.get(0).getOffsetY() : 0;
                 int index = 0;
                 for (ImageData frame : frames) {
                     images[index++] = frame.toBufferedImage();
                 }
+            } else if (value.toLowerCase().matches(IMG_FOFRM_REGEX)) {
+                FOFRM fofrm = new FOFRM(imgFile);
+                images = fofrm.getImages();
             }
         }
     }
@@ -69,11 +81,15 @@ public class ImageWrapper implements FeatureValue {
         Configuration instance = Configuration.getInstance();
         File outDir = instance.getOutDir();
         final File imgFile = new File(outDir.getPath() + File.separator + value);
-
-        if (value.matches(IMG_EXT_REGEX)) {
+        
+        if (value.toLowerCase().matches(IMG_IO_REGEX)) {
             ImageIO.write(images[0], "png", imgFile);
-        } else if (value.endsWith(".frm") | value.endsWith(".FRM")) {
+        } else if (value.toLowerCase().matches(IMG_FRM_REGEX)) {
+            FRM frm = new FRM(fps, images, offsetX, offsetY);
             frm.write(imgFile);
+        } else if (value.toLowerCase().matches(IMG_FOFRM_REGEX)) {
+            FOFRM fofrm = new FOFRM(fps, images.length, images, offsetX, offsetY);
+            fofrm.write(value, imgFile);
         }
     }
 
@@ -115,5 +131,21 @@ public class ImageWrapper implements FeatureValue {
     public void setStringValue(String value) {
         this.value = value;
     }
-
+    
+    public int getFps() {
+        return fps;
+    }
+    
+    public int getOffsetX() {
+        return offsetX;
+    }
+    
+    public int getOffsetY() {
+        return offsetY;
+    }
+    
+    public String getValue() {
+        return value;
+    }
+    
 }

@@ -28,7 +28,7 @@ public class Section {
     protected final FeatureKey[] keys;
 
     public static enum SectionName {
-        Aim, Barter, Character, Chosen, Console, DialogBox, FixBoy, GlobalMap,
+        Aim, Barter, Character, Chosen, Console, DialogBox, Faction, FixBoy, GlobalMap, GroundPickup,
         InputBox, Intrface, Inventory, PopUp, MiniMap, Login, Options, PriceSetup, Perk, PipBoy,
         PickUp, Radio, Registration, SaveLoad, SayBox, SkillBox, Split,
         TownView, Timer, Use

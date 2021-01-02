@@ -46,6 +46,8 @@ public class Configuration {
     private boolean keepAspectRatio = false;
     private String defaultIni = "default.ini";
 
+    private boolean ignoreErrors = false;
+
     private static Configuration instance;
 
     private Configuration() {
@@ -116,6 +118,9 @@ public class Configuration {
                             case "KeepAspectRatio":
                                 keepAspectRatio = Boolean.parseBoolean(words[1]);
                                 break;
+                            case "IgnoreErrors":
+                                ignoreErrors = Boolean.parseBoolean(words[1]);
+                                break;
                         }
                     }
                 }
@@ -155,6 +160,7 @@ public class Configuration {
             pw.println("QMarkColor = " + writeRGBA(qmarkCol));
             pw.println("TextureSize = " + textureSize);
             pw.println("KeepAspectRatio = " + keepAspectRatio);
+            pw.println("IgnoreErrors = " + ignoreErrors);
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } finally {
@@ -231,6 +237,18 @@ public class Configuration {
 
     public void setDefaultIni(String defaultIni) {
         this.defaultIni = defaultIni;
+    }
+
+    public boolean isIgnoreErrors() {
+        return ignoreErrors;
+    }
+
+    public void setTextureSize(int textureSize) {
+        this.textureSize = textureSize;
+    }
+
+    public void setIgnoreErrors(boolean ignoreErrors) {
+        this.ignoreErrors = ignoreErrors;
     }
 
 }

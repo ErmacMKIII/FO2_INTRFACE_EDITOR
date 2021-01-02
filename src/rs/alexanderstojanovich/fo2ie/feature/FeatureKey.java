@@ -32,8 +32,10 @@ public interface FeatureKey {
     public static final String CHOSEN = "Chosen";
     public static final String CONSOLE = "Console";
     public static final String DIALOG_BOX = "Dlg";
+    public static final String FACTION = "Faction";
     public static final String FIX_BOY = "Fix";
     public static final String GLOBAL_MAP = "Gmap";
+    public static final String GROUND_PICKUP = "GPickup";
 
     public static final String INPUT_BOX = "Ibox";
     public static final String INTRFACE = "Int";
@@ -59,7 +61,7 @@ public interface FeatureKey {
     public static final String USE = "Use";
 
     public static final String[] ABBRS = {
-        AIM, BARTER, CHARACTER, CHOSEN, CONSOLE, DIALOG_BOX, FIX_BOY, GLOBAL_MAP,
+        AIM, BARTER, CHARACTER, CHOSEN, CONSOLE, DIALOG_BOX, FACTION, FIX_BOY, GLOBAL_MAP, GROUND_PICKUP,
         INPUT_BOX, INTRFACE, INVENTORY, POP_UP, MINI_MAP, LOGIN, OPTIONS, PRICE_SETUP, PERK, PIP_BOY,
         PICK_UP, RADIO, REGISTRATION, SAVE_LOAD, SAY_BOX, SKILL_BOX, SPLIT,
         TOWN_VIEW, TIMER, USE
@@ -715,6 +717,64 @@ public interface FeatureKey {
 
     }
 
+    // Faction (deprecated)
+    public static enum Faction implements FeatureKey {
+        FactionButton0,
+        FactionButton1,
+        FactionButton2,
+        FactionButton3,
+        FactionButton4,
+        FactionButton5,
+        FactionLabel,
+        FactionMainPic,
+        FactionMainText;
+
+        @Override
+        public FeatureKey getMainPic() {
+            return FactionMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return null;
+        }
+
+        @Override
+        public String getStringValue() {
+            return this.name();
+        }
+
+        @Override
+        public int getNumericValue() {
+            return this.ordinal();
+        }
+
+        @Override
+        public String getPrefix() {
+            return FACTION;
+        }
+
+        @Override
+        public Type getType() {
+            switch (this) {
+                case FactionMainPic:
+                    return Type.PIC;
+                case FactionButton0:
+                case FactionButton1:
+                case FactionButton2:
+                case FactionButton3:
+                case FactionButton4:
+                case FactionButton5:
+                    return Type.PIC_POS;
+                case FactionLabel:
+                case FactionMainText:
+                    return Type.TXT;
+                default:
+                    return Type.UNKNOWN;
+            }
+        }
+    }
+
     // Fix-boy
     public static enum FixBoy implements FeatureKey {
         FixButton1,
@@ -942,6 +1002,75 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return GmapMain;
+        }
+
+    }
+
+    // Ground pickup
+    public static enum GroundPickup implements FeatureKey {
+        GPickupCancel,
+        GPickupCancelPicDn,
+        GPickupHeightItem,
+        GPickupInv,
+        GPickupInvScrDn,
+        GPickupInvScrDnPic,
+        GPickupInvScrDnPicDn,
+        GPickupInvScrDnPicNa,
+        GPickupInvScrUp,
+        GPickupInvScrUpPic,
+        GPickupInvScrUpPicDn,
+        GPickupInvScrUpPicNa,
+        GPickupMainPic,
+        GPickupWidthItem;
+
+        @Override
+        public FeatureKey getMainPic() {
+            return GPickupMainPic;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return null;
+        }
+
+        @Override
+        public String getStringValue() {
+            return this.name();
+        }
+
+        @Override
+        public int getNumericValue() {
+            return this.ordinal();
+        }
+
+        @Override
+        public String getPrefix() {
+            return GROUND_PICKUP;
+        }
+
+        @Override
+        public Type getType() {
+            switch (this) {
+                case GPickupCancelPicDn:
+                case GPickupInvScrDnPic:
+                case GPickupInvScrDnPicDn:
+                case GPickupInvScrDnPicNa:
+                case GPickupInvScrUpPic:
+                case GPickupInvScrUpPicDn:
+                case GPickupInvScrUpPicNa:
+                case GPickupMainPic:
+                    return Type.PIC;
+                case GPickupCancel:
+                case GPickupInv:
+                case GPickupInvScrDn:
+                case GPickupInvScrUp:
+                    return Type.PIC_POS;
+                case GPickupWidthItem:
+                case GPickupHeightItem:
+                    return Type.VALUE;
+                default:
+                    return Type.UNKNOWN;
+            }
         }
 
     }
@@ -2711,10 +2840,14 @@ public interface FeatureKey {
                 return Console.values();
             case DIALOG_BOX:
                 return Dialog.values();
+            case FACTION:
+                return Faction.values();
             case FIX_BOY:
                 return FixBoy.values();
             case GLOBAL_MAP:
                 return GlobalMap.values();
+            case GROUND_PICKUP:
+                return GroundPickup.values();
             case INPUT_BOX:
                 return InputBox.values();
             case INTRFACE:

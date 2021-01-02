@@ -62,7 +62,27 @@ public class FRM {
     }
 
     /**
-     * Create FRM with given attributes and series of images
+     * Create FRM with given attributes and series of images (short)
+     *
+     * @param fps frames per second rate of the animation
+     * @param images array of images
+     * @param offsetX offset array of X direction for image array
+     * @param offsetY offset array of Y direction for image array
+     */
+    public FRM(int fps, BufferedImage[] images, int offsetX, int offsetY) {
+        this.version = 0x04;
+        this.fps = fps;
+        this.actionFrame = 0x00;
+        this.frameSize = 0;
+        for (BufferedImage image : images) {
+            frameSize += image.getWidth() * image.getHeight() + 12;
+            ImageData imgData = new ImageData(image, offsetX, offsetY);
+            frames.add(imgData);
+        }
+    }
+
+    /**
+     * Create FRM with given attributes and series of images (long)
      *
      * @param version version number of the FRM file format
      * @param fps frames per second rate of the animation
