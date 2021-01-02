@@ -216,16 +216,6 @@
             <Property name="text" type="java.lang.String" value="Section:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cmbBoxResolution">
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
-          </AuxValues>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblResolution">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Resolution:"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JComboBox" name="cmbBoxSection">
           <Properties>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -234,6 +224,16 @@
           </Properties>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Section.SectionName&gt;"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblResolution">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Resolution:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JComboBox" name="cmbBoxResolution">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Object&gt;"/>
           </AuxValues>
         </Component>
         <Component class="javax.swing.JToggleButton" name="btnTogAllRes">

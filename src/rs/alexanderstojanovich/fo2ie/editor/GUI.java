@@ -25,6 +25,7 @@ import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,9 +179,9 @@ public class GUI extends javax.swing.JFrame {
         btnCheck = new javax.swing.JButton();
         pnlIntrface = new javax.swing.JPanel();
         lblSection = new javax.swing.JLabel();
-        cmbBoxResolution = new javax.swing.JComboBox<>();
-        lblResolution = new javax.swing.JLabel();
         cmbBoxSection = new javax.swing.JComboBox<>();
+        lblResolution = new javax.swing.JLabel();
+        cmbBoxResolution = new javax.swing.JComboBox<>();
         btnTogAllRes = new javax.swing.JToggleButton();
         btnTblePreview = new javax.swing.JButton();
         btnBuild = new javax.swing.JButton();
@@ -289,13 +290,13 @@ public class GUI extends javax.swing.JFrame {
 
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
-        pnlIntrface.add(cmbBoxResolution);
-
-        lblResolution.setText("Resolution:");
-        pnlIntrface.add(lblResolution);
 
         cmbBoxSection.setModel(DCBM);
         pnlIntrface.add(cmbBoxSection);
+
+        lblResolution.setText("Resolution:");
+        pnlIntrface.add(lblResolution);
+        pnlIntrface.add(cmbBoxResolution);
 
         btnTogAllRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"))); // NOI18N
         btnTogAllRes.setText("All Resolutions");
@@ -430,6 +431,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
+        save();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnTblePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTblePreviewActionPerformed
@@ -477,9 +479,9 @@ public class GUI extends javax.swing.JFrame {
             this.cmbBoxResolution.setModel(resModel);
 
             if (intrface.getErrorNum() == 0) {
-                JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface load", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
             } else if (cfg.isIgnoreErrors()) {
-                JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax errors", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
             }
@@ -495,11 +497,25 @@ public class GUI extends javax.swing.JFrame {
         initIntEn();
     }
 
+    private void save() {
+        if (intrface.isInitialized()) {
+            final File file = new File(cfg.getOutDir().getPath() + File.separator + cfg.getDefaultIni());
+            boolean ok = intrface.writeIniFile(file);
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "App successfully saved ini of your new interface!", "Interface Save", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "App encountered errors whilst saving ini of your interface!", "Interface Save Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Nothing to save, please load your interface!", "Interface Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void infoAbout() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2021-01-01 at 10:30).</b></html>\n");
+            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2021-01-02 at 06:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");

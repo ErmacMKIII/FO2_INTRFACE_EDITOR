@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -715,6 +717,80 @@ public class Intrface {
         }
 
         return result;
+    }
+
+    /**
+     * Write ini file to the file
+     *
+     * @param outfile output file to write ini to
+     * @return write success (false if failed)
+     */
+    public boolean writeIniFile(File outfile) {
+        boolean ok = false;
+
+        FO2IELogger.reportInfo("Writing ini..", null);
+
+        if (outfile.exists()) {
+            outfile.delete();
+        }
+
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(outfile);
+            pw.println("# Generated ini by FOnline2 S3 Interface Editor");
+            pw.println("# Generated at " + LocalDateTime.now().toString());
+            pw.println();
+            pw.println("# Common mappings");
+            pw.println();
+            String currClass = null;
+            String prevClass = null;
+            for (FeatureKey fk : commonFeatMap.keySet()) {
+                currClass = fk.getClass().getSimpleName();
+                if (!currClass.equals(prevClass)) {
+                    pw.println();
+                    pw.println("# " + currClass);
+                    pw.println();
+                }
+                FeatureValue fv = commonFeatMap.get(fk);
+                if (fv != null) {
+                    pw.println(fk.getStringValue() + " = " + fv.getStringValue());
+                }
+                prevClass = currClass;
+            }
+            pw.println();
+            pw.println("# Resolution pragmas");
+            for (ResolutionPragma pragma : customResolutions) {
+                pw.println();
+                pw.println("# Resolution pragma: " + pragma.getWidth() + "x" + pragma.getHeight());
+                pw.println("Resolution " + pragma.getWidth() + " " + pragma.getHeight());
+                pw.println();
+                for (FeatureKey fkx : pragma.customFeatMap.keySet()) {
+                    FeatureValue fvx = pragma.customFeatMap.get(fkx);
+                    // basically asking to write unique values
+                    if (fvx != null && !commonFeatMap.containsKey(fkx)) {
+                        pw.println(fkx.getStringValue() + " = " + fvx.getStringValue());
+                    }
+                }
+            }
+
+            ok = true;
+
+        } catch (FileNotFoundException ex) {
+            FO2IELogger.reportError(ex.getMessage(), ex);
+        } finally {
+            if (pw != null) {
+                pw.close();
+            }
+        }
+
+        FO2IELogger.reportInfo("Writing ini finished!", null);
+        if (ok) {
+            FO2IELogger.reportInfo("Everything OK!", null);
+        } else {
+            FO2IELogger.reportInfo("Writing ini resulted in error!", null);
+        }
+
+        return ok;
     }
 
     public Mode getMode() {
