@@ -170,8 +170,15 @@ public class Intrface {
             // whilst the last line is not reached
             while ((line = br.readLine()) != null) {
                 lineNum++;
+
+                // removing single line comments
+                String[] things = line.split("[#;]");
+                if (things.length > 0) {
+                    line = things[0];
+                }
+
                 // for now comments are ignored {#, ;} and so is the auto cursor
-                if (!line.isEmpty() && !line.startsWith("#") && !line.startsWith(";") && !line.startsWith("autocursor")) {
+                if (!line.isEmpty() && !line.startsWith("autocursor")) {
                     // if word resolution occurs 
                     // switch mode, add it to custom resolution
                     // and take control over it

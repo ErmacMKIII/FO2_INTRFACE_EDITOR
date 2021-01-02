@@ -51,13 +51,13 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class GUI extends javax.swing.JFrame {
-    
+
     public static final GLProfile GL20 = GLProfile.get(GLProfile.GL2);
     public static final GLCapabilities GL_CAP = new GLCapabilities(GL20);
-    
+
     public static final GLWindow GL_WINDOW = GLWindow.create(GL_CAP);
     public static final GLCanvas GL_CANVAS = new GLCanvas(GL_CAP);
-    
+
     private static final Configuration cfg = Configuration.getInstance();
     private static final DefaultComboBoxModel<Section.SectionName> DCBM = new DefaultComboBoxModel<>(Section.SectionName.values());
     private final Intrface intrface = new Intrface();
@@ -68,20 +68,20 @@ public class GUI extends javax.swing.JFrame {
     private static final String LOGO_FILE_NAME = "fo2ie_logo.png";
     // and logox variant with black outline
     private static final String LOGOX_FILE_NAME = "fo2ie_logox.png";
-    
+
     public static final String RESOURCES_DIR = "/rs/alexanderstojanovich/fo2ie/res/";
     public static final String LICENSE_LOGO_FILE_NAME = "gplv3_logo.png";
 
     // OpenGL stuff
     public static final String PRIM_VERTEX_SHADER = "primitiveVS.glsl";
     public static final String PRIM_FRAGMENT_SHADER = "primitiveFS.glsl";
-    
+
     public static final String IMG_VERTEX_SHADER = "imageVS.glsl";
     public static final String IMG_FRAGMENT_SHADER = "imageFS.glsl";
-    
+
     public static final String FNT_VERTEX_SHADER = "fontVS.glsl";
     public static final String FNT_FRAGMENT_SHADER = "fontFS.glsl";
-    
+
     public static final String FNT_PIC = "font.png";
     public static final String QMARK_PIC = "qmark.png";
 
@@ -109,22 +109,22 @@ public class GUI extends javax.swing.JFrame {
             this.setIconImages(icons);//.getScaledInstance(23, 14, Image.SCALE_SMOOTH));
         }
     }
-    
+
     private void initPaths() {
         this.txtFldInPath.setText(cfg.getInDir().getPath());
         this.txtFldOutPath.setText(cfg.getOutDir().getPath());
         this.txtFldInPath.setToolTipText(cfg.getInDir().getPath());
         this.txtFldOutPath.setToolTipText(cfg.getOutDir().getPath());
-        
+
         if (!cfg.getInDir().getPath().isEmpty()) {
             btnLoad.setEnabled(true);
         }
-        
+
         if (!cfg.getOutDir().getPath().isEmpty()) {
             btnSave.setEnabled(true);
         }
     }
-    
+
     private void initGL() {
         GL_CANVAS.addGLEventListener(mdlAnim);
         GL_CANVAS.setSize(panelModule.getSize());
@@ -144,15 +144,15 @@ public class GUI extends javax.swing.JFrame {
         fpsAnim.add(GL_WINDOW);
         this.panelModule.add(GL_CANVAS);
     }
-    
+
     private void initIntEn() {
-        
+
         boolean ok = intrface.isInitialized() && intrface.getErrorNum() == 0;
-        
+
         for (int i = 0; i < this.pnlIntrface.getComponentCount(); i++) {
             this.pnlIntrface.getComponent(i).setEnabled(ok);
         }
-        
+
     }
 
     /**
@@ -418,25 +418,25 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         fileInOpen();
     }//GEN-LAST:event_btnChooseInPathActionPerformed
-    
+
     private void btnChoosePathOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChoosePathOutActionPerformed
         // TODO add your handling code here:
         fileOutOpen();
     }//GEN-LAST:event_btnChoosePathOutActionPerformed
-    
+
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         load();
     }//GEN-LAST:event_btnLoadActionPerformed
-    
+
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnSaveActionPerformed
-    
+
     private void btnTblePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTblePreviewActionPerformed
         // TODO add your handling code here:
         tablePreview();
     }//GEN-LAST:event_btnTblePreviewActionPerformed
-    
+
     private void btnBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildActionPerformed
         // TODO add your handling code here:
         SwingUtilities.invokeLater(new Runnable() {
@@ -446,36 +446,36 @@ public class GUI extends javax.swing.JFrame {
             }
         });
     }//GEN-LAST:event_btnBuildActionPerformed
-    
+
     private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
         // TODO add your handling code here:
         this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_fileMenuExitActionPerformed
-    
+
     private void infoMenuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuAboutActionPerformed
         // TODO add your handling code here:
         infoAbout();
     }//GEN-LAST:event_infoMenuAboutActionPerformed
-    
+
     private void infoMenuHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuHelpActionPerformed
         // TODO add your handling code here:
         infoHelp();
     }//GEN-LAST:event_infoMenuHelpActionPerformed
-    
+
     private void load() {
         boolean ok = intrface.readIniFile();
         if (ok) {
             final List<String> resStrs = new ArrayList<>();
             List<ResolutionPragma> customResolutions = intrface.getCustomResolutions();
-            
+
             for (ResolutionPragma resPrag : customResolutions) {
                 String resStr = String.valueOf(resPrag.getWidth()) + "x" + String.valueOf(resPrag.getHeight());
                 resStrs.add(resStr);
             }
-            
+
             final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
             this.cmbBoxResolution.setModel(resModel);
-            
+
             if (intrface.getErrorNum() == 0) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface load", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -484,15 +484,15 @@ public class GUI extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Interface Load Error", JOptionPane.ERROR_MESSAGE);
         }
-        
+
         DefaultTableModel defFtTblModel = (DefaultTableModel) tblFeatures.getModel();
         for (int i = tblFeatures.getRowCount() - 1; i >= 0; i--) {
             defFtTblModel.removeRow(i);
         }
-        
+
         initIntEn();
     }
-    
+
     private void infoAbout() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
@@ -524,7 +524,7 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, sb.toString(), "About", JOptionPane.INFORMATION_MESSAGE, icon);
         }
     }
-    
+
     private void infoHelp() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
         if (icon_url != null) {
@@ -549,13 +549,13 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, sb.toString(), "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
         }
     }
-    
+
     private void tablePreview() {
         String resStr = (String) cmbBoxResolution.getSelectedItem();
         String[] things = resStr.trim().split("x");
         int width = Integer.parseInt(things[0]);
         int height = Integer.parseInt(things[1]);
-        
+
         ResolutionPragma resolutionPragma = null;
         for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
             if (resolution.getWidth() == width && resolution.getHeight() == height) {
@@ -563,7 +563,7 @@ public class GUI extends javax.swing.JFrame {
                 break;
             }
         }
-        
+
         if (resolutionPragma != null) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel();
             ftTblMdl.addColumn("Feature Key");
@@ -577,7 +577,7 @@ public class GUI extends javax.swing.JFrame {
                     ftTblMdl.addRow(row);
                 }
             }
-            
+
             tblFeatures.setModel(ftTblMdl);
         }
     }
@@ -595,7 +595,7 @@ public class GUI extends javax.swing.JFrame {
             String[] things = resStr.trim().split("x");
             int width = Integer.parseInt(things[0]);
             int height = Integer.parseInt(things[1]);
-            
+
             ResolutionPragma resolutionPragma = null;
             for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
                 if (resolution.getWidth() == width && resolution.getHeight() == height) {
@@ -603,7 +603,7 @@ public class GUI extends javax.swing.JFrame {
                     break;
                 }
             }
-            
+
             if (resolutionPragma != null) {
                 intrface.setSectionName(sectionName);
                 intrface.setResolutionPragma(resolutionPragma);
@@ -611,9 +611,9 @@ public class GUI extends javax.swing.JFrame {
                 mdlAnim.state = ModuleAnimation.State.BUILD;
             }
         }
-        
+
     }
-    
+
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:
         SwingUtilities.invokeLater(new Runnable() {
@@ -629,7 +629,7 @@ public class GUI extends javax.swing.JFrame {
         }
         GL_WINDOW.setVisible(true);
     }//GEN-LAST:event_btnMdlePreviewActionPerformed
-    
+
     private void btnCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckActionPerformed
         // TODO add your handling code here:
         StringBuilder sb = new StringBuilder();
@@ -649,13 +649,13 @@ public class GUI extends javax.swing.JFrame {
         }
         JOptionPane.showMessageDialog(this, sb.toString(), "Interface status", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnCheckActionPerformed
-    
+
     private void btnTogAllResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTogAllResActionPerformed
         // TODO add your handling code here:
         mdlAnim.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
     }//GEN-LAST:event_btnTogAllResActionPerformed
-    
+
     private void fileInOpen() {
         int returnVal = fileChooserInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -663,18 +663,18 @@ public class GUI extends javax.swing.JFrame {
             txtFldInPath.setText(cfg.getInDir().getPath());
             txtFldInPath.setToolTipText(cfg.getInDir().getPath());
         }
-        
+
         if (!cfg.getInDir().getPath().isEmpty()) {
             btnLoad.setEnabled(true);
         }
-        
+
         if (fileChooserInput.getSelectedFile() != null
                 && fileChooserInput.getSelectedFile().equals(fileChooserOutput.getSelectedFile())) {
             JOptionPane.showMessageDialog(this, "Input and output path are the same,\nIt may lead to undesired results!", "Warning", JOptionPane.WARNING_MESSAGE);
         }
-        
+
     }
-    
+
     private void fileOutOpen() {
         int returnVal = fileChooserOutput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -682,16 +682,16 @@ public class GUI extends javax.swing.JFrame {
             txtFldOutPath.setText(cfg.getOutDir().getPath());
             txtFldOutPath.setToolTipText(cfg.getOutDir().getPath());
         }
-        
+
         if (!cfg.getOutDir().getPath().isEmpty()) {
             btnSave.setEnabled(true);
         }
-        
+
         if (fileChooserOutput.getSelectedFile() != null
                 && fileChooserOutput.getSelectedFile().equals(fileChooserInput.getSelectedFile())) {
             JOptionPane.showMessageDialog(this, "Input and output path are the same,\nIt may lead to undesired results!", "Warning", JOptionPane.WARNING_MESSAGE);
         }
-        
+
     }
 
     /**
@@ -725,7 +725,7 @@ public class GUI extends javax.swing.JFrame {
                 gui.pack();
             }
         });
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {

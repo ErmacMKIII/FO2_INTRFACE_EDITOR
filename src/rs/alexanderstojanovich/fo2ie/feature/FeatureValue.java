@@ -62,7 +62,7 @@ public interface FeatureValue {
                 || Pattern.matches(IMG_EXT_REGEX_UPPERCASE, string)) {
             result = new ImageWrapper(string);
         } else if (Pattern.matches(NUMBER_ARRAY_REGEX, string)) {
-            String[] split = string.split(" ");
+            String[] split = string.split("\\s+");
             switch (split.length) {
                 case 1:
                     result = new SingleValue();
@@ -76,7 +76,7 @@ public interface FeatureValue {
             }
         }
         // this essetnial thing is always overriden
-        if (result != null) {
+        if (result != null && !string.isEmpty()) {
             result.setStringValue(string);
         }
         return result;

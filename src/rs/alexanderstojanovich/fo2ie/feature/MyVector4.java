@@ -74,7 +74,7 @@ public class MyVector4 extends Vector4f implements FeatureValue {
 
     @Override
     public void setStringValue(String value) {
-        String[] split = value.split(" ");
+        String[] split = value.split("\\s+");
         if (split.length == 4) {
             x = Float.valueOf(split[0]);
             y = Float.valueOf(split[1]);

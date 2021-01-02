@@ -55,7 +55,7 @@ public class Array implements FeatureValue {
      */
     @Override
     public void setStringValue(String value) {
-        String[] split = value.trim().split(" ");
+        String[] split = value.trim().split("\\s+");
         array = new float[split.length];
         int index = 0;
         for (String str : split) {
