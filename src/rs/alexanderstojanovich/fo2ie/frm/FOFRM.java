@@ -71,6 +71,10 @@ public class FOFRM {
     }
 
     private void read(File file) {
+        if (!file.exists()) {
+            return;
+        }
+        int index = 0;
         mode = Mode.STD_RD;
         BufferedReader br = null;
         try {
@@ -101,15 +105,12 @@ public class FOFRM {
                                 }
                                 break;
                             case IMGS_RD:
-                                for (int i = 0; i < imageCount; i++) {
-                                    if (words[0].toLowerCase().equalsIgnoreCase("frm_" + i)) {
-                                        File imgFile = new File(file.getPath() + words[1]);
-                                        images[i] = ImageIO.read(imgFile);
-                                    }
+                                if (words[0].toLowerCase().equalsIgnoreCase("frm_" + index)) {
+                                    File imgFile = new File(File.separator + file.getParentFile().getPath() + File.separator + words[1]);
+                                    images[index++] = ImageIO.read(imgFile);
                                 }
                                 break;
                         }
-                        break;
                     }
                 }
             }

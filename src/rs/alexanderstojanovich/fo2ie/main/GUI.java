@@ -718,23 +718,25 @@ public class GUI extends javax.swing.JFrame {
             mdlAnim.state = ModuleAnimation.State.BUILD;
         } else {
             String resStr = (String) cmbBoxResolution.getSelectedItem();
-            String[] things = resStr.trim().split("x");
-            int width = Integer.parseInt(things[0]);
-            int height = Integer.parseInt(things[1]);
+            if (resStr != null) {
+                String[] things = resStr.trim().split("x");
+                int width = Integer.parseInt(things[0]);
+                int height = Integer.parseInt(things[1]);
 
-            ResolutionPragma resolutionPragma = null;
-            for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                    resolutionPragma = resolution;
-                    break;
+                ResolutionPragma resolutionPragma = null;
+                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                        resolutionPragma = resolution;
+                        break;
+                    }
                 }
-            }
 
-            if (resolutionPragma != null) {
-                intrface.setSectionName(sectionName);
-                intrface.setResolutionPragma(resolutionPragma);
-                mdlAnim.mode = Mode.TARGET_RES;
-                mdlAnim.state = ModuleAnimation.State.BUILD;
+                if (resolutionPragma != null) {
+                    intrface.setSectionName(sectionName);
+                    intrface.setResolutionPragma(resolutionPragma);
+                    mdlAnim.mode = Mode.TARGET_RES;
+                    mdlAnim.state = ModuleAnimation.State.BUILD;
+                }
             }
         }
 

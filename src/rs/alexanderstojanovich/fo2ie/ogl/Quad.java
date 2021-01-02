@@ -159,11 +159,17 @@ public class Quad implements GLComponent {
             IntBuffer intBuffer = GLBuffers.newDirectIntBuffer(1);
             gl20.glGenBuffers(1, intBuffer);
             vbo = intBuffer.get(0);
-        }
-        gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
 
-        gl20.glBufferData(GL2.GL_ARRAY_BUFFER, VERTEX_COUNT * VERTEX_SIZE * Float.BYTES, fb, GL2.GL_STATIC_DRAW);
-        gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
+
+            gl20.glBufferData(GL2.GL_ARRAY_BUFFER, VERTEX_COUNT * VERTEX_SIZE * Float.BYTES, fb, GL2.GL_STATIC_DRAW);
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+        } else {
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
+
+            gl20.glBufferSubData(GL2.GL_ARRAY_BUFFER, VERTEX_COUNT * VERTEX_SIZE * Float.BYTES, 0, fb);
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+        }
         //----------------------------------------------------------------------
         if (ibo == 0) {
             IntBuffer intBuffer = GLBuffers.newDirectIntBuffer(1);

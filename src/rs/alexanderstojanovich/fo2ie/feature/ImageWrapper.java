@@ -67,7 +67,12 @@ public class ImageWrapper implements FeatureValue {
                 }
             } else if (value.toLowerCase().matches(IMG_FOFRM_REGEX)) {
                 FOFRM fofrm = new FOFRM(imgFile);
+                fps = fofrm.getFps();
                 images = fofrm.getImages();
+
+                offsetX = fofrm.getOffsetX();
+                offsetY = fofrm.getOffsetY();
+
             }
         }
     }
