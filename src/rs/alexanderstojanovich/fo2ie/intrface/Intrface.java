@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
-import rs.alexanderstojanovich.fo2ie.editor.GUI;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;

@@ -44,7 +44,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import javax.imageio.ImageIO;
-import rs.alexanderstojanovich.fo2ie.editor.GUI;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 

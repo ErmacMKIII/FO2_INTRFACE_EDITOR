@@ -21,7 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import rs.alexanderstojanovich.fo2ie.editor.GUI;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 
 /**
  *

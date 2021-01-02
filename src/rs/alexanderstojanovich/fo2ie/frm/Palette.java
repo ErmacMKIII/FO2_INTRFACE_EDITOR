@@ -19,7 +19,7 @@ package rs.alexanderstojanovich.fo2ie.frm;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
-import rs.alexanderstojanovich.fo2ie.editor.GUI;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**

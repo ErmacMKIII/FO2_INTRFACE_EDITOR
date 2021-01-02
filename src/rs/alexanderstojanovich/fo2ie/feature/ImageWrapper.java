@@ -31,23 +31,23 @@ import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class ImageWrapper implements FeatureValue {
-    
+
     private int fps = 0;
     private int offsetX = 0;
     private int offsetY = 0;
-    
+
     private String value; // is actually filename
     private BufferedImage[] images;
-    
+
     public ImageWrapper(String value) {
         this.value = value;
     }
-    
+
     public void loadImage() throws IOException {
         Configuration instance = Configuration.getInstance();
         File inDir = instance.getInDir();
         final File imgFile = new File(inDir.getPath() + File.separator + value);
-        
+
         if (imgFile.exists()
                 && value.toLowerCase().matches(IMG_EXT_REGEX)) {
             if (value.toLowerCase().matches(IMG_IO_REGEX)) {
@@ -56,7 +56,7 @@ public class ImageWrapper implements FeatureValue {
             } else if (value.toLowerCase().matches(IMG_FRM_REGEX)) {
                 FRM frm = new FRM(imgFile);
                 fps = frm.getFps();
-                
+
                 List<ImageData> frames = frm.getFrames();
                 images = new BufferedImage[frames.size()];
                 offsetX = (frames.size() > 0) ? frames.get(0).getOffsetX() : 0;
@@ -81,7 +81,7 @@ public class ImageWrapper implements FeatureValue {
         Configuration instance = Configuration.getInstance();
         File outDir = instance.getOutDir();
         final File imgFile = new File(outDir.getPath() + File.separator + value);
-        
+
         if (value.toLowerCase().matches(IMG_IO_REGEX)) {
             ImageIO.write(images[0], "png", imgFile);
         } else if (value.toLowerCase().matches(IMG_FRM_REGEX)) {
@@ -131,21 +131,21 @@ public class ImageWrapper implements FeatureValue {
     public void setStringValue(String value) {
         this.value = value;
     }
-    
+
     public int getFps() {
         return fps;
     }
-    
+
     public int getOffsetX() {
         return offsetX;
     }
-    
+
     public int getOffsetY() {
         return offsetY;
     }
-    
+
     public String getValue() {
         return value;
     }
-    
+
 }

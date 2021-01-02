@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package rs.alexanderstojanovich.fo2ie.editor;
+package rs.alexanderstojanovich.fo2ie.main;
 
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLCapabilities;
@@ -22,6 +22,8 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
@@ -31,20 +33,24 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
-import rs.alexanderstojanovich.fo2ie.editor.ModuleAnimation.Mode;
+import javax.swing.table.TableColumn;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
+import rs.alexanderstojanovich.fo2ie.helper.ButtonEditor;
+import rs.alexanderstojanovich.fo2ie.helper.ButtonRenderer;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
+import rs.alexanderstojanovich.fo2ie.main.ModuleAnimation.Mode;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**
@@ -205,7 +211,6 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor");
         setMinimumSize(new java.awt.Dimension(960, 540));
-        setPreferredSize(new java.awt.Dimension(960, 540));
         setSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
@@ -357,6 +362,7 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblFeatures.setRowHeight(24);
         sbFeatures.setViewportView(tblFeatures);
 
         pnlTable.add(sbFeatures, java.awt.BorderLayout.CENTER);
@@ -568,28 +574,76 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    private void tablePreview() {
-        String resStr = (String) cmbBoxResolution.getSelectedItem();
-        String[] things = resStr.trim().split("x");
-        int width = Integer.parseInt(things[0]);
-        int height = Integer.parseInt(things[1]);
+    private void editFeatureValue() {
+        final int srow = tblFeatures.getSelectedRow();
+        final int scol = tblFeatures.getSelectedColumn();
+        Object valueAtKey = tblFeatures.getValueAt(srow, scol - 2);
+        Object valueAtVal = tblFeatures.getValueAt(srow, scol - 1);
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        final FeatureValue featVal = FeatureValue.valueOf((String) valueAtVal);
+        final FeatValueEditor fve = new FeatValueEditor(featKey, featVal, intrface, btnTogAllRes.isSelected()) {
+            @Override
+            public void execute() {
+                if (!btnTogAllRes.isSelected()) {
+                    String resStr = (String) cmbBoxResolution.getSelectedItem();
+                    String[] things = resStr.trim().split("x");
+                    int width = Integer.parseInt(things[0]);
+                    int height = Integer.parseInt(things[1]);
 
-        ResolutionPragma resolutionPragma = null;
-        for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-            if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                resolutionPragma = resolution;
-                break;
+                    ResolutionPragma resolutionPragma = null;
+                    for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                        if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                            resolutionPragma = resolution;
+                            break;
+                        }
+                    }
+
+                    if (resolutionPragma != null) {
+                        intrface.setResolutionPragma(resolutionPragma);
+                        mdlAnim.mode = Mode.TARGET_RES;
+                        mdlAnim.state = ModuleAnimation.State.BUILD;
+                    }
+                }
+
+                tblFeatures.setValueAt(featVal.getStringValue(), srow, scol - 1);
+
+                if (btnTogAllRes.isSelected()) {
+                    intrface.getCommonFeatMap().replace(featKey, featVal);
+                } else {
+                    ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+                    if (resolutionPragma != null) {
+                        resolutionPragma.getCustomFeatMap().replace(featKey, featVal);
+                    }
+                }
             }
-        }
+        };
 
-        if (resolutionPragma != null) {
+        fve.setVisible(true);
+        fve.setResizable(false);
+        fve.pack();
+    }
+
+    // makes preview for the feature table
+    private void tablePreview() {
+        if (btnTogAllRes.isSelected()) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel();
             ftTblMdl.addColumn("Feature Key");
             ftTblMdl.addColumn("Feature Value");
+            ftTblMdl.addColumn("Edit Feature");
+
+            ButtonEditor btnModEditor = new ButtonEditor(new JButton("Edit"));
+            btnModEditor.getButton().addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    editFeatureValue();
+                }
+            });
+            ButtonRenderer btnRenderer = new ButtonRenderer(btnModEditor.getButton());
+
             SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
             Section section = intrface.getNameToSectionMap().get(sectionName);
             for (FeatureKey featKey : section.getKeys()) {
-                FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+                FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
                 if (featVal != null) {
                     Object[] row = {featKey.getStringValue(), featVal.getStringValue()};
                     ftTblMdl.addRow(row);
@@ -597,6 +651,60 @@ public class GUI extends javax.swing.JFrame {
             }
 
             tblFeatures.setModel(ftTblMdl);
+            TableColumn column = tblFeatures.getColumn("Edit Feature");
+            column.setCellEditor(btnModEditor);
+            column.setCellRenderer(btnRenderer);
+        } else {
+            String resStr = (String) cmbBoxResolution.getSelectedItem();
+            ResolutionPragma resolutionPragma = null;
+            if (resStr != null) {
+                String[] things = resStr.trim().split("x");
+                int width = Integer.parseInt(things[0]);
+                int height = Integer.parseInt(things[1]);
+                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                        resolutionPragma = resolution;
+                        break;
+                    }
+                }
+            }
+
+            if (resolutionPragma != null) {
+                final DefaultTableModel ftTblMdl = new DefaultTableModel() {
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return column == 2;
+                    }
+
+                };
+                ftTblMdl.addColumn("Feature Key");
+                ftTblMdl.addColumn("Feature Value");
+                ftTblMdl.addColumn("Edit Feature");
+
+                ButtonEditor btnModEditor = new ButtonEditor(new JButton("Edit"));
+                btnModEditor.getButton().addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        editFeatureValue();
+                    }
+                });
+                ButtonRenderer btnRenderer = new ButtonRenderer(btnModEditor.getButton());
+
+                SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
+                Section section = intrface.getNameToSectionMap().get(sectionName);
+                for (FeatureKey featKey : section.getKeys()) {
+                    FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+                    if (featVal != null) {
+                        Object[] row = {featKey.getStringValue(), featVal.getStringValue()};
+                        ftTblMdl.addRow(row);
+                    }
+                }
+
+                tblFeatures.setModel(ftTblMdl);
+                TableColumn column = tblFeatures.getColumn("Edit Feature");
+                column.setCellEditor(btnModEditor);
+                column.setCellRenderer(btnRenderer);
+            }
         }
     }
 
