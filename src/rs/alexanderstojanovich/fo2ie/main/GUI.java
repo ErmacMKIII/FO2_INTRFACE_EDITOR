@@ -21,7 +21,11 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -31,11 +35,16 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
@@ -58,6 +67,8 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class GUI extends javax.swing.JFrame {
+
+    public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
 
     public static final GLProfile GL20 = GLProfile.get(GLProfile.GL2);
     public static final GLCapabilities GL_CAP = new GLCapabilities(GL20);
@@ -92,6 +103,8 @@ public class GUI extends javax.swing.JFrame {
     public static final String FNT_PIC = "font.png";
     public static final String QMARK_PIC = "qmark.png";
 
+    public static final String BUILD_ICON = "build_icon.png";
+
     /**
      * Creates new form GUI
      */
@@ -101,6 +114,7 @@ public class GUI extends javax.swing.JFrame {
         initPaths(); // set paths from config
         initGL(); // sets GL canvas 
         initIntEn(); // init enable intrface panel components {comboxes, buildTargetRes module, preview values etc}
+        initPosition(); // centers the GUI
     }
 
     // init both logos
@@ -162,6 +176,63 @@ public class GUI extends javax.swing.JFrame {
 
     }
 
+    // Center the GUI window into center of the screen
+    private void initPosition() {
+        this.setLocation(DIM.width / 2 - this.getSize().width / 2, DIM.height / 2 - this.getSize().height / 2);
+    }
+
+    private void workBuild() {
+        final JLabel jLabel = new JLabel("Building progress");
+        final URL urlBuild = getClass().getResource(RESOURCES_DIR + BUILD_ICON);
+        Font font = new Font(Font.SANS_SERIF, Font.BOLD, 26);
+        jLabel.setFont(font);
+        jLabel.setIcon(new ImageIcon(urlBuild));
+        final JProgressBar progBar = new JProgressBar(1, 100);
+        progBar.setStringPainted(true);
+        final JWindow window = new JWindow(this);
+        window.setLayout(new BorderLayout());
+        window.getContentPane().add(jLabel, BorderLayout.CENTER);
+        window.getContentPane().add(progBar, BorderLayout.SOUTH);
+        window.setAlwaysOnTop(true);
+        window.setVisible(true);
+        window.setLocation(DIM.width / 2 - window.getSize().width / 2, DIM.height / 2 - window.getSize().height / 2);
+        window.pack();
+
+        btnBuild.setEnabled(false);
+        Timer timer = new Timer("Progress Timer");
+
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    intrface.resetProgress();
+                    while (intrface.getProgress() < 100.0f) {
+                        progBar.setValue(Math.round(intrface.getProgress()));
+                        progBar.validate();
+                    }
+                    progBar.setValue(Math.round(intrface.getProgress()));
+                    progBar.validate();
+                    Thread.sleep(250L);
+                    window.dispose();
+                } catch (InterruptedException ex) {
+                    FO2IELogger.reportInfo(ex.getMessage(), ex);
+                }
+            }
+        };
+        timer.schedule(timerTask, 0L);
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                build();
+
+                timer.cancel();
+                btnBuild.setEnabled(true);
+            }
+        });
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -215,7 +286,7 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
-        pnlFilePaths.setLayout(new java.awt.GridLayout(3, 3));
+        pnlFilePaths.setLayout(new java.awt.GridLayout(3, 3, 2, 2));
 
         lblInput.setText("Input data directory:");
         pnlFilePaths.add(lblInput);
@@ -291,7 +362,7 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().add(pnlFilePaths);
 
         pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
-        pnlIntrface.setLayout(new java.awt.GridLayout(4, 3));
+        pnlIntrface.setLayout(new java.awt.GridLayout(4, 3, 2, 2));
 
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
@@ -447,12 +518,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildActionPerformed
         // TODO add your handling code here:
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                build();
-            }
-        });
+        workBuild();
     }//GEN-LAST:event_btnBuildActionPerformed
 
     private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
@@ -521,29 +587,17 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2021-01-03 at 12:00).</b></html>\n");
+            sb.append("<html><b>VERSION v0.3 - DEUTERIUM (PUBLIC BUILD reviewed on 2021-01-03 at 12:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
-            sb.append("Changelog for v0.2 CHINESE:\n");
+            sb.append("Changelog for v0.3 DEUTERIUM:\n");
             sb.append("\t- Initial pre-release.\n");
             sb.append("\n");
-//            sb.append("Changelog since V1.1 GOTHS:\n");
-//            sb.append("\t- Added preview of palette for FRMs.\n");
-//            sb.append("\t- Changed default item colors.\n");
-//            sb.append("\t- Changed description of step 1 in \"How to use\" [Randall].\n");
-//            sb.append("\t- Fixed bad quality FRM images.\n");
-//            sb.append("\t- Fixed missing custom color for resources.\n");
-//            sb.append("\t- Fixed color not updating for buttons [Randall].\n");
-//            sb.append("\n");
-//            sb.append("Objective:\n");
-//            sb.append("\tThe purpose of this program is\n");
-//            sb.append("\tcolorizing onground and scenery items for FOnline series.\n");
-//            sb.append("\n");
-//            sb.append("\tDesignated to use primarily for FOnline 2 Season 3.\n");
             sb.append("\n");
             sb.append("<html><b>Copyright © 2021</b></html>\n");
             sb.append("<html><b>Alexander \"Ermac\" Stojanovich</b></html>\n");
+            sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JOptionPane.showMessageDialog(this, sb.toString(), "About", JOptionPane.INFORMATION_MESSAGE, icon);
         }
@@ -708,8 +762,8 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    // synchronized cuz its called from another thread (and may be called repeatedly)
-    private synchronized void build() {
+    // cuz its called from another thread (and may be called repeatedly)
+    private void build() {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
         if (btnTogAllRes.isSelected()) {
             intrface.setSectionName(sectionName);
@@ -744,12 +798,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                build();
-            }
-        });
+        workBuild();
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();
             int height = intrface.getResolutionPragma().getHeight();

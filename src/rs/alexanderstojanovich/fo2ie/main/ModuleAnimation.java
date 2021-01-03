@@ -140,13 +140,12 @@ public class ModuleAnimation implements GLEventListener {
     @Override
     public synchronized void dispose(GLAutoDrawable glad) {
         // cancel unbuffer timer
-        module.unbufTask.cancel();
+//        module.unbufTask.cancel();
 
         // animator should stop working
-        this.animator.stop();
-
+//        this.animator.stop();
         // finish utilizing the time (its not needed)
-        GameTime.getInstance().setFinished(true);
+//        GameTime.getInstance().setFinished(true);
     }
 
     /**

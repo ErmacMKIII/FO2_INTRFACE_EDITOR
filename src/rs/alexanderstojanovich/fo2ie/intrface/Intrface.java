@@ -119,6 +119,8 @@ public class Intrface {
     private SectionName sectionName;
     private ResolutionPragma resolutionPragma;
 
+    private float progress = 0.0f;
+
     public Intrface() {
         initMap();
     }
@@ -279,6 +281,7 @@ public class Intrface {
      * image
      */
     public List<GLComponent> buildAllRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
+        progress = 0.0f;
         final int screenWidth = GUI.GL_CANVAS.getWidth();
         final int screenHeight = GUI.GL_CANVAS.getHeight();
 
@@ -498,6 +501,8 @@ public class Intrface {
                             break;
                     }
                 }
+
+                progress += 100.0f / section.keys.length;
             }
 
             result.addAll(picComps);
@@ -505,6 +510,7 @@ public class Intrface {
             result.addAll(txtComps);
         }
 
+        progress = 100.0f;
         return result;
     }
 
@@ -519,6 +525,7 @@ public class Intrface {
      * image
      */
     public List<GLComponent> buildTargetRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
+        progress = 0.0f;
         final int screenWidth = GUI.GL_CANVAS.getWidth();
         final int screenHeight = GUI.GL_CANVAS.getHeight();
 
@@ -738,6 +745,8 @@ public class Intrface {
                             break;
                     }
                 }
+
+                progress += 100.0f / section.keys.length;
             }
 
             result.addAll(picComps);
@@ -745,6 +754,7 @@ public class Intrface {
             result.addAll(txtComps);
         }
 
+        progress = 100.0f;
         return result;
     }
 
@@ -820,6 +830,18 @@ public class Intrface {
         }
 
         return ok;
+    }
+
+    public void resetProgress() {
+        progress = 0.0f;
+    }
+
+    public Section getFaction() {
+        return faction;
+    }
+
+    public float getProgress() {
+        return progress;
     }
 
     public Mode getMode() {

@@ -16,7 +16,9 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -55,6 +57,13 @@ public abstract class FeatValueEditor extends JFrame {
         this.setType(Type.POPUP);
         this.setAlwaysOnTop(true);
         init();
+        initPosition();
+    }
+
+    // Center the GUI window into center of the screen
+    private void initPosition() {
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
     }
 
     private void apply() {
@@ -75,7 +84,7 @@ public abstract class FeatValueEditor extends JFrame {
         switch (featureValue.getType()) {
             case IMAGE:
                 this.setLayout(new GridLayout(3, 2));
-                final JLabel lbl = new JLabel(featureKey.getStringValue());
+                final JLabel lbl = new JLabel(featureKey.getStringValue() + ":");
                 this.getContentPane().add(lbl);
                 final JTextField txtFld = new JTextField(featureValue.getStringValue());
                 this.getContentPane().add(txtFld);
@@ -111,7 +120,7 @@ public abstract class FeatValueEditor extends JFrame {
             case ARRAY:
             case SINGLE_VALUE:
                 this.setLayout(new GridLayout(3, 2));
-                final JLabel lbla = new JLabel(featureKey.getStringValue());
+                final JLabel lbla = new JLabel(featureKey.getStringValue() + ":");
                 this.getContentPane().add(lbla);
                 final JSpinner spinval = new JSpinner(new SpinnerNumberModel(Integer.parseInt(featureValue.getStringValue()), -5000, 5000, 1));
                 this.getContentPane().add(spinval);
