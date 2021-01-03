@@ -34,12 +34,13 @@ import java.util.Map;
 import java.util.Set;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
-import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
 import rs.alexanderstojanovich.fo2ie.feature.MyVector4;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.ogl.Animation;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
 import rs.alexanderstojanovich.fo2ie.ogl.Quad;
@@ -381,13 +382,20 @@ public class Intrface {
                                             // and in most case it's single image (.PNG for instance)
                                             BufferedImage[] images = picWrap.getImages();
 
-                                            int index = 0;
-                                            if (images != null) {
-                                                for (BufferedImage image : images) {
-                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
+                                            if (images != null && images.length > 0) {
+                                                if (images.length == 1) {
+                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue(), gl20, images[0]);
                                                     Quad imgComp = new Quad(width, height, tex, posGL);
                                                     picComps.add(imgComp);
-                                                    index++;
+                                                } else {
+                                                    int index = 0;
+                                                    final Texture[] texas = new Texture[images.length];
+                                                    for (BufferedImage image : images) {
+                                                        texas[index] = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
+                                                        index++;
+                                                    }
+                                                    Animation anim = new Animation(picWrap.getFps(), width, height, texas, posGL);
+                                                    picComps.add(anim);
                                                 }
                                             }
                                         } else if (picPosVal != null) {
@@ -425,13 +433,20 @@ public class Intrface {
                                                 ImageWrapper picWrapX = (ImageWrapper) fvPic;
                                                 picWrapX.loadImage();
                                                 BufferedImage[] images = picWrapX.getImages();
-                                                if (images != null) {
-                                                    int index = 0;
-                                                    for (BufferedImage image : images) {
-                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
+                                                if (images != null && images.length > 0) {
+                                                    if (images.length == 1) {
+                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue(), gl20, images[0]);
                                                         Quad imgComp = new Quad(width, height, tex, posGL);
                                                         picComps.add(imgComp);
-                                                        index++;
+                                                    } else {
+                                                        int index = 0;
+                                                        final Texture[] texas = new Texture[images.length];
+                                                        for (BufferedImage image : images) {
+                                                            texas[index] = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
+                                                            index++;
+                                                        }
+                                                        Animation anim = new Animation(picWrapX.getFps(), width, height, texas, posGL);
+                                                        picComps.add(anim);
                                                     }
                                                 }
                                             } else if (fvPic != null) {
@@ -607,13 +622,20 @@ public class Intrface {
                                             // and in most case it's single image (.PNG for instance)
                                             BufferedImage[] images = picWrap.getImages();
 
-                                            int index = 0;
-                                            if (images != null) {
-                                                for (BufferedImage image : images) {
-                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
+                                            if (images != null && images.length > 0) {
+                                                if (images.length == 1) {
+                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue(), gl20, images[0]);
                                                     Quad imgComp = new Quad(width, height, tex, posGL);
                                                     picComps.add(imgComp);
-                                                    index++;
+                                                } else {
+                                                    int index = 0;
+                                                    final Texture[] texas = new Texture[images.length];
+                                                    for (BufferedImage image : images) {
+                                                        texas[index] = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
+                                                        index++;
+                                                    }
+                                                    Animation anim = new Animation(picWrap.getFps(), width, height, texas, posGL);
+                                                    picComps.add(anim);
                                                 }
                                             }
                                         } else if (picPosVal != null) {
@@ -651,13 +673,20 @@ public class Intrface {
                                                 ImageWrapper picWrapX = (ImageWrapper) fvPic;
                                                 picWrapX.loadImage();
                                                 BufferedImage[] images = picWrapX.getImages();
-                                                if (images != null) {
-                                                    int index = 0;
-                                                    for (BufferedImage image : images) {
-                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
+                                                if (images != null && images.length > 0) {
+                                                    if (images.length == 1) {
+                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue(), gl20, images[0]);
                                                         Quad imgComp = new Quad(width, height, tex, posGL);
                                                         picComps.add(imgComp);
-                                                        index++;
+                                                    } else {
+                                                        int index = 0;
+                                                        final Texture[] texas = new Texture[images.length];
+                                                        for (BufferedImage image : images) {
+                                                            texas[index] = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
+                                                            index++;
+                                                        }
+                                                        Animation anim = new Animation(picWrapX.getFps(), width, height, texas, posGL);
+                                                        picComps.add(anim);
                                                     }
                                                 }
                                             } else if (fvPic != null) {

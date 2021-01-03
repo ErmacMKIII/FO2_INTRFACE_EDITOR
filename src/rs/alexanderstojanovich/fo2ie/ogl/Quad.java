@@ -385,6 +385,7 @@ public class Quad implements GLComponent {
         this.scale = scale;
     }
 
+    @Override
     public Vector2f getPos() {
         return pos;
     }
@@ -418,6 +419,7 @@ public class Quad implements GLComponent {
         this.pos = pos;
     }
 
+    @Override
     public Vector4f getColor() {
         return color;
     }

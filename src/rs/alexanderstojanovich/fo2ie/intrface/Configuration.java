@@ -50,6 +50,8 @@ public class Configuration {
 
     private static Configuration instance;
 
+    private int animationSpeed = 10;
+
     private Configuration() {
 
     }
@@ -114,6 +116,11 @@ public class Configuration {
                                 if (number != 0 && (number & (number - 1)) == 0) {
                                     textureSize = number;
                                 }
+                            case "AnimationSpeed":
+                                int animspd = Integer.parseInt(words[1]);
+                                if (animspd >= 0 && animspd < 64) {
+                                    animationSpeed = animspd;
+                                }
                                 break;
                             case "KeepAspectRatio":
                                 keepAspectRatio = Boolean.parseBoolean(words[1]);
@@ -159,6 +166,7 @@ public class Configuration {
             pw.println("TextOverlayColor = " + writeRGBA(txtOverlayCol));
             pw.println("QMarkColor = " + writeRGBA(qmarkCol));
             pw.println("TextureSize = " + textureSize);
+            pw.println("AnimationSpeed = " + animationSpeed);
             pw.println("KeepAspectRatio = " + keepAspectRatio);
             pw.println("IgnoreErrors = " + ignoreErrors);
         } catch (FileNotFoundException ex) {
@@ -249,6 +257,10 @@ public class Configuration {
 
     public void setIgnoreErrors(boolean ignoreErrors) {
         this.ignoreErrors = ignoreErrors;
+    }
+
+    public int getAnimationSpeed() {
+        return animationSpeed;
     }
 
 }

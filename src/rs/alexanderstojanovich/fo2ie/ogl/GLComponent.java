@@ -31,7 +31,7 @@ public interface GLComponent {
      * Type of this GLComponent
      */
     public enum Type {
-        PRIM, PIC, TXT
+        PRIM, PIC, ANIM, TXT
     }
 
     /**

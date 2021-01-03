@@ -60,4 +60,21 @@ public class MathUtils {
         return ((maxNew - minNew) * (x - min) / (max - min)) + minNew;
     }
 
+    /**
+     * Scaling argument with changing their range where they reside (four double
+     * args)
+     *
+     * @param x argument to scale
+     * @param min left bound of interval [min, max] where x is
+     * @param max right bound of interval [min, max] where x is
+     * @param minNew left bound of the new interval [minNew, maxNew] where x
+     * should be
+     * @param maxNew right bound of the new interval [minNew, maxNew] where x
+     * should be
+     * @return scaled argument
+     */
+    public static double getScaledD(double x, double min, double max, double minNew, double maxNew) {
+        return ((maxNew - minNew) * (x - min) / (max - min)) + minNew;
+    }
+
 }

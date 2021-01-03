@@ -25,17 +25,22 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class PrimitiveQuad implements GLComponent {
+public class Animation implements GLComponent {
 
-    private final Type type = Type.PRIM;
+    private final Type type = Type.ANIM;
+
+    private int fps = 0; // frames per second
+    private int frmIndex = 0;
 
     private int width;
     private int height;
+    private Texture[] texture;
 
     private Vector4f color = new Vector4f(Vector3fColors.WHITE, 1.0f);
     private float scale = 1.0f;
@@ -46,15 +51,19 @@ public class PrimitiveQuad implements GLComponent {
     private static final Vector2f[] VERTICES = new Vector2f[4];
     private final FloatBuffer fb = GLBuffers.newDirectFloatBuffer(4 * VERTEX_SIZE);
 
+    private final Vector2f[] uvs = new Vector2f[4];
     private static final int[] INDICES = {0, 1, 2, 2, 3, 0};
     private static final IntBuffer CONST_INT_BUFFER = GLBuffers.newDirectIntBuffer(INDICES.length);
     private int vbo = 0;
     private static int ibo = 0;
 
-    public static final int VERTEX_SIZE = 2;
+    public static final int VERTEX_SIZE = 4;
     public static final int VERTEX_COUNT = 4;
 
     private boolean buffered = false;
+
+    private long lastTime = System.currentTimeMillis();
+    private final long period = Math.round(1000L / (double) fps);
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -71,25 +80,42 @@ public class PrimitiveQuad implements GLComponent {
     /**
      * Create new quad with resize factor
      *
+     * @param fps frames per second
      * @param width quad width
      * @param height quad height
+     * @param texture parsed texture
      */
-    public PrimitiveQuad(int width, int height) {
+    public Animation(int fps, int width, int height, Texture[] texture) {
+        this.fps = fps;
         this.width = width;
         this.height = height;
+        this.texture = texture;
+        initUVs();
     }
 
     /**
      * Create new quad with resize factor
      *
+     * @param fps frames per second
      * @param width quad width
      * @param height quad height
+     * @param texture parsed texture
      * @param pos position of the quad center
      */
-    public PrimitiveQuad(int width, int height, Vector2f pos) {
+    public Animation(int fps, int width, int height, Texture[] texture, Vector2f pos) {
+        this.fps = fps;
         this.width = width;
         this.height = height;
+        this.texture = texture;
         this.pos = pos;
+        initUVs();
+    }
+
+    private void initUVs() {
+        uvs[0] = new Vector2f(0.0f, 1.0f); // (-1.0f, -1.0f)
+        uvs[1] = new Vector2f(1.0f, 1.0f); // (1.0f, -1.0f)
+        uvs[2] = new Vector2f(1.0f, 0.0f); // (1.0f, 1.0f)
+        uvs[3] = new Vector2f(0.0f, 0.0f); // (-1.0f, 1.0f)
     }
 
     @Override
@@ -108,6 +134,8 @@ public class PrimitiveQuad implements GLComponent {
         for (int i = 0; i < VERTEX_COUNT; i++) {
             fb.put(VERTICES[i].x);
             fb.put(VERTICES[i].y);
+            fb.put(uvs[i].x);
+            fb.put(uvs[i].y);
         }
         fb.flip();
         if (vbo == 0) {
@@ -140,6 +168,16 @@ public class PrimitiveQuad implements GLComponent {
         buffered = true;
     }
 
+    private boolean timerBeep() {
+        boolean beep = false;
+        long currTime = System.currentTimeMillis();
+        if ((currTime - lastTime) >= 1000L) {
+            beep = true;
+            lastTime += 1000L;
+        }
+        return beep;
+    }
+    
     private Matrix4f calcModelMatrix() {
         Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
@@ -154,9 +192,10 @@ public class PrimitiveQuad implements GLComponent {
     }
 
     /**
-     * Render image
+     * Render animation
      *
      * @param gl20 GL2 binding
+     * @param projMat4
      * @param program shader program for images
      */
     @Override
@@ -167,32 +206,114 @@ public class PrimitiveQuad implements GLComponent {
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
 
             gl20.glEnableVertexAttribArray(0);
+            gl20.glEnableVertexAttribArray(1);
             gl20.glVertexAttribPointer(0, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 0); // this is for font pos
+            gl20.glVertexAttribPointer(1, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 8); // this is for font uv                                     
             program.bindAttribute(gl20, 0, "pos");
+            program.bindAttribute(gl20, 1, "uv");
 
             Matrix4f modelMat4 = calcModelMatrix();
             program.updateUniform(gl20, projMat4, "projectionMatrix");
             program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
+                        
+            texture[timerBeep() ? ++frmIndex : frmIndex].bind(gl20, 0, program, "colorMap");            
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
-
+            Texture.unbind(gl20, 0);
+            
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
             gl20.glDisableVertexAttribArray(0);
+            gl20.glDisableVertexAttribArray(1);
 
             ShaderProgram.unbind(gl20);
+                        
+            if (frmIndex == texture.length) {
+                frmIndex = 0;
+            }
         }
+    }
+
+    private Matrix4f calcModelMatrix(float xinc, float ydec) {
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x + xinc, pos.y + ydec, 0.0f);
+        Matrix4f rotationMatrix = new Matrix4f().identity();
+
+        float sx = giveRelativeWidth();
+        float sy = giveRelativeHeight();
+        Matrix4f scaleMatrix = new Matrix4f().scaleXY(sx, sy);
+
+        Matrix4f temp = new Matrix4f();
+        Matrix4f modelMatrix = translationMatrix.mul(rotationMatrix.mul(scaleMatrix, temp), temp);
+        return modelMatrix;
+    }
+
+    /**
+     * Render font
+     *
+     * @param gl20 GL2 binding
+     * @param xinc x-advance
+     * @param ydec y-drop (for multi-line text)
+     * @param projMat4 projection matrix
+     * @param program shader program for fonts
+     */
+    public void render(GL2 gl20, float xinc, float ydec, Matrix4f projMat4, ShaderProgram program) { // used for fonts
+        if (enabled && buffered) {
+            program.bind(gl20);
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
+            gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+            gl20.glEnableVertexAttribArray(0);
+            gl20.glEnableVertexAttribArray(1);
+            gl20.glVertexAttribPointer(0, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 0); // this is for font pos
+            gl20.glVertexAttribPointer(1, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 8); // this is for font uv                                     
+            program.bindAttribute(gl20, 0, "pos");
+            program.bindAttribute(gl20, 1, "uv");
+
+            Matrix4f modelMat4 = calcModelMatrix(xinc, ydec);
+            program.updateUniform(gl20, projMat4, "projectionMatrix");
+            program.updateUniform(gl20, modelMat4, "modelMatrix");
+            program.updateUniform(gl20, color, "color");
+            
+            texture[timerBeep() ? ++frmIndex : frmIndex].bind(gl20, 0, program, "colorMap");       
+            gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);            
+            Texture.unbind(gl20, 0);
+            
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+            gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
+            gl20.glDisableVertexAttribArray(0);
+            gl20.glDisableVertexAttribArray(1);
+
+            ShaderProgram.unbind(gl20);
+            
+            if (frmIndex == texture.length) {
+                frmIndex = 0;
+            }
+        }
+    }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
+
+    public float giveRelativeWidth() {
+        return scale * width / GUI.GL_CANVAS.getWidth();
+    }
+
+    public float giveRelativeHeight() {
+        return scale * height / GUI.GL_CANVAS.getHeight();
     }
 
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 61 * hash + Objects.hashCode(this.type);
-        hash = 61 * hash + this.width;
-        hash = 61 * hash + this.height;
-        hash = 61 * hash + Objects.hashCode(this.color);
-        hash = 61 * hash + Float.floatToIntBits(this.scale);
-        hash = 61 * hash + Objects.hashCode(this.pos);
+        hash = 41 * hash + Objects.hashCode(this.type);
+        hash = 41 * hash + this.width;
+        hash = 41 * hash + this.height;
+        hash = 41 * hash + Objects.hashCode(this.texture);
+        hash = 41 * hash + Objects.hashCode(this.color);
+        hash = 41 * hash + Float.floatToIntBits(this.scale);
+        hash = 41 * hash + Objects.hashCode(this.pos);
         return hash;
     }
 
@@ -207,7 +328,7 @@ public class PrimitiveQuad implements GLComponent {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final PrimitiveQuad other = (PrimitiveQuad) obj;
+        final Animation other = (Animation) obj;
         if (this.width != other.width) {
             return false;
         }
@@ -220,6 +341,9 @@ public class PrimitiveQuad implements GLComponent {
         if (this.type != other.type) {
             return false;
         }
+        if (!Objects.equals(this.texture, other.texture)) {
+            return false;
+        }
         if (!Objects.equals(this.color, other.color)) {
             return false;
         }
@@ -227,19 +351,6 @@ public class PrimitiveQuad implements GLComponent {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public Type getType() {
-        return type;
-    }
-
-    public float giveRelativeWidth() {
-        return scale * width / GUI.GL_CANVAS.getWidth();
-    }
-
-    public float giveRelativeHeight() {
-        return scale * height / GUI.GL_CANVAS.getHeight();
     }
 
     @Override
@@ -258,6 +369,14 @@ public class PrimitiveQuad implements GLComponent {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public Texture[] getTexture() {
+        return texture;
+    }
+
+    public void setTexture(Texture[] texture) {
+        this.texture = texture;
     }
 
     public float getScale() {
@@ -294,6 +413,10 @@ public class PrimitiveQuad implements GLComponent {
         return buffered;
     }
 
+    public Vector2f[] getUvs() {
+        return uvs;
+    }
+
     public void setPos(Vector2f pos) {
         this.pos = pos;
     }
@@ -312,7 +435,23 @@ public class PrimitiveQuad implements GLComponent {
     }
 
     public static void setIbo(int ibo) {
-        PrimitiveQuad.ibo = ibo;
+        Animation.ibo = ibo;
+    }
+
+    public int getFrmIndex() {
+        return frmIndex;
+    }
+
+    public void setFrmIndex(int frmIndex) {
+        this.frmIndex = frmIndex;
+    }
+
+    public FloatBuffer getFb() {
+        return fb;
+    }
+
+    public int getFps() {
+        return fps;
     }
 
 }

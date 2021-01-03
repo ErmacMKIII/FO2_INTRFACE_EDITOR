@@ -317,6 +317,7 @@ public class Text implements GLComponent {
         return charHeight;
     }
 
+    @Override
     public Vector2f getPos() {
         return pos;
     }
@@ -325,6 +326,7 @@ public class Text implements GLComponent {
         return scale;
     }
 
+    @Override
     public Vector4f getColor() {
         return color;
     }

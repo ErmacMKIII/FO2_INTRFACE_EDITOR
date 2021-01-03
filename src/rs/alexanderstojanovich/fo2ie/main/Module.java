@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.joml.Matrix4f;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 
@@ -31,9 +32,12 @@ import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
  */
 public class Module {
 
+    public static final int MAX_FRAMES = 32;
+    public static final long MASK = (1L << Configuration.getInstance().getAnimationSpeed()) - 1L;
+
     protected final List<GLComponent> components = new ArrayList<>();
 
-    protected final TimerTask timerTask = new TimerTask() {
+    protected final TimerTask unbufTask = new TimerTask() {
         @Override
         public void run() {
             for (GLComponent component : components) {
@@ -43,10 +47,10 @@ public class Module {
     };
 
     public Module() {
-        buffTimer.schedule(timerTask, 250L, 250L);
+        timer.schedule(unbufTask, 250L, 250L);
     }
 
-    protected final Timer buffTimer = new Timer("Component Buff Util");
+    protected final Timer timer = new Timer("Timer Util");
 
     /**
      * Renders this module to the OpenGL canvas
@@ -73,9 +77,14 @@ public class Module {
                 case TXT:
                     component.render(gl20, projMat4, fntSP);
                     break;
+                case ANIM:
+                    component.render(gl20, projMat4, imgSP);
+                    break;
+
             }
 
         }
+
     }
 
     public List<GLComponent> getComponents() {
@@ -86,7 +95,15 @@ public class Module {
      * Stops timer util
      */
     public void stopTimer() {
-        buffTimer.cancel();
+        timer.cancel();
+    }
+
+    public TimerTask getUnbufTask() {
+        return unbufTask;
+    }
+
+    public Timer getTimer() {
+        return timer;
     }
 
 }
