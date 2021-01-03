@@ -521,7 +521,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2021-01-02 at 06:00).</b></html>\n");
+            sb.append("<html><b>VERSION v0.2 - CHINESE (PUBLIC BUILD reviewed on 2021-01-03 at 12:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -829,6 +829,10 @@ public class GUI extends javax.swing.JFrame {
         FO2IELogger.init(args.length > 0 && args[0].equals("-debug"));
         cfg.readConfigFile();
         Palette.load("Fallout Palette.act");
+
+        // to measure elapsed time in interval [0, 120) cycled
+        GameTime gameTime = GameTime.getInstance();
+        gameTime.start();
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

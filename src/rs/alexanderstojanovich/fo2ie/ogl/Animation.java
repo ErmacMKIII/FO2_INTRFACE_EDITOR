@@ -25,7 +25,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
-import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.main.GameTime;
 
 /**
  *
@@ -33,10 +33,12 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
  */
 public class Animation implements GLComponent {
 
+    private final GameTime gameTime = GameTime.getInstance();
+
     private final Type type = Type.ANIM;
 
     private int fps = 0; // frames per second
-    private int frmIndex = 0;
+    private int frameIndex = 0;
 
     private int width;
     private int height;
@@ -63,7 +65,6 @@ public class Animation implements GLComponent {
     private boolean buffered = false;
 
     private long lastTime = System.currentTimeMillis();
-    private final long period = Math.round(1000L / (double) fps);
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -168,16 +169,11 @@ public class Animation implements GLComponent {
         buffered = true;
     }
 
-    private boolean timerBeep() {
-        boolean beep = false;
-        long currTime = System.currentTimeMillis();
-        if ((currTime - lastTime) >= 1000L) {
-            beep = true;
-            lastTime += 1000L;
-        }
-        return beep;
+    private int getFrame() {
+        frameIndex = (int) Math.floorMod(Math.round(gameTime.getGameTicks()), texture.length);
+        return frameIndex;
     }
-    
+
     private Matrix4f calcModelMatrix() {
         Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
@@ -216,21 +212,17 @@ public class Animation implements GLComponent {
             program.updateUniform(gl20, projMat4, "projectionMatrix");
             program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
-                        
-            texture[timerBeep() ? ++frmIndex : frmIndex].bind(gl20, 0, program, "colorMap");            
+
+            texture[getFrame()].bind(gl20, 0, program, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
             Texture.unbind(gl20, 0);
-            
+
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
             gl20.glDisableVertexAttribArray(0);
             gl20.glDisableVertexAttribArray(1);
 
             ShaderProgram.unbind(gl20);
-                        
-            if (frmIndex == texture.length) {
-                frmIndex = 0;
-            }
         }
     }
 
@@ -273,21 +265,17 @@ public class Animation implements GLComponent {
             program.updateUniform(gl20, projMat4, "projectionMatrix");
             program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
-            
-            texture[timerBeep() ? ++frmIndex : frmIndex].bind(gl20, 0, program, "colorMap");       
-            gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);            
+
+            texture[getFrame()].bind(gl20, 0, program, "colorMap");
+            gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
             Texture.unbind(gl20, 0);
-            
+
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
             gl20.glDisableVertexAttribArray(0);
             gl20.glDisableVertexAttribArray(1);
 
             ShaderProgram.unbind(gl20);
-            
-            if (frmIndex == texture.length) {
-                frmIndex = 0;
-            }
         }
     }
 
@@ -438,20 +426,20 @@ public class Animation implements GLComponent {
         Animation.ibo = ibo;
     }
 
-    public int getFrmIndex() {
-        return frmIndex;
-    }
-
-    public void setFrmIndex(int frmIndex) {
-        this.frmIndex = frmIndex;
-    }
-
     public FloatBuffer getFb() {
         return fb;
     }
 
     public int getFps() {
         return fps;
+    }
+
+    public int getFrameIndex() {
+        return frameIndex;
+    }
+
+    public long getLastTime() {
+        return lastTime;
     }
 
 }

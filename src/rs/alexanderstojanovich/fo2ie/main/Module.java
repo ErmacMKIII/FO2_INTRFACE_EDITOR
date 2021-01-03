@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.joml.Matrix4f;
-import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 
@@ -31,9 +30,6 @@ import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class Module {
-
-    public static final int MAX_FRAMES = 32;
-    public static final long MASK = (1L << Configuration.getInstance().getAnimationSpeed()) - 1L;
 
     protected final List<GLComponent> components = new ArrayList<>();
 

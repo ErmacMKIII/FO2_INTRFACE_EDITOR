@@ -144,6 +144,9 @@ public class ModuleAnimation implements GLEventListener {
 
         // animator should stop working
         this.animator.stop();
+
+        // finish utilizing the time (its not needed)
+        GameTime.getInstance().setFinished(true);
     }
 
     /**
