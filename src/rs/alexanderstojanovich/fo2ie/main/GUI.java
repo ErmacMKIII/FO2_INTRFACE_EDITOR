@@ -182,6 +182,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void workBuild() {
+        btnBuild.setEnabled(false);
+        btnMdlePreview.setEnabled(false);
+        
         final JLabel jLabel = new JLabel("Building progress");
         final URL urlBuild = getClass().getResource(RESOURCES_DIR + BUILD_ICON);
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 26);
@@ -197,8 +200,7 @@ public class GUI extends javax.swing.JFrame {
         window.setVisible(true);
         window.setLocation(DIM.width / 2 - window.getSize().width / 2, DIM.height / 2 - window.getSize().height / 2);
         window.pack();
-
-        btnBuild.setEnabled(false);
+        
         Timer timer = new Timer("Progress Timer");
 
         TimerTask timerTask = new TimerTask() {
@@ -228,6 +230,7 @@ public class GUI extends javax.swing.JFrame {
 
                 timer.cancel();
                 btnBuild.setEnabled(true);
+                btnMdlePreview.setEnabled(true);
             }
         });
 
