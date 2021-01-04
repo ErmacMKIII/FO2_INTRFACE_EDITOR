@@ -149,10 +149,151 @@ public class Intrface {
      * Reads ini file and initializes the interface (check flag initialized to
      * see if it's successfully initialized)
      *
+     * Default ini file will be used (set in configuration)
+     *
      * @return initialization ok status
      */
     public boolean readIniFile() {
         boolean ok = false;
+
+        FO2IELogger.reportInfo("Loading ini..", null);
+        File inDir = Configuration.getInstance().getInDir();
+        final File iniFile = new File(inDir.getPath() + File.separator + config.getDefaultIni());
+
+        if (!iniFile.exists()) {
+            FO2IELogger.reportInfo("Loading ini finished!", null);
+            FO2IELogger.reportInfo("Loading ini resulted in error!", null);
+            return ok;
+        }
+
+        // set standard (default) mode
+        mode = Mode.STD;
+        // reset error number
+        errorNum = 0;
+        errStrMsg.setLength(0);
+
+        // clear common and resolution sections
+        commonFeatMap.clear();
+        customResolutions.clear();
+
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader(iniFile));
+            String line;
+            ResolutionPragma rs = null;
+            int lineNum = 0;
+            // whilst the last line is not reached
+            while ((line = br.readLine()) != null) {
+                lineNum++;
+
+                // removing single line comments
+                String[] things = line.split("[#;]");
+                if (things.length > 0) {
+                    line = things[0];
+                }
+
+                // for now comments are ignored {#, ;} and so is the auto cursor
+                if (!line.isEmpty() && !line.startsWith("autocursor")) {
+                    // if word resolution occurs 
+                    // switch mode, add it to custom resolution
+                    // and take control over it
+                    if (line.startsWith("resolution")) {
+                        String[] res = line.split(" ");
+                        int width = Integer.parseInt(res[1]);
+                        int height = Integer.parseInt(res[2]);
+                        mode = Mode.RES;
+
+                        rs = new ResolutionPragma(
+                                commonFeatMap,
+                                width,
+                                height
+                        );
+                        customResolutions.add(rs);
+                        // in other case if line starts with =
+                    } else if (line.contains("=")) {
+                        String[] words = line.split("=");
+                        words[0] = words[0].trim();
+                        words[1] = words[1].trim();
+
+                        FeatureKey fk = FeatureKey.valueOf(words[0]);
+                        if (fk == null) {
+                            errorNum++;
+                            errStrMsg.append(lineNum).append(": @").append(words[0]).append("\n");
+                            FO2IELogger.reportError(lineNum + ":" + " @" + words[0], null);
+                        }
+                        FeatureValue fv = FeatureValue.valueOf(words[1]);
+                        if (fv == null) {
+                            errorNum++;
+                            errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
+                            FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
+                        }
+
+                        if (fk != null && fv != null) {
+                            switch (mode) {
+                                case STD:
+                                    commonFeatMap.put(fk, fv);
+                                    break;
+                                case RES:
+                                    if (rs != null) {
+                                        rs.getCustomFeatMap().put(fk, fv);
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+            FO2IELogger.reportInfo("Loaded total common key/vals: " + commonFeatMap.size(), null);
+            FO2IELogger.reportInfo("Total custom resolutions: " + customResolutions.size(), null);
+            FO2IELogger.reportInfo("Total lines: " + lineNum, null);
+            FO2IELogger.reportInfo("Total errors: " + errorNum, null);
+
+            ok = true;
+        } catch (FileNotFoundException ex) {
+            FO2IELogger.reportError(ex.getMessage(), ex);
+        } catch (IOException ex) {
+            FO2IELogger.reportError(ex.getMessage(), ex);
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException ex) {
+                    FO2IELogger.reportError(ex.getMessage(), ex);
+                }
+            }
+        }
+
+        FO2IELogger.reportInfo("Loading ini finished!", null);
+        if (ok && errorNum == 0) {
+            FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
+        } else {
+            FO2IELogger.reportInfo("Loading ini resulted in error!", null);
+        }
+
+        initialized = ok;
+
+        return ok;
+    }
+
+    /**
+     * Reads ini file and initializes the interface (check flag initialized to
+     * see if it's successfully initialized)
+     *
+     * @param iniFile ini file of the interface
+     * @return initialization ok status
+     */
+    public boolean readIniFile(File iniFile) {
+        boolean ok = false;
+
+        if (!iniFile.exists()) {
+            FO2IELogger.reportInfo("Loading ini finished!", null);
+            FO2IELogger.reportInfo("Loading ini resulted in error!", null);
+            return ok;
+        }
 
         // set standard (default) mode
         mode = Mode.STD;
@@ -165,8 +306,7 @@ public class Intrface {
         customResolutions.clear();
 
         FO2IELogger.reportInfo("Loading ini..", null);
-        File inDir = Configuration.getInstance().getInDir();
-        final File iniFile = new File(inDir.getPath() + File.separator + config.getDefaultIni());
+
         BufferedReader br = null;
 
         try {
@@ -769,8 +909,14 @@ public class Intrface {
 
         FO2IELogger.reportInfo("Writing ini..", null);
 
+        // overwrite existing
         if (outfile.exists()) {
             outfile.delete();
+        }
+
+        // if extension is missing add the extension
+        if (!outfile.getName().endsWith(".ini")) {
+            outfile = new File(outfile.getAbsolutePath() + ".ini");
         }
 
         PrintWriter pw = null;

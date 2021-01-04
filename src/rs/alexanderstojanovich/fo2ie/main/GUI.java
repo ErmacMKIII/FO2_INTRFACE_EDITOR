@@ -47,6 +47,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
@@ -105,6 +106,8 @@ public class GUI extends javax.swing.JFrame {
 
     public static final String BUILD_ICON = "build_icon.png";
 
+    private File targetIniFile;
+
     /**
      * Creates new form GUI
      */
@@ -115,6 +118,7 @@ public class GUI extends javax.swing.JFrame {
         initGL(); // sets GL canvas 
         initIntEn(); // init enable intrface panel components {comboxes, buildTargetRes module, preview values etc}
         initPosition(); // centers the GUI
+        initMenuDialogs(); // init menu dialogs
     }
 
     // init both logos
@@ -181,10 +185,17 @@ public class GUI extends javax.swing.JFrame {
         this.setLocation(DIM.width / 2 - this.getSize().width / 2, DIM.height / 2 - this.getSize().height / 2);
     }
 
+    private void initMenuDialogs() {
+        final FileNameExtensionFilter iniFilter = new FileNameExtensionFilter("FOnline Interface ini (*.ini)", "ini");
+        this.fileChooserIniLoad.setFileFilter(iniFilter);
+        this.fileChooserIniSave.setFileFilter(iniFilter);
+    }
+
+    // bulding the module priv method
     private void workBuild() {
         btnBuild.setEnabled(false);
         btnMdlePreview.setEnabled(false);
-        
+
         final JLabel jLabel = new JLabel("Building progress");
         final URL urlBuild = getClass().getResource(RESOURCES_DIR + BUILD_ICON);
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 26);
@@ -200,7 +211,7 @@ public class GUI extends javax.swing.JFrame {
         window.setVisible(true);
         window.setLocation(DIM.width / 2 - window.getSize().width / 2, DIM.height / 2 - window.getSize().height / 2);
         window.pack();
-        
+
         Timer timer = new Timer("Progress Timer");
 
         TimerTask timerTask = new TimerTask() {
@@ -245,8 +256,10 @@ public class GUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        fileChooserInput = new javax.swing.JFileChooser();
-        fileChooserOutput = new javax.swing.JFileChooser();
+        fileChooserDirInput = new javax.swing.JFileChooser();
+        fileChooserDirOutput = new javax.swing.JFileChooser();
+        fileChooserIniLoad = new javax.swing.JFileChooser();
+        fileChooserIniSave = new javax.swing.JFileChooser();
         pnlFilePaths = new javax.swing.JPanel();
         lblInput = new javax.swing.JLabel();
         txtFldInPath = new javax.swing.JTextField();
@@ -272,18 +285,25 @@ public class GUI extends javax.swing.JFrame {
         panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
+        fileMenuLoad = new javax.swing.JMenuItem();
+        fileMenuSep0 = new javax.swing.JPopupMenu.Separator();
+        fileMenuSave = new javax.swing.JMenuItem();
+        fileMenuSaveAs = new javax.swing.JMenuItem();
+        fileMenuSep1 = new javax.swing.JPopupMenu.Separator();
         fileMenuExit = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
         infoMenuAbout = new javax.swing.JMenuItem();
         infoMenuHelp = new javax.swing.JMenuItem();
 
-        fileChooserInput.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        fileChooserDirInput.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 
-        fileChooserOutput.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
-        fileChooserOutput.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        fileChooserDirOutput.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
+        fileChooserDirOutput.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+
+        fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor");
+        setTitle("FOnline2 S3 Interface Editor - DEUTERIUM");
         setMinimumSize(new java.awt.Dimension(960, 540));
         setSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
@@ -460,6 +480,32 @@ public class GUI extends javax.swing.JFrame {
 
         mainMenuFile.setText("File");
 
+        fileMenuLoad.setText("Load...");
+        fileMenuLoad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileMenuLoadActionPerformed(evt);
+            }
+        });
+        mainMenuFile.add(fileMenuLoad);
+        mainMenuFile.add(fileMenuSep0);
+
+        fileMenuSave.setText("Save");
+        fileMenuSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileMenuSaveActionPerformed(evt);
+            }
+        });
+        mainMenuFile.add(fileMenuSave);
+
+        fileMenuSaveAs.setText("Save as...");
+        fileMenuSaveAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileMenuSaveAsActionPerformed(evt);
+            }
+        });
+        mainMenuFile.add(fileMenuSaveAs);
+        mainMenuFile.add(fileMenuSep1);
+
         fileMenuExit.setText("Exit");
         fileMenuExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -506,12 +552,12 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnChoosePathOutActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
-        load();
+        loadFromButton();
     }//GEN-LAST:event_btnLoadActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        save();
+        saveFromButton();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnTblePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTblePreviewActionPerformed
@@ -539,7 +585,7 @@ public class GUI extends javax.swing.JFrame {
         infoHelp();
     }//GEN-LAST:event_infoMenuHelpActionPerformed
 
-    private void load() {
+    private void loadFromButton() {
         boolean ok = intrface.readIniFile();
         if (ok) {
             final List<String> resStrs = new ArrayList<>();
@@ -572,10 +618,56 @@ public class GUI extends javax.swing.JFrame {
         initIntEn();
     }
 
-    private void save() {
+    private void loadFromMenu() {
+        boolean ok = intrface.readIniFile(targetIniFile);
+        if (ok) {
+            final List<String> resStrs = new ArrayList<>();
+            List<ResolutionPragma> customResolutions = intrface.getCustomResolutions();
+
+            for (ResolutionPragma resPrag : customResolutions) {
+                String resStr = String.valueOf(resPrag.getWidth()) + "x" + String.valueOf(resPrag.getHeight());
+                resStrs.add(resStr);
+            }
+
+            final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
+            this.cmbBoxResolution.setModel(resModel);
+
+            if (intrface.getErrorNum() == 0) {
+                JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
+            } else if (cfg.isIgnoreErrors()) {
+                JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Interface Load Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        DefaultTableModel defFtTblModel = (DefaultTableModel) tblFeatures.getModel();
+        for (int i = tblFeatures.getRowCount() - 1; i >= 0; i--) {
+            defFtTblModel.removeRow(i);
+        }
+
+        initIntEn();
+    }
+
+    private void saveFromButton() {
         if (intrface.isInitialized()) {
             final File file = new File(cfg.getOutDir().getPath() + File.separator + cfg.getDefaultIni());
             boolean ok = intrface.writeIniFile(file);
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "App successfully saved ini of your new interface!", "Interface Save", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "App encountered errors whilst saving ini of your interface!", "Interface Save Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Nothing to save, please load your interface!", "Interface Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void saveFromMenu() {
+        if (intrface.isInitialized() && targetIniFile != null) {
+            boolean ok = intrface.writeIniFile(targetIniFile);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "App successfully saved ini of your new interface!", "Interface Save", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -590,7 +682,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.3 - DEUTERIUM (PUBLIC BUILD reviewed on 2021-01-03 at 12:00).</b></html>\n");
+            sb.append("<html><b>VERSION v0.3 - DEUTERIUM (PUBLIC BUILD reviewed on 2021-01-04 at 04:30).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -836,10 +928,72 @@ public class GUI extends javax.swing.JFrame {
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
     }//GEN-LAST:event_btnTogAllResActionPerformed
 
-    private void fileInOpen() {
-        int returnVal = fileChooserInput.showOpenDialog(this);
+    private void fileMenuLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuLoadActionPerformed
+        // TODO add your handling code here:
+        int returnVal = fileChooserIniLoad.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            cfg.setInDir(fileChooserInput.getSelectedFile());
+            this.targetIniFile = fileChooserIniLoad.getSelectedFile();
+            cfg.setInDir(fileChooserIniLoad.getSelectedFile().getParentFile());
+            txtFldInPath.setText(cfg.getInDir().getPath());
+            txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+            loadFromMenu();
+        }
+
+        if (!cfg.getInDir().getPath().isEmpty()) {
+            btnLoad.setEnabled(true);
+        }
+
+    }//GEN-LAST:event_fileMenuLoadActionPerformed
+
+    private void fileMenuSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuSaveActionPerformed
+        // TODO add your handling code here: 
+        if (intrface.isInitialized()) {
+            if (targetIniFile != null) {
+                saveFromMenu();
+            } else {
+                int returnVal = fileChooserIniSave.showSaveDialog(this);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    targetIniFile = fileChooserIniSave.getSelectedFile();
+                    cfg.setInDir(fileChooserIniSave.getSelectedFile().getParentFile());
+                    txtFldInPath.setText(cfg.getInDir().getPath());
+                    txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+
+                    saveFromMenu();
+                }
+
+                if (!cfg.getInDir().getPath().isEmpty()) {
+                    btnLoad.setEnabled(true);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Nothing to save, please load your interface!", "Interface Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_fileMenuSaveActionPerformed
+
+    private void fileMenuSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuSaveAsActionPerformed
+        // TODO add your handling code here:
+        if (intrface.isInitialized()) {
+            int returnVal = fileChooserIniSave.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                targetIniFile = fileChooserIniSave.getSelectedFile();
+                cfg.setInDir(fileChooserIniSave.getSelectedFile().getParentFile());
+                txtFldInPath.setText(cfg.getInDir().getPath());
+                txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+                saveFromMenu();
+            }
+
+            if (!cfg.getInDir().getPath().isEmpty()) {
+                btnLoad.setEnabled(true);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Nothing to save, please load your interface!", "Interface Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_fileMenuSaveAsActionPerformed
+
+    private void fileInOpen() {
+        int returnVal = fileChooserDirInput.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            cfg.setInDir(fileChooserDirInput.getSelectedFile());
             txtFldInPath.setText(cfg.getInDir().getPath());
             txtFldInPath.setToolTipText(cfg.getInDir().getPath());
         }
@@ -848,17 +1002,17 @@ public class GUI extends javax.swing.JFrame {
             btnLoad.setEnabled(true);
         }
 
-        if (fileChooserInput.getSelectedFile() != null
-                && fileChooserInput.getSelectedFile().equals(fileChooserOutput.getSelectedFile())) {
+        if (fileChooserDirInput.getSelectedFile() != null
+                && fileChooserDirInput.getSelectedFile().equals(fileChooserDirOutput.getSelectedFile())) {
             JOptionPane.showMessageDialog(this, "Input and output path are the same,\nIt may lead to undesired results!", "Warning", JOptionPane.WARNING_MESSAGE);
         }
 
     }
 
     private void fileOutOpen() {
-        int returnVal = fileChooserOutput.showOpenDialog(this);
+        int returnVal = fileChooserDirOutput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            cfg.setOutDir(fileChooserOutput.getSelectedFile());
+            cfg.setOutDir(fileChooserDirOutput.getSelectedFile());
             txtFldOutPath.setText(cfg.getOutDir().getPath());
             txtFldOutPath.setToolTipText(cfg.getOutDir().getPath());
         }
@@ -867,8 +1021,8 @@ public class GUI extends javax.swing.JFrame {
             btnSave.setEnabled(true);
         }
 
-        if (fileChooserOutput.getSelectedFile() != null
-                && fileChooserOutput.getSelectedFile().equals(fileChooserInput.getSelectedFile())) {
+        if (fileChooserDirOutput.getSelectedFile() != null
+                && fileChooserDirOutput.getSelectedFile().equals(fileChooserDirInput.getSelectedFile())) {
             JOptionPane.showMessageDialog(this, "Input and output path are the same,\nIt may lead to undesired results!", "Warning", JOptionPane.WARNING_MESSAGE);
         }
 
@@ -930,9 +1084,16 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JToggleButton btnTogAllRes;
     private javax.swing.JComboBox<Object> cmbBoxResolution;
     private javax.swing.JComboBox<Section.SectionName> cmbBoxSection;
-    private javax.swing.JFileChooser fileChooserInput;
-    private javax.swing.JFileChooser fileChooserOutput;
+    private javax.swing.JFileChooser fileChooserDirInput;
+    private javax.swing.JFileChooser fileChooserDirOutput;
+    private javax.swing.JFileChooser fileChooserIniLoad;
+    private javax.swing.JFileChooser fileChooserIniSave;
     private javax.swing.JMenuItem fileMenuExit;
+    private javax.swing.JMenuItem fileMenuLoad;
+    private javax.swing.JMenuItem fileMenuSave;
+    private javax.swing.JMenuItem fileMenuSaveAs;
+    private javax.swing.JPopupMenu.Separator fileMenuSep0;
+    private javax.swing.JPopupMenu.Separator fileMenuSep1;
     private javax.swing.JMenuItem infoMenuAbout;
     private javax.swing.JMenuItem infoMenuHelp;
     private javax.swing.JLabel lblInput;
