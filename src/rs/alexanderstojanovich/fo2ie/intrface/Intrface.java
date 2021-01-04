@@ -88,7 +88,7 @@ public class Intrface {
     private final Section faction = new Section(Section.SectionName.Faction, FeatureKey.Faction.FactionMainPic, FeatureKey.Faction.values());
     private final Section fixBoy = new Section(Section.SectionName.FixBoy, FeatureKey.FixBoy.FixMainPic, FeatureKey.FixBoy.values());
     private final Section globalMap = new Section(Section.SectionName.GlobalMap, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GlobalMap.values());
-    private final Section groundPickup = new Section(Section.SectionName.GroundPickup, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GroundPickup.values());
+    private final Section groundPickup = new Section(Section.SectionName.GroundPickup, FeatureKey.GroundPickup.GPickupMainPic, FeatureKey.GroundPickup.values());
     private final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.IboxMainPic, FeatureKey.InputBox.values());
     private final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.IntMainPic, FeatureKey.Interface.values());
     private final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.InvMainPic, FeatureKey.Inventory.values());
@@ -436,7 +436,7 @@ public class Intrface {
             int mainPicHeight = 600;
 
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null) {
+            if (mainPicKey != null && commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) commonFeatMap.get(mainPicKey);
                 mainPicVal.loadImage();
 
@@ -680,7 +680,7 @@ public class Intrface {
             int mainPicHeight = 600;
 
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null) {
+            if (mainPicKey != null && resolutionPragma.customFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
                 mainPicVal.loadImage();
 

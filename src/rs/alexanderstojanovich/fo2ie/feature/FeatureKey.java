@@ -25,9 +25,9 @@ import java.util.List;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public interface FeatureKey {
-
+    
     public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Dow|Off|Mask|Na)?";
-
+    
     public static final String AIM = "Aim";
     public static final String BARTER = "Barter";
     public static final String CHARACTER = "Cha";
@@ -38,7 +38,7 @@ public interface FeatureKey {
     public static final String FIX_BOY = "Fix";
     public static final String GLOBAL_MAP = "Gmap";
     public static final String GROUND_PICKUP = "GPickup";
-
+    
     public static final String INPUT_BOX = "Ibox";
     public static final String INTRFACE = "Int";
     public static final String INVENTORY = "Inv";
@@ -49,7 +49,7 @@ public interface FeatureKey {
     public static final String PRICE_SETUP = "PS";
     public static final String PERK = "Perk";
     public static final String PIP_BOY = "Pip";
-
+    
     public static final String PICK_UP = "Pup";
     public static final String RADIO = "Radio";
     public static final String REGISTRATION = "Reg";
@@ -57,11 +57,11 @@ public interface FeatureKey {
     public static final String SAY_BOX = "Say";
     public static final String SKILL_BOX = "Sbox";
     public static final String SPLIT = "Split";
-
+    
     public static final String TOWN_VIEW = "TView";
     public static final String TIMER = "Timer";
     public static final String USE = "Use";
-
+    
     public static final String[] ABBRS = {
         AIM, BARTER, CHARACTER, CHOSEN, CONSOLE, DIALOG_BOX, FACTION, FIX_BOY, GLOBAL_MAP, GROUND_PICKUP,
         INPUT_BOX, INTRFACE, INVENTORY, POP_UP, MINI_MAP, LOGIN, OPTIONS, PRICE_SETUP, PERK, PIP_BOY,
@@ -98,12 +98,12 @@ public interface FeatureKey {
         AimRLegText,
         AimTorsoProc,
         AimTorsoText;
-
+        
         @Override
         public String getPrefix() {
             return AIM;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -137,27 +137,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return AimMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return AimMain;
         }
-
+        
     }
 
     // Barter
@@ -215,12 +215,12 @@ public interface FeatureKey {
         BarterTalk,
         BarterTalkPic,
         BarterTalkText;
-
+        
         @Override
         public String getPrefix() {
             return BARTER;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -285,27 +285,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return BarterMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return BarterMain;
         }
-
+        
     }
 
     // Character
@@ -392,12 +392,12 @@ public interface FeatureKey {
         ChaSwitchText,
         ChaUnspentSP,
         ChaUnspentSPText;
-
+        
         @Override
         public String getPrefix() {
             return CHARACTER;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -489,30 +489,30 @@ public interface FeatureKey {
                     return Type.VALUE;
                 default:
                     return Type.UNKNOWN;
-
+                
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return ChaMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return ChaMain;
         }
-
+        
     }
 
     // Chosen Tabs
@@ -521,12 +521,12 @@ public interface FeatureKey {
         ChosenTabPic,
         ChosenTabStepX,
         ChosenTabStepY;
-
+        
         @Override
         public String getPrefix() {
             return CHOSEN;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -541,27 +541,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return ChosenTabPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return ChosenTab;
         }
-
+        
     }
 
     // Console
@@ -571,12 +571,12 @@ public interface FeatureKey {
         ConsoleMainPicY,
         ConsoleTextX,
         ConsoleTextY;
-
+        
         @Override
         public String getPrefix() {
             return CONSOLE;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -592,27 +592,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return ConsoleMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return null;
         }
-
+        
     }
 
     // Dialog (Talk)
@@ -648,12 +648,12 @@ public interface FeatureKey {
         DlgboxText,
         DlgboxTop,
         DlgboxTopPic;
-
+        
         @Override
         public String getPrefix() {
             return DIALOG_BOX;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -696,27 +696,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return DlgMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return DlgMain;
         }
-
+        
     }
 
     // Faction (deprecated)
@@ -730,32 +730,32 @@ public interface FeatureKey {
         FactionLabel,
         FactionMainPic,
         FactionMainText;
-
+        
         @Override
         public FeatureKey getMainPic() {
             return FactionMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return null;
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public String getPrefix() {
             return FACTION;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -805,12 +805,12 @@ public interface FeatureKey {
         FixUp,
         FixUpPic,
         FixWin;
-
+        
         @Override
         public String getPrefix() {
             return FIX_BOY;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -847,27 +847,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return FixMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return FixMain;
         }
-
+        
     }
 
     // Global map (World map)
@@ -920,12 +920,12 @@ public interface FeatureKey {
         GmapTownViewPic,
         GmapTownViewPicDn,
         GmapTownViewPicMask;
-
+        
         @Override
         public String getPrefix() {
             return GLOBAL_MAP;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -985,27 +985,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return GmapMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return GmapMain;
         }
-
+        
     }
 
     // Ground pickup
@@ -1024,32 +1024,32 @@ public interface FeatureKey {
         GPickupInvScrUpPicNa,
         GPickupMainPic,
         GPickupWidthItem;
-
+        
         @Override
         public FeatureKey getMainPic() {
             return GPickupMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return null;
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public String getPrefix() {
             return GROUND_PICKUP;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1074,7 +1074,7 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
     }
 
     // Input box
@@ -1089,12 +1089,12 @@ public interface FeatureKey {
         IboxMainPic,
         IboxText,
         IboxTitle;
-
+        
         @Override
         public String getPrefix() {
             return INPUT_BOX;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1115,27 +1115,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return IboxMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return IboxMain;
         }
-
+        
     }
 
     // (Game) Interface
@@ -1201,12 +1201,12 @@ public interface FeatureKey {
         IntWearProcent,
         IntWearProcentText,
         IntX;
-
+        
         @Override
         public String getPrefix() {
             return INTRFACE;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1279,27 +1279,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return IntMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return IntMain;
         }
-
+        
     }
 
     // Inventory
@@ -1324,12 +1324,12 @@ public interface FeatureKey {
         InvSlot1,
         InvSlot2,
         InvText;
-
+        
         @Override
         public String getPrefix() {
             return INVENTORY;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1361,27 +1361,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return InvMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return InvMain;
         }
-
+        
     }
 
     // Popup menu
@@ -1427,12 +1427,12 @@ public interface FeatureKey {
         LMenuVoteDownPicDn,
         LMenuVoteUpPic,
         LMenuVoteUpPicDn;
-
+        
         @Override
         public String getPrefix() {
             return POP_UP;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1483,27 +1483,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return null;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return null;
         }
-
+        
     }
 
     // Mini-map
@@ -1517,12 +1517,12 @@ public interface FeatureKey {
         LmapOkPicDn,
         LmapScan,
         LmapScanPicDn;
-
+        
         @Override
         public String getPrefix() {
             return MINI_MAP;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1541,27 +1541,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return LmapMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return LmapMain;
         }
-
+        
     }
 
     // Login (Main menu)
@@ -1588,12 +1588,12 @@ public interface FeatureKey {
         LogRegText,
         LogSingleplayerMainPic,
         LogVersion;
-
+        
         @Override
         public String getPrefix() {
             return LOGIN;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1626,27 +1626,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return LogMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return LogMain;
         }
-
+        
     }
 
     // Options
@@ -1664,12 +1664,12 @@ public interface FeatureKey {
         MoptSaveGame,
         MoptSaveGamePicDn,
         MoptSingleplayerMainPic;
-
+        
         @Override
         public String getPrefix() {
             return OPTIONS;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1692,27 +1692,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return MoptMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return MoptMain;
         }
-
+        
     }
 
     // Price setup
@@ -1735,12 +1735,12 @@ public interface FeatureKey {
         PScancelPicDn,
         PSdone,
         PSdonePicDn;
-
+        
         @Override
         public String getPrefix() {
             return PRICE_SETUP;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1770,27 +1770,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return PSMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return null;
         }
-
+        
     }
 
     // Perk window
@@ -1813,12 +1813,12 @@ public interface FeatureKey {
         PerkScrUp,
         PerkScrUpPic,
         PerkText;
-
+        
         @Override
         public String getPrefix() {
             return PERK;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1848,27 +1848,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return PerkMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return PerkMain;
         }
-
+        
     }
 
     // Pip-boy
@@ -1886,12 +1886,12 @@ public interface FeatureKey {
         PipStatus,
         PipStatusPicDn,
         PipTime;
-
+        
         @Override
         public String getPrefix() {
             return PIP_BOY;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -1915,27 +1915,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return PipMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return PipMain;
         }
-
+        
     }
 
     // Pick up
@@ -1969,12 +1969,12 @@ public interface FeatureKey {
         PupScrUp2PicOff,
         PupTAPicDn,
         PupTakeAll;
-
+        
         @Override
         public String getPrefix() {
             return PICK_UP;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2015,27 +2015,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return PupMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return PupMain;
         }
-
+        
     }
 
     // Radio
@@ -2079,12 +2079,12 @@ public interface FeatureKey {
         RadioRefresh,
         RadioRefreshPicDn,
         RadioRefreshText;
-
+        
         @Override
         public String getPrefix() {
             return RADIO;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2134,27 +2134,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return RadioMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return RadioMain;
         }
-
+        
     }
 
     // Registration
@@ -2180,12 +2180,12 @@ public interface FeatureKey {
         RegTraitRText,
         RegUnspentSpecial,
         RegUnspentSpecialText;
-
+        
         @Override
         public String getPrefix() {
             return REGISTRATION;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2218,27 +2218,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return RegMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return RegMain;
         }
-
+        
     }
 
     // Save/Load
@@ -2259,12 +2259,12 @@ public interface FeatureKey {
         SaveLoadScrUpPicDn,
         SaveLoadSlots,
         SaveLoadText;
-
+        
         @Override
         public String getPrefix() {
             return SAVE_LOAD;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2291,27 +2291,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return SaveLoadMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return SaveLoadMain;
         }
-
+        
     }
 
     // Say box
@@ -2326,12 +2326,12 @@ public interface FeatureKey {
         SayOkPicDn,
         SayOkText,
         SaySay;
-
+        
         @Override
         public String getPrefix() {
             return "Say";
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2352,27 +2352,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return SayMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return SayMain;
         }
-
+        
     }
 
     // Skillbox
@@ -2407,12 +2407,12 @@ public interface FeatureKey {
         SboxTrap,
         SboxTrapPicDn,
         SboxTrapText;
-
+        
         @Override
         public String getPrefix() {
             return SKILL_BOX;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2453,27 +2453,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return SboxMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return SboxMain;
         }
-
+        
     }
 
     // Split
@@ -2493,12 +2493,12 @@ public interface FeatureKey {
         SplitUp,
         SplitUpPicDn,
         SplitValue;
-
+        
         @Override
         public String getPrefix() {
             return SPLIT;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2524,27 +2524,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return SplitMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return SplitMain;
         }
-
+        
     }
 
     // Town view
@@ -2557,12 +2557,12 @@ public interface FeatureKey {
         TViewEnterPicDn,
         TViewMain,
         TViewMainPic;
-
+        
         @Override
         public String getPrefix() {
             return TOWN_VIEW;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2580,27 +2580,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return TViewMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return TViewMain;
         }
-
+        
     }
 
     // Timer
@@ -2618,12 +2618,12 @@ public interface FeatureKey {
         TimerUp,
         TimerUpPicDn,
         TimerValue;
-
+        
         @Override
         public String getPrefix() {
             return TIMER;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2647,27 +2647,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return TimerMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return TimerMain;
         }
-
+        
     }
 
     // Use
@@ -2688,12 +2688,12 @@ public interface FeatureKey {
         UseScrUpPic,
         UseScrUpPicDn,
         UseScrUpPicOff;
-
+        
         @Override
         public String getPrefix() {
             return USE;
         }
-
+        
         @Override
         public Type getType() {
             switch (this) {
@@ -2720,27 +2720,27 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
-
+        
         @Override
         public String getStringValue() {
             return this.name();
         }
-
+        
         @Override
         public int getNumericValue() {
             return this.ordinal();
         }
-
+        
         @Override
         public FeatureKey getMainPic() {
             return UseMainPic;
         }
-
+        
         @Override
         public FeatureKey getMainPicPos() {
             return UseMain;
         }
-
+        
     }
 
     /**
@@ -2808,17 +2808,17 @@ public interface FeatureKey {
             if (string.toLowerCase().startsWith(prefix.toLowerCase())) {
                 FeatureKey[] keys = valuesOf(prefix);
                 Arrays.sort(keys);
-
+                
                 for (FeatureKey key : keys) {
                     if (key.getStringValue().equalsIgnoreCase(string)) {
                         return key;
                     }
                 }
-
+                
                 return null;
             }
         }
-
+        
         return null;
     }
 
@@ -2904,9 +2904,12 @@ public interface FeatureKey {
     public static List<FeatureKey> getPics(FeatureKey picPos) {
         if (picPos.getType() == Type.PIC_POS) {
             List<FeatureKey> result = new ArrayList<>();
-
-            String begin = picPos.getStringValue() + PIC_REGEX;
+            
+            String begin = picPos.getStringValue() + PIC_REGEX;            
+            final String altRegex = begin;
+            
             begin = begin.replaceAll(FeatureValue.NUMBER_REGEX, "");
+            begin = begin.replaceAll("Opponent", "");
             final boolean hasNumber = picPos.getStringValue().matches(
                     picPos.getStringValue().replaceAll(FeatureValue.NUMBER_REGEX, "") + FeatureValue.NUMBER_REGEX
             );
@@ -2916,15 +2919,16 @@ public interface FeatureKey {
             FeatureKey[] keys = valuesOf(prefix);
             for (FeatureKey key : keys) {
                 if (key.getType() == Type.PIC
-                        && key.getStringValue().matches(regex)) {
+                        && (key.getStringValue().matches(regex)
+                        || key.getStringValue().matches(altRegex))) {
                     result.add(key);
                 }
             }
-
+            
             return result;
         }
-
+        
         return null;
     }
-
+    
 }

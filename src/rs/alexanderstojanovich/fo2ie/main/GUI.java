@@ -305,6 +305,7 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor - DEUTERIUM");
         setMinimumSize(new java.awt.Dimension(960, 540));
+        setPreferredSize(new java.awt.Dimension(960, 540));
         setSize(new java.awt.Dimension(960, 540));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
@@ -395,6 +396,8 @@ public class GUI extends javax.swing.JFrame {
 
         lblResolution.setText("Resolution:");
         pnlIntrface.add(lblResolution);
+
+        cmbBoxResolution.setMaximumRowCount(6);
         pnlIntrface.add(cmbBoxResolution);
 
         btnTogAllRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"))); // NOI18N
@@ -682,7 +685,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.3 - DEUTERIUM (PUBLIC BUILD reviewed on 2021-01-04 at 04:30).</b></html>\n");
+            sb.append("<html><b>VERSION v0.3 - DEUTERIUM (PUBLIC BUILD reviewed on 2021-01-04 at 07:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
