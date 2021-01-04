@@ -810,7 +810,7 @@ public class Intrface {
                                 Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
                                 int width = Math.round(picPosVec.z - picPosVec.x);
                                 int height = Math.round(picPosVec.w - picPosVec.y);
-                                // gets the possible pictur keys
+                                // gets the possible picture keys
                                 List<FeatureKey> pics = FeatureKey.getPics(featKey);
                                 if (!pics.isEmpty()) {
                                     for (FeatureKey fkPic : pics) {

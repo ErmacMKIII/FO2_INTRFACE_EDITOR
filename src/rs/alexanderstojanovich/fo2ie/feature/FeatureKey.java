@@ -26,6 +26,8 @@ import java.util.List;
  */
 public interface FeatureKey {
 
+    public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Dow|Off|Mask|Na)?";
+
     public static final String AIM = "Aim";
     public static final String BARTER = "Barter";
     public static final String CHARACTER = "Cha";
@@ -2902,11 +2904,19 @@ public interface FeatureKey {
     public static List<FeatureKey> getPics(FeatureKey picPos) {
         if (picPos.getType() == Type.PIC_POS) {
             List<FeatureKey> result = new ArrayList<>();
+
+            String begin = picPos.getStringValue() + PIC_REGEX;
+            begin = begin.replaceAll(FeatureValue.NUMBER_REGEX, "");
+            final boolean hasNumber = picPos.getStringValue().matches(
+                    picPos.getStringValue().replaceAll(FeatureValue.NUMBER_REGEX, "") + FeatureValue.NUMBER_REGEX
+            );
+            final String regex = hasNumber ? begin + FeatureValue.NUMBER_REGEX : begin;
+            
             String prefix = picPos.getPrefix();
             FeatureKey[] keys = valuesOf(prefix);
             for (FeatureKey key : keys) {
                 if (key.getType() == Type.PIC
-                        && key.getStringValue().contains(picPos.getStringValue())) {
+                        && key.getStringValue().matches(regex)) {
                     result.add(key);
                 }
             }
