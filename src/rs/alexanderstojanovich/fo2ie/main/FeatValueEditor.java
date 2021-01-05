@@ -142,14 +142,13 @@ public abstract class FeatValueEditor extends JFrame {
                         featureValue.setStringValue(strFVal);
                     }
                 });
-
+                this.getContentPane().add(btnReset);
                 btnCancel.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         FeatValueEditor.this.dispose();
                     }
                 });
-
                 this.getContentPane().add(btnCancel);
                 break;
             case VECTOR4:
