@@ -430,6 +430,7 @@ public class Intrface {
         final Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             FeatureKey mainPicKey = section.root.getMainPic();
+            MyVector4 mainPicPosVal = null;
 
             // it's intially assumed that picture is 800x600 unless specified otherwise
             int mainPicWidth = 800;
@@ -456,32 +457,17 @@ public class Intrface {
 
                 // defining root of the module (the main image)
                 // all positions are referred to this root (image)
-                Quad root;
                 // if position exists for the main (root) image
                 if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
-                    MyVector4 mainPicPosVal = (MyVector4) commonFeatMap.get(mainPicPosKey);
+                    mainPicPosVal = (MyVector4) commonFeatMap.get(mainPicPosKey);
                     MyVector4 temp = new MyVector4();
                     mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-
-                    // center is the mid point (essentially that's the formula)
-                    float posx = (mainPicPosVal.x + mainPicPosVal.z) / 2.0f;
-                    float posy = (mainPicPosVal.y + mainPicPosVal.w) / 2.0f;
-
-                    Vector2f pos = new Vector2f(posx, posy);
-                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-
-                    // width and height are according to the corner coodinates substraction
-                    int width = Math.round(mainPicPosVal.z - mainPicPosVal.x);
-                    int height = Math.round(mainPicPosVal.w - mainPicPosVal.y);
-
-                    root = new Quad(width, height, rootTex, posGL);
-                    result.add(root);
-                } else { // otherwise just make it size as read before and center it
-                    float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
-                    float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                    root = new Quad(Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
-                    result.add(root);
                 }
+
+                float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
+                float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
+                Quad root = new Quad(Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
+                result.add(root);
             }
 
             // defining mutually exclusive sets for pictures, primitives (overlays) and text
@@ -512,6 +498,11 @@ public class Intrface {
 
                                             float posx = (picPosVec.x + picPosVec.z) / 2.0f;
                                             float posy = (picPosVec.y + picPosVec.w) / 2.0f;
+
+                                            if (mainPicPosVal != null) {
+                                                posx += mainPicPosVal.x;
+                                                posy += mainPicPosVal.y;
+                                            }
 
                                             Vector2f pos = new Vector2f(posx, posy);
                                             Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
@@ -562,6 +553,12 @@ public class Intrface {
                                 picPosVec = picPosVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
                                 float posx = (picPosVec.x + picPosVec.z) / 2.0f;
                                 float posy = (picPosVec.y + picPosVec.w) / 2.0f;
+
+                                if (mainPicPosVal != null) {
+                                    posx += mainPicPosVal.x;
+                                    posy += mainPicPosVal.y;
+                                }
+
                                 Vector2f pos = new Vector2f(posx, posy);
                                 Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
                                 int width = Math.round(picPosVec.z - picPosVec.x);
@@ -617,6 +614,12 @@ public class Intrface {
                                 txtValVec = txtValVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, ttemp);
                                 float tposx = (txtValVec.x + txtValVec.z) / 2.0f;
                                 float tposy = (txtValVec.y + txtValVec.w) / 2.0f;
+
+                                if (mainPicPosVal != null) {
+                                    tposx += mainPicPosVal.x;
+                                    tposy += mainPicPosVal.y;
+                                }
+
                                 Vector2f tpos = new Vector2f(tposx, tposy);
                                 Vector2f tposGL = GLCoords.getOpenGLCoordinates(tpos, screenWidth, screenHeight);
                                 int twidth = Math.round(txtValVec.z - txtValVec.x);
@@ -674,6 +677,7 @@ public class Intrface {
         final Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             FeatureKey mainPicKey = section.root.getMainPic();
+            MyVector4 mainPicPosVal = null;
 
             // it's intially assumed that picture is 800x600 unless specified otherwise
             int mainPicWidth = 800;
@@ -700,32 +704,17 @@ public class Intrface {
 
                 // defining root of the module (the main image)
                 // all positions are referred to this root (image)
-                Quad root;
                 // if position exists for the main (root) image
                 if (mainPicPosKey != null && resolutionPragma.customFeatMap.containsKey(mainPicPosKey)) {
-                    MyVector4 mainPicPosVal = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
+                    mainPicPosVal = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
                     MyVector4 temp = new MyVector4();
                     mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-
-                    // center is the mid point (essentially that's the formula)
-                    float posx = (mainPicPosVal.x + mainPicPosVal.z) / 2.0f;
-                    float posy = (mainPicPosVal.y + mainPicPosVal.w) / 2.0f;
-
-                    Vector2f pos = new Vector2f(posx, posy);
-                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-
-                    // width and height are according to the corner coodinates substraction
-                    int width = Math.round(mainPicPosVal.z - mainPicPosVal.x);
-                    int height = Math.round(mainPicPosVal.w - mainPicPosVal.y);
-
-                    root = new Quad(width, height, rootTex, posGL);
-                    result.add(root);
-                } else { // otherwise just make it size as read before and center it
-                    float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
-                    float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                    root = new Quad(Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
-                    result.add(root);
                 }
+
+                float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
+                float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
+                Quad root = new Quad(Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
+                result.add(root);
             }
 
             // defining mutually exclusive sets for pictures, primitives (overlays) and text
@@ -756,6 +745,11 @@ public class Intrface {
 
                                             float posx = (picPosVec.x + picPosVec.z) / 2.0f;
                                             float posy = (picPosVec.y + picPosVec.w) / 2.0f;
+
+                                            if (mainPicPosVal != null) {
+                                                posx += mainPicPosVal.x;
+                                                posy += mainPicPosVal.y;
+                                            }
 
                                             Vector2f pos = new Vector2f(posx, posy);
                                             Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
@@ -806,6 +800,12 @@ public class Intrface {
                                 picPosVec = picPosVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
                                 float posx = (picPosVec.x + picPosVec.z) / 2.0f;
                                 float posy = (picPosVec.y + picPosVec.w) / 2.0f;
+
+                                if (mainPicPosVal != null) {
+                                    posx += mainPicPosVal.x;
+                                    posy += mainPicPosVal.y;
+                                }
+
                                 Vector2f pos = new Vector2f(posx, posy);
                                 Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
                                 int width = Math.round(picPosVec.z - picPosVec.x);
@@ -861,6 +861,12 @@ public class Intrface {
                                 txtValVec = txtValVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, ttemp);
                                 float tposx = (txtValVec.x + txtValVec.z) / 2.0f;
                                 float tposy = (txtValVec.y + txtValVec.w) / 2.0f;
+
+                                if (mainPicPosVal != null) {
+                                    tposx += mainPicPosVal.x;
+                                    tposy += mainPicPosVal.y;
+                                }
+
                                 Vector2f tpos = new Vector2f(tposx, tposy);
                                 Vector2f tposGL = GLCoords.getOpenGLCoordinates(tpos, screenWidth, screenHeight);
                                 int twidth = Math.round(txtValVec.z - txtValVec.x);

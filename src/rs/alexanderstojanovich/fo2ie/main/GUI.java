@@ -303,7 +303,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - DEUTERIUM");
+        setTitle("FOnline2 S3 Interface Editor - ESTONIA");
         setMinimumSize(new java.awt.Dimension(960, 540));
         setPreferredSize(new java.awt.Dimension(960, 540));
         setSize(new java.awt.Dimension(960, 540));

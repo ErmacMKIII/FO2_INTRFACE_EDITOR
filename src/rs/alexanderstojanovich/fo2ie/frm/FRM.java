@@ -41,7 +41,7 @@ public class FRM {
     private int[] shiftX = new int[6]; // signed 
     private int[] shiftY = new int[6]; // signed   
 
-    private int[] offset = new int[6]; // unsigned
+    private final int[] offset = new int[6]; // unsigned
 
     // image composed of frames (but frame 0 is primarily used)
     private final List<ImageData> frames = new ArrayList<>();
@@ -74,10 +74,16 @@ public class FRM {
         this.fps = fps;
         this.actionFrame = 0x00;
         this.frameSize = 0;
+        int direction = 0;
+        int index = 0;
         for (BufferedImage image : images) {
+            if (index == direction * framesPerDirection) {
+                this.offset[direction++] = frameSize;
+            }
             frameSize += image.getWidth() * image.getHeight() + 12;
             ImageData imgData = new ImageData(image, offsetX, offsetY);
             frames.add(imgData);
+            index++;
         }
     }
 
@@ -105,9 +111,12 @@ public class FRM {
         this.frameSize = 0;
         this.shiftX = shiftX;
         this.shiftY = shiftY;
-        this.offset = offset;
+        int direction = 0;
         int index = 0;
         for (BufferedImage image : images) {
+            if (index == direction * framesPerDirection) {
+                this.offset[direction++] = frameSize;
+            }
             frameSize += image.getWidth() * image.getHeight() + 12;
             ImageData imgData = new ImageData(image, offsetsX[index], offsetsY[index]);
             frames.add(imgData);
@@ -238,9 +247,9 @@ public class FRM {
         pos = 0x0000;
         // big endian motorola
         buffer[pos] = (byte) (version >> 24);
-        buffer[pos + 2] = (byte) (version >> 16);
-        buffer[pos + 3] = (byte) (version >> 8);
-        buffer[pos + 4] = (byte) (version);
+        buffer[pos + 1] = (byte) (version >> 16);
+        buffer[pos + 2] = (byte) (version >> 8);
+        buffer[pos + 3] = (byte) (version);
         pos += 4;
         buffer[pos] = (byte) (fps >> 8);
         buffer[pos + 1] = (byte) (fps);
@@ -266,16 +275,16 @@ public class FRM {
         //----------------------------------------------------------------------        
         for (int i = 0; i < 6; i++) {
             buffer[pos] = (byte) (offset[i] >> 24);
-            buffer[pos + 2] = (byte) (offset[i] >> 16);
-            buffer[pos + 3] = (byte) (offset[i] >> 8);
-            buffer[pos + 4] = (byte) (offset[i]);
+            buffer[pos + 1] = (byte) (offset[i] >> 16);
+            buffer[pos + 2] = (byte) (offset[i] >> 8);
+            buffer[pos + 3] = (byte) (offset[i]);
             pos += 4;
         }
         //----------------------------------------------------------------------
         buffer[pos] = (byte) (frameSize >> 24);
-        buffer[pos + 2] = (byte) (frameSize >> 16);
-        buffer[pos + 3] = (byte) (frameSize >> 8);
-        buffer[pos + 4] = (byte) (frameSize);
+        buffer[pos + 1] = (byte) (frameSize >> 16);
+        buffer[pos + 2] = (byte) (frameSize >> 8);
+        buffer[pos + 3] = (byte) (frameSize);
         pos += 4;
         //----------------------------------------------------------------------
         for (ImageData frame : frames) {
