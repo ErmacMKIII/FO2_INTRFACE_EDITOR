@@ -587,6 +587,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildActionPerformed
         // TODO add your handling code here:
+        tablePreview();
         workBuild();
     }//GEN-LAST:event_btnBuildActionPerformed
 
@@ -786,9 +787,9 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
 
-            DefaultTableModel model = (DefaultTableModel) tblFeatures.getModel();
-            model.removeRow(srow);
-
+//            DefaultTableModel model = (DefaultTableModel) tblFeatures.getModel();
+//            model.removeRow(srow);
+            tablePreview();
             mdlAnim.state = ModuleAnimation.State.BUILD;
         }
     }
@@ -965,6 +966,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:
+        tablePreview();
         workBuild();
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();

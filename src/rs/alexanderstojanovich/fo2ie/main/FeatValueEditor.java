@@ -39,7 +39,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public abstract class FeatValueEditor extends JFrame {
-    
+
     private final FeatureKey featureKey;
     private final FeatureValue featureValue;
     private final JButton btnSet = new JButton("Set");
@@ -47,7 +47,7 @@ public abstract class FeatValueEditor extends JFrame {
     private final JButton btnCancel = new JButton("Cancel");
     private final Intrface intrface;
     private final boolean allRes;
-    
+
     public FeatValueEditor(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
         this.setTitle(featureKey.getStringValue());
         this.featureKey = featureKey;
@@ -66,7 +66,7 @@ public abstract class FeatValueEditor extends JFrame {
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
     }
-    
+
     private void apply() {
         if (allRes) {
             intrface.getCommonFeatMap().replace(featureKey, featureValue);
@@ -77,17 +77,17 @@ public abstract class FeatValueEditor extends JFrame {
             }
         }
     }
-    
+
     private void init() {
         // this value is kept for reset
         final String strFVal = featureValue.getStringValue();
-        
+
         switch (featureValue.getType()) {
             case IMAGE:
                 this.setLayout(new GridLayout(3, 2));
                 final JLabel lbl = new JLabel(featureKey.getStringValue() + ":");
                 this.getContentPane().add(lbl);
-                final JTextField txtFld = new JTextField(featureValue.getStringValue());
+                final JTextField txtFld = new JTextField(featureValue.getStringValue(), 16);
                 this.getContentPane().add(txtFld);
                 btnSet.addActionListener(new ActionListener() {
                     @Override
@@ -95,7 +95,7 @@ public abstract class FeatValueEditor extends JFrame {
                         featureValue.setStringValue(txtFld.getText());
                         execute();
                         apply();
-                        
+
                         FeatValueEditor.this.dispose();
                     }
                 });
@@ -108,14 +108,14 @@ public abstract class FeatValueEditor extends JFrame {
                     }
                 });
                 this.getContentPane().add(btnReset);
-                
+
                 btnCancel.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         FeatValueEditor.this.dispose();
                     }
                 });
-                
+
                 this.getContentPane().add(btnCancel);
                 break;
             case ARRAY:
@@ -131,7 +131,7 @@ public abstract class FeatValueEditor extends JFrame {
                         featureValue.setStringValue(String.valueOf((int) spinval.getValue()));
                         execute();
                         apply();
-                        
+
                         FeatValueEditor.this.dispose();
                     }
                 });
@@ -155,7 +155,7 @@ public abstract class FeatValueEditor extends JFrame {
             case VECTOR4:
                 this.setLayout(new GridLayout(3, 4));
                 MyVector4 vec4 = (MyVector4) featureValue;
-                
+
                 JLabel lblTL = new JLabel("Top Left:");
                 JSpinner spinX = new JSpinner(new SpinnerNumberModel(Math.round(vec4.x), -5000, 5000, 1));
                 JSpinner spinY = new JSpinner(new SpinnerNumberModel(Math.round(vec4.y), -5000, 5000, 1));
@@ -176,12 +176,12 @@ public abstract class FeatValueEditor extends JFrame {
                         vec4.w = (int) spinW.getValue();
                         execute();
                         apply();
-                        
+
                         FeatValueEditor.this.dispose();
                     }
                 });
                 this.getContentPane().add(btnSet);
-                
+
                 btnReset.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -193,43 +193,43 @@ public abstract class FeatValueEditor extends JFrame {
                     }
                 });
                 this.getContentPane().add(btnReset);
-                
+
                 btnCancel.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         FeatValueEditor.this.dispose();
                     }
                 });
-                
+
                 this.getContentPane().add(btnCancel);
                 break;
         }
-        
+
     }
 
     /**
      * Execute (command) on set
      */
     public abstract void execute();
-    
+
     public FeatureKey getFeatureKey() {
         return featureKey;
     }
-    
+
     public FeatureValue getFeatureValue() {
         return featureValue;
     }
-    
+
     public JButton getBtnSet() {
         return btnSet;
     }
-    
+
     public JButton getBtnReset() {
         return btnReset;
     }
-    
+
     public JButton getBtnCancel() {
         return btnCancel;
     }
-    
+
 }

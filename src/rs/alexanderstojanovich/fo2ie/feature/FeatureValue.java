@@ -60,7 +60,7 @@ public interface FeatureValue {
      */
     public static FeatureValue valueOf(String string) {
         FeatureValue result = null;
-        if (Pattern.matches(IMG_EXT_REGEX, string.toLowerCase())) {
+        if (string.isEmpty() || Pattern.matches(IMG_EXT_REGEX, string.toLowerCase())) {
             result = new ImageWrapper(string);
         } else if (Pattern.matches(NUMBER_ARRAY_REGEX, string.toLowerCase())) {
             String[] split = string.split("\\s+");
