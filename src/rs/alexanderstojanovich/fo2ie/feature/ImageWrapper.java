@@ -19,7 +19,9 @@ package rs.alexanderstojanovich.fo2ie.feature;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import rs.alexanderstojanovich.fo2ie.frm.FOFRM;
 import rs.alexanderstojanovich.fo2ie.frm.FRM;
@@ -36,7 +38,7 @@ public class ImageWrapper implements FeatureValue {
     private int offsetX = 0;
     private int offsetY = 0;
 
-    private String value; // is actually filename
+    private String value = ""; // is actually filename
     private BufferedImage[] images;
 
     public ImageWrapper(String value) {
@@ -72,7 +74,6 @@ public class ImageWrapper implements FeatureValue {
 
                 offsetX = fofrm.getOffsetX();
                 offsetY = fofrm.getOffsetY();
-
             }
         }
     }
@@ -151,6 +152,47 @@ public class ImageWrapper implements FeatureValue {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 83 * hash + this.fps;
+        hash = 83 * hash + this.offsetX;
+        hash = 83 * hash + this.offsetY;
+        hash = 83 * hash + Objects.hashCode(this.value);
+        hash = 83 * hash + Arrays.deepHashCode(this.images);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ImageWrapper other = (ImageWrapper) obj;
+        if (this.fps != other.fps) {
+            return false;
+        }
+        if (this.offsetX != other.offsetX) {
+            return false;
+        }
+        if (this.offsetY != other.offsetY) {
+            return false;
+        }
+        if (!Objects.equals(this.value, other.value)) {
+            return false;
+        }
+        if (!Arrays.deepEquals(this.images, other.images)) {
+            return false;
+        }
+        return true;
     }
 
 }

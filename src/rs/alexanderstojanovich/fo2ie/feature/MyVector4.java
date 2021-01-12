@@ -26,6 +26,13 @@ import rs.alexanderstojanovich.fo2ie.util.MathUtils;
 public class MyVector4 extends Vector4f implements FeatureValue {
 
     /**
+     * Constructs new MyVector (initialized with zeroes)
+     */
+    public MyVector4() {
+        super(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+    /**
      * Scale my vector so it can be rendered on the screen
      *
      * @param mainPicWidth main picture width

@@ -72,7 +72,7 @@ public interface FeatureValue {
                     result = new MyVector4();
                     break;
                 default:
-                    result = new Array();
+                    result = new MyArray();
                     break;
             }
         }

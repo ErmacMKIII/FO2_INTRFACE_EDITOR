@@ -16,11 +16,13 @@
  */
 package rs.alexanderstojanovich.fo2ie.feature;
 
+import java.util.Arrays;
+
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class Array implements FeatureValue {
+public class MyArray implements FeatureValue {
 
     private float[] array;
 
@@ -70,6 +72,31 @@ public class Array implements FeatureValue {
      */
     public float[] getArray() {
         return array;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Arrays.hashCode(this.array);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MyArray other = (MyArray) obj;
+        if (!Arrays.equals(this.array, other.array)) {
+            return false;
+        }
+        return true;
     }
 
 }

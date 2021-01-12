@@ -205,7 +205,6 @@ public class Intrface {
                         mode = Mode.RES;
 
                         rs = new ResolutionPragma(
-                                commonFeatMap,
                                 width,
                                 height
                         );
@@ -336,7 +335,6 @@ public class Intrface {
                         mode = Mode.RES;
 
                         rs = new ResolutionPragma(
-                                commonFeatMap,
                                 width,
                                 height
                         );
@@ -669,6 +667,19 @@ public class Intrface {
      */
     public List<GLComponent> buildTargetRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
         progress = 0.0f;
+        final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(commonFeatMap);
+
+        if (resolutionPragma != null) {
+            for (FeatureKey custKey : resolutionPragma.customFeatMap.keySet()) {
+                FeatureValue custVal = resolutionPragma.customFeatMap.get(custKey);
+                if (resFeatMap.containsKey(custKey)) {
+                    resFeatMap.replace(custKey, custVal);
+                } else {
+                    resFeatMap.put(custKey, custVal);
+                }
+            }
+        }
+
         final int screenWidth = GUI.GL_CANVAS.getWidth();
         final int screenHeight = GUI.GL_CANVAS.getHeight();
 
@@ -684,8 +695,8 @@ public class Intrface {
             int mainPicHeight = 600;
 
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null && resolutionPragma.customFeatMap.containsKey(mainPicKey)) {
-                ImageWrapper mainPicVal = (ImageWrapper) resolutionPragma.customFeatMap.get(mainPicKey);
+            if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
+                ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
                 mainPicVal.loadImage();
 
                 // texture for main picture
@@ -705,8 +716,8 @@ public class Intrface {
                 // defining root of the module (the main image)
                 // all positions are referred to this root (image)
                 // if position exists for the main (root) image
-                if (mainPicPosKey != null && resolutionPragma.customFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyVector4) resolutionPragma.customFeatMap.get(mainPicPosKey);
+                if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
+                    mainPicPosVal = (MyVector4) resFeatMap.get(mainPicPosKey);
                     MyVector4 temp = new MyVector4();
                     mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
                 }
@@ -729,7 +740,7 @@ public class Intrface {
                     switch (fkType) {
                         // if feat key is picture
                         case PIC:
-                            FeatureValue picVal = resolutionPragma.customFeatMap.get(featKey);
+                            FeatureValue picVal = resFeatMap.get(featKey);
                             if (picVal instanceof ImageWrapper) {
                                 ImageWrapper picWrap = (ImageWrapper) picVal;
                                 String picPosStr = featKey.getStringValue().replaceAll(PIC_REGEX, "");
@@ -737,7 +748,7 @@ public class Intrface {
                                     FeatureKey picPosKey = FeatureKey.valueOf(picPosStr);
 
                                     if (picPosKey != null) {
-                                        FeatureValue picPosVal = resolutionPragma.customFeatMap.get(picPosKey);
+                                        FeatureValue picPosVal = resFeatMap.get(picPosKey);
                                         if (picPosVal instanceof MyVector4) {
                                             MyVector4 picPosVec = (MyVector4) picPosVal;
                                             MyVector4 temp = new MyVector4();
@@ -793,7 +804,7 @@ public class Intrface {
                             break;
                         // if feat key is picture positon
                         case PIC_POS:
-                            FeatureValue picPosVal = resolutionPragma.customFeatMap.get(featKey);
+                            FeatureValue picPosVal = resFeatMap.get(featKey);
                             if (picPosVal instanceof MyVector4) {
                                 MyVector4 picPosVec = (MyVector4) picPosVal;
                                 MyVector4 temp = new MyVector4();
@@ -815,7 +826,7 @@ public class Intrface {
                                 if (!pics.isEmpty()) {
                                     for (FeatureKey fkPic : pics) {
                                         if (fkPic != fkPic.getMainPic()) {
-                                            FeatureValue fvPic = resolutionPragma.customFeatMap.get(fkPic);
+                                            FeatureValue fvPic = resFeatMap.get(fkPic);
                                             if (fvPic instanceof ImageWrapper) {
                                                 ImageWrapper picWrapX = (ImageWrapper) fvPic;
                                                 picWrapX.loadImage();
@@ -854,7 +865,7 @@ public class Intrface {
                             break;
                         // if feat key is text position
                         case TXT:
-                            FeatureValue txtVal = resolutionPragma.customFeatMap.get(featKey);
+                            FeatureValue txtVal = resFeatMap.get(featKey);
                             if (txtVal instanceof MyVector4) {
                                 MyVector4 txtValVec = (MyVector4) txtVal;
                                 MyVector4 ttemp = new MyVector4();
@@ -935,6 +946,7 @@ public class Intrface {
             pw.println();
             String currClass = null;
             String prevClass = null;
+            // iterating through the feature keys of the common mappings
             for (FeatureKey fk : commonFeatMap.keySet()) {
                 currClass = fk.getClass().getSimpleName();
                 if (!currClass.equals(prevClass)) {
@@ -944,21 +956,24 @@ public class Intrface {
                 }
                 FeatureValue fv = commonFeatMap.get(fk);
                 if (fv != null) {
+                    // writing each of the common key/values to the ini file
                     pw.println(fk.getStringValue() + " = " + fv.getStringValue());
                 }
                 prevClass = currClass;
             }
             pw.println();
             pw.println("# Resolution pragmas");
+            // iterating through the custom resolution pragmas
             for (ResolutionPragma pragma : customResolutions) {
                 pw.println();
                 pw.println("# Resolution pragma: " + pragma.getWidth() + "x" + pragma.getHeight());
                 pw.println("Resolution " + pragma.getWidth() + " " + pragma.getHeight());
                 pw.println();
                 for (FeatureKey fkx : pragma.customFeatMap.keySet()) {
+                    // value from the pragma
                     FeatureValue fvx = pragma.customFeatMap.get(fkx);
-                    // basically asking to write unique values
-                    if (fvx != null && !commonFeatMap.containsKey(fkx)) {
+                    // write value from the pragma to the ini file
+                    if (fvx != null) {
                         pw.println(fkx.getStringValue() + " = " + fvx.getStringValue());
                     }
                 }
@@ -982,6 +997,73 @@ public class Intrface {
         }
 
         return ok;
+    }
+
+    /**
+     * Gets mapped keys (in either common mappings or custom resolution pragma
+     * map)
+     *
+     * @param section current observed section
+     * @param allRes use common mappings (true) or use custom resolution pragma
+     * (false)
+     * @return list of mapped keys
+     */
+    public FeatureKey[] getMappedKeys(Section section, boolean allRes) {
+        final List<FeatureKey> result = new ArrayList<>();
+        if (allRes) {
+            for (FeatureKey key : section.keys) {
+                if (commonFeatMap.containsKey(key)) {
+                    result.add(key);
+                }
+            }
+        } else if (resolutionPragma != null) {
+            for (FeatureKey key : section.keys) {
+                FeatureValue cval = commonFeatMap.get(key);
+                FeatureValue pval = resolutionPragma.getCustomFeatMap().get(key);
+                // if it's unique (provides overriden mapping)
+                if (pval != null && !pval.equals(cval)) {
+                    result.add(key);
+                }
+            }
+        }
+        FeatureKey[] toArray = result.toArray(new FeatureKey[result.size()]);
+
+        return toArray;
+    }
+
+    /**
+     * Gets unmapped keys (in either common mappings or custom resolution pragma
+     * map)
+     *
+     * @param section current observed section
+     * @param allRes use common mappings (true) or use custom resolution pragma
+     * (false)
+     * @return list of mapped keys
+     */
+    public FeatureKey[] getUnmappedKeys(Section section, boolean allRes) {
+        FeatureKey[] allKeys = section.keys;
+        FeatureKey[] mappedKeys = getMappedKeys(section, allRes);
+        FeatureKey[] result = new FeatureKey[allKeys.length - mappedKeys.length];
+
+        if (result.length > 0) {
+            int index = 0;
+            for (FeatureKey keyI : allKeys) {
+                boolean isMapped = false;
+                for (FeatureKey keyJ : mappedKeys) {
+                    if (keyJ == keyI) {
+                        isMapped = true;
+                        break;
+                    }
+                }
+
+                if (!isMapped) {
+                    result[index++] = keyI;
+                }
+
+            }
+        }
+
+        return result;
     }
 
     public void resetProgress() {

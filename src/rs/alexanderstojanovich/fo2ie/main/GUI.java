@@ -70,6 +70,7 @@ import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 public class GUI extends javax.swing.JFrame {
 
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
+    public static final List<Image> ICONS = initFO2IELogos();
 
     public static final GLProfile GL20 = GLProfile.get(GLProfile.GL2);
     public static final GLCapabilities GL_CAP = new GLCapabilities(GL20);
@@ -113,7 +114,7 @@ public class GUI extends javax.swing.JFrame {
      */
     public GUI() {
         initComponents(); // netbeans loading components
-        initFO2IELogos(); // logos for app
+        initLogos4App(); // logos for app
         initPaths(); // set paths from config
         initGL(); // sets GL canvas 
         initIntEn(); // init enable intrface panel components {comboxes, buildTargetRes module, preview values etc}
@@ -122,17 +123,24 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // init both logos
-    private void initFO2IELogos() {
-        URL url_logo = getClass().getResource(RESOURCES_DIR + LOGO_FILE_NAME);
-        URL url_logox = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
+    private static List<Image> initFO2IELogos() {
+        List<Image> result = new ArrayList<>();
+
+        URL url_logo = GUI.class.getResource(RESOURCES_DIR + LOGO_FILE_NAME);
+        URL url_logox = GUI.class.getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
         if (url_logo != null && url_logox != null) {
             ImageIcon logo = new ImageIcon(url_logo);
             ImageIcon logox = new ImageIcon(url_logox);
-            List<Image> icons = new ArrayList<>();
-            icons.add(logo.getImage());
-            icons.add(logox.getImage());
-            this.setIconImages(icons);//.getScaledInstance(23, 14, Image.SCALE_SMOOTH));
+
+            result.add(logo.getImage());
+            result.add(logox.getImage());
         }
+
+        return result;
+    }
+
+    private void initLogos4App() {
+        this.setIconImages(ICONS);
     }
 
     private void initPaths() {
@@ -282,6 +290,7 @@ public class GUI extends javax.swing.JFrame {
         pnlTable = new javax.swing.JPanel();
         sbFeatures = new javax.swing.JScrollPane();
         tblFeatures = new javax.swing.JTable();
+        btnAddFeat = new javax.swing.JButton();
         panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
@@ -463,6 +472,14 @@ public class GUI extends javax.swing.JFrame {
         sbFeatures.setViewportView(tblFeatures);
 
         pnlTable.add(sbFeatures, java.awt.BorderLayout.CENTER);
+
+        btnAddFeat.setText("Add Feature");
+        btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddFeatActionPerformed(evt);
+            }
+        });
+        pnlTable.add(btnAddFeat, java.awt.BorderLayout.PAGE_END);
 
         getContentPane().add(pnlTable);
 
@@ -685,11 +702,16 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.3 - DEUTERIUM (PUBLIC BUILD reviewed on 2021-01-04 at 07:00).</b></html>\n");
+            sb.append("<html><b>VERSION v0.4 - ESTONIA (PUBLIC BUILD reviewed on 2021-01-12 at 19:15).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
-            sb.append("Changelog for v0.3 DEUTERIUM:\n");
+            sb.append("Changelog for v0.4 ESTONIA:\n");
+            sb.append("\t- Add/Remove for features.\n");
+            sb.append("\t- Fix for some modules to display correctly (like Global Map).\n");
+            sb.append("\t- Fix for the Ini Writer.\n");
+            sb.append("\n");
+            sb.append("Changelog since v0.3 DEUTERIUM:\n");
             sb.append("\t- Initial pre-release.\n");
             sb.append("\n");
             sb.append("\n");
@@ -726,6 +748,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    // edit feature value in the subform
     private void editFeatureValue() {
         final int srow = tblFeatures.getSelectedRow();
         final int scol = tblFeatures.getSelectedColumn();
@@ -736,37 +759,8 @@ public class GUI extends javax.swing.JFrame {
         final FeatValueEditor fve = new FeatValueEditor(featKey, featVal, intrface, btnTogAllRes.isSelected()) {
             @Override
             public void execute() {
-                if (!btnTogAllRes.isSelected()) {
-                    String resStr = (String) cmbBoxResolution.getSelectedItem();
-                    String[] things = resStr.trim().split("x");
-                    int width = Integer.parseInt(things[0]);
-                    int height = Integer.parseInt(things[1]);
-
-                    ResolutionPragma resolutionPragma = null;
-                    for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                        if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                            resolutionPragma = resolution;
-                            break;
-                        }
-                    }
-
-                    if (resolutionPragma != null) {
-                        intrface.setResolutionPragma(resolutionPragma);
-                        mdlAnim.mode = Mode.TARGET_RES;
-                        mdlAnim.state = ModuleAnimation.State.BUILD;
-                    }
-                }
-
+                mdlAnim.state = ModuleAnimation.State.BUILD;
                 tblFeatures.setValueAt(featVal.getStringValue(), srow, scol - 1);
-
-                if (btnTogAllRes.isSelected()) {
-                    intrface.getCommonFeatMap().replace(featKey, featVal);
-                } else {
-                    ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                    if (resolutionPragma != null) {
-                        resolutionPragma.getCustomFeatMap().replace(featKey, featVal);
-                    }
-                }
             }
         };
 
@@ -775,22 +769,78 @@ public class GUI extends javax.swing.JFrame {
         fve.pack();
     }
 
+    // remove feature (with yes/no "are you sure" dialog)
+    private void removeFeature() {
+        final int srow = tblFeatures.getSelectedRow();
+        final int scol = tblFeatures.getSelectedColumn();
+        Object valueAtKey = tblFeatures.getValueAt(srow, scol - 3);
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
+        if (val == JOptionPane.YES_OPTION) {
+            if (btnTogAllRes.isSelected()) {
+                intrface.getCommonFeatMap().remove(featKey);
+            } else {
+                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+                if (resolutionPragma != null) {
+                    resolutionPragma.getCustomFeatMap().remove(featKey);
+                }
+            }
+
+            DefaultTableModel model = (DefaultTableModel) tblFeatures.getModel();
+            model.removeRow(srow);
+
+            mdlAnim.state = ModuleAnimation.State.BUILD;
+        }
+    }
+
+    // gives ability to add new features
+    private void addFeature() {
+        SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
+        Section section = intrface.getNameToSectionMap().get(sectionName);
+
+        FeatValueAdder fva = new FeatValueAdder(section, intrface, btnTogAllRes.isSelected()) {
+            @Override
+            public void execute() {
+                tablePreview();
+                mdlAnim.state = ModuleAnimation.State.BUILD;
+            }
+        };
+        fva.setVisible(true);
+        fva.setResizable(false);
+        fva.pack();
+    }
+
     // makes preview for the feature table
     private void tablePreview() {
         if (btnTogAllRes.isSelected()) {
-            final DefaultTableModel ftTblMdl = new DefaultTableModel();
+            final DefaultTableModel ftTblMdl = new DefaultTableModel() {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return column == 2 || column == 3;
+                }
+            };
             ftTblMdl.addColumn("Feature Key");
             ftTblMdl.addColumn("Feature Value");
             ftTblMdl.addColumn("Edit Feature");
+            ftTblMdl.addColumn("Remove Feature");
 
-            ButtonEditor btnModEditor = new ButtonEditor(new JButton("Edit"));
-            btnModEditor.getButton().addActionListener(new ActionListener() {
+            ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+            btnModifyEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     editFeatureValue();
                 }
             });
-            ButtonRenderer btnRenderer = new ButtonRenderer(btnModEditor.getButton());
+            ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
+
+            ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+            btnRemoveEditor.getButton().addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    removeFeature();
+                }
+            });
+            ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
 
             SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
             Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -803,9 +853,14 @@ public class GUI extends javax.swing.JFrame {
             }
 
             tblFeatures.setModel(ftTblMdl);
-            TableColumn column = tblFeatures.getColumn("Edit Feature");
-            column.setCellEditor(btnModEditor);
-            column.setCellRenderer(btnRenderer);
+            TableColumn editCol = tblFeatures.getColumn("Edit Feature");
+            editCol.setCellEditor(btnModifyEditor);
+            editCol.setCellRenderer(btnModifyRenderer);
+
+            TableColumn remCol = tblFeatures.getColumn("Remove Feature");
+            remCol.setCellEditor(btnRemoveEditor);
+            remCol.setCellRenderer(btnRemoveRenderer);
+
         } else {
             String resStr = (String) cmbBoxResolution.getSelectedItem();
             ResolutionPragma resolutionPragma = null;
@@ -825,22 +880,31 @@ public class GUI extends javax.swing.JFrame {
                 final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                     @Override
                     public boolean isCellEditable(int row, int column) {
-                        return column == 2;
+                        return column == 2 || column == 3;
                     }
-
                 };
                 ftTblMdl.addColumn("Feature Key");
                 ftTblMdl.addColumn("Feature Value");
                 ftTblMdl.addColumn("Edit Feature");
+                ftTblMdl.addColumn("Remove Feature");
 
-                ButtonEditor btnModEditor = new ButtonEditor(new JButton("Edit"));
-                btnModEditor.getButton().addActionListener(new ActionListener() {
+                ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+                btnModifyEditor.getButton().addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         editFeatureValue();
                     }
                 });
-                ButtonRenderer btnRenderer = new ButtonRenderer(btnModEditor.getButton());
+                ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
+
+                ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+                btnRemoveEditor.getButton().addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        removeFeature();
+                    }
+                });
+                ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
 
                 SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
                 Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -853,9 +917,14 @@ public class GUI extends javax.swing.JFrame {
                 }
 
                 tblFeatures.setModel(ftTblMdl);
-                TableColumn column = tblFeatures.getColumn("Edit Feature");
-                column.setCellEditor(btnModEditor);
-                column.setCellRenderer(btnRenderer);
+                TableColumn editCol = tblFeatures.getColumn("Edit Feature");
+                editCol.setCellEditor(btnModifyEditor);
+                editCol.setCellRenderer(btnModifyRenderer);
+
+                TableColumn remCol = tblFeatures.getColumn("Remove Feature");
+                remCol.setCellEditor(btnRemoveEditor);
+                remCol.setCellRenderer(btnRemoveRenderer);
+
             }
         }
     }
@@ -993,6 +1062,11 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_fileMenuSaveAsActionPerformed
 
+    private void btnAddFeatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddFeatActionPerformed
+        // TODO add your handling code here:        
+        addFeature();
+    }//GEN-LAST:event_btnAddFeatActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1076,6 +1150,7 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddFeat;
     private javax.swing.JButton btnBuild;
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;

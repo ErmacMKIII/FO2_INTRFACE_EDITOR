@@ -16,7 +16,7 @@
  */
 package rs.alexanderstojanovich.fo2ie.intrface;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
@@ -30,18 +30,18 @@ public class ResolutionPragma {
     private final int width;
     private final int height;
 
-    protected Map<FeatureKey, FeatureValue> customFeatMap = new HashMap<>();
+    protected Map<FeatureKey, FeatureValue> customFeatMap = new LinkedHashMap<>();
 
     /**
+     * Create new resolution pragma (which override common mappings for
+     * specified resolution)
      *
-     * @param inheritedFeats features inherited from the common map
      * @param width resolution width
      * @param height resolution height
      */
-    public ResolutionPragma(Map<FeatureKey, FeatureValue> inheritedFeats, int width, int height) {
+    public ResolutionPragma(int width, int height) {
         this.width = width;
         this.height = height;
-        this.customFeatMap.putAll(inheritedFeats);
     }
 
     public int getWidth() {
