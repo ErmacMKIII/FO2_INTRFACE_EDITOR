@@ -81,6 +81,7 @@ public class Text implements GLComponent {
     public Text(Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
         this.texture = texture;
         this.content = content;
+        this.pos = pos;
         this.enabled = true;
         this.charWidth = charWidth;
         this.charHeight = charHeight;

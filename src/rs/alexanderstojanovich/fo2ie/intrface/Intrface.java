@@ -628,7 +628,10 @@ public class Intrface {
                                 PrimitiveQuad txtOlay = new PrimitiveQuad(twidth, theight, tposGL);
                                 txtOlay.setColor(textOverlayColor);
                                 // text is set to the default (font) texture
-                                Text txtComp = new Text(fntTexture, text, textColor, tposGL);
+                                float swidth = MathUtils.getScaled(Text.STD_FONT_WIDTH, 0.0f, mainPicWidth, 0.0f, screenWidth);
+                                float sheight = MathUtils.getScaled(Text.STD_FONT_HEIGHT, 0.0f, mainPicHeight, 0.0f, screenHeight);
+                                Text txtComp = new Text(fntTexture, text, tposGL, Math.round(swidth), Math.round(sheight));
+                                txtComp.setColor(textColor);
                                 txtComp.setAlignment(Text.ALIGNMENT_CENTER);
                                 prmComps.add(txtOlay);
                                 txtComps.add(txtComp);
@@ -888,7 +891,10 @@ public class Intrface {
                                 PrimitiveQuad txtOlay = new PrimitiveQuad(twidth, theight, tposGL);
                                 txtOlay.setColor(textOverlayColor);
                                 // text is set to the default (font) texture
-                                Text txtComp = new Text(fntTexture, text, textColor, tposGL);
+                                float swidth = MathUtils.getScaled(Text.STD_FONT_WIDTH, 0.0f, mainPicWidth, 0.0f, screenWidth);
+                                float sheight = MathUtils.getScaled(Text.STD_FONT_HEIGHT, 0.0f, mainPicHeight, 0.0f, screenHeight);
+                                Text txtComp = new Text(fntTexture, text, tposGL, Math.round(swidth), Math.round(sheight));
+                                txtComp.setColor(textColor);
                                 txtComp.setAlignment(Text.ALIGNMENT_CENTER);
                                 prmComps.add(txtOlay);
                                 txtComps.add(txtComp);

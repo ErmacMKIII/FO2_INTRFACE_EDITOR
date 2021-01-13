@@ -186,6 +186,7 @@ public class GUI extends javax.swing.JFrame {
             this.pnlIntrface.getComponent(i).setEnabled(ok);
         }
 
+        btnAddFeat.setEnabled(ok);
     }
 
     // Center the GUI window into center of the screen
@@ -474,6 +475,7 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.add(sbFeatures, java.awt.BorderLayout.CENTER);
 
         btnAddFeat.setText("Add Feature");
+        btnAddFeat.setEnabled(false);
         btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddFeatActionPerformed(evt);
@@ -703,12 +705,13 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.4 - ESTONIA (PUBLIC BUILD reviewed on 2021-01-12 at 19:15).</b></html>\n");
+            sb.append("<html><b>VERSION v0.4 - ESTONIA (PUBLIC BUILD reviewed on 2021-01-13 at 09:15).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
             sb.append("Changelog for v0.4 ESTONIA:\n");
             sb.append("\t- Add/Remove for features.\n");
+            sb.append("\t- Fonts are properly scaled.\n");
             sb.append("\t- Fix for some modules to display correctly (like Global Map).\n");
             sb.append("\t- Fix for the Ini Writer.\n");
             sb.append("\n");
