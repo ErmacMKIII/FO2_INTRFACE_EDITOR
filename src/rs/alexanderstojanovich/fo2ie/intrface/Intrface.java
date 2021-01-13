@@ -973,7 +973,7 @@ public class Intrface {
             for (ResolutionPragma pragma : customResolutions) {
                 pw.println();
                 pw.println("# Resolution pragma: " + pragma.getWidth() + "x" + pragma.getHeight());
-                pw.println("Resolution " + pragma.getWidth() + " " + pragma.getHeight());
+                pw.println("resolution " + pragma.getWidth() + " " + pragma.getHeight());
                 pw.println();
                 for (FeatureKey fkx : pragma.customFeatMap.keySet()) {
                     // value from the pragma
