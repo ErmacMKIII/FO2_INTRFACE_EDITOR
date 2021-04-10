@@ -44,8 +44,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import javax.imageio.ImageIO;
-import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
 /**
@@ -171,7 +171,7 @@ public class Texture {
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
         g2d.setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f));
         g2d.drawImage(dstImg, 0, 0, null);
 

@@ -40,6 +40,7 @@ public class Configuration {
     private File outDir = new File(OUTPUT_DIR_PATH);
     private Color txtCol = Color.GREEN;
     private Color txtOverlayCol = new Color(128, 128, 128, 128); // gray half translucent
+    private Color selectCol = new Color(255, 0, 0, 128); // half red translucent
     private Color qmarkCol = Color.MAGENTA;
     private int textureSize = 1024;
 
@@ -110,6 +111,9 @@ public class Configuration {
                             case "QMarkColor":
                                 qmarkCol = readRGBA(words[1]);
                                 break;
+                            case "SelectedColor":
+                                selectCol = readRGBA(words[1]);
+                                break;
                             case "TextureSize":
                                 int number = Integer.parseInt(words[1]);
                                 // if tex size is a non-zero power of two
@@ -165,6 +169,7 @@ public class Configuration {
             pw.println();
             pw.println("TextColor = " + writeRGBA(txtCol));
             pw.println("TextOverlayColor = " + writeRGBA(txtOverlayCol));
+            pw.println("SelectedColor = " + writeRGBA(selectCol));
             pw.println("QMarkColor = " + writeRGBA(qmarkCol));
             pw.println("TextureSize = " + textureSize);
             pw.println("AnimationTicks = " + animationTicks);
@@ -262,6 +267,10 @@ public class Configuration {
 
     public int getAnimationTicks() {
         return animationTicks;
+    }
+
+    public Color getSelectCol() {
+        return selectCol;
     }
 
 }

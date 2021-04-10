@@ -50,7 +50,6 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
@@ -63,8 +62,8 @@ import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.main.ModuleAnimator.Mode;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
-import rs.alexanderstojanovich.fo2ie.ogl.Vector3fColors;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 
 /**
  *
@@ -85,7 +84,13 @@ public class GUI extends javax.swing.JFrame {
     private static final DefaultComboBoxModel<Section.SectionName> DCBM = new DefaultComboBoxModel<>(Section.SectionName.values());
     private final Intrface intrface = new Intrface();
     private final FPSAnimator fpsAnim = new FPSAnimator(GL_CANVAS, FPSAnimator.DEFAULT_FRAMES_PER_INTERVAL, true);
-    private final ModuleAnimator mdlAnim;
+    private final ModuleAnimator mdlAnim = new ModuleAnimator(fpsAnim, intrface) {
+        @Override
+        public void afterSelection() {
+            featurePreview();
+            componentsPreview();
+        }
+    };
 
     // cool it's our new logo :)
     private static final String LOGO_FILE_NAME = "fo2ie_logo.png";
@@ -119,9 +124,7 @@ public class GUI extends javax.swing.JFrame {
      * Creates new form GUI
      */
     public GUI() {
-        initComponents(); // netbeans loading components
-
-        this.mdlAnim = new ModuleAnimator(fpsAnim, intrface, tblComps);
+        initComponents(); // netbeans loading components        
 
         initLogos4App(); // logos for app
         initPaths(); // set paths from config
@@ -774,7 +777,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.5 - FINLAND (PUBLIC BUILD reviewed on 2021-04-10 at 07:30).</b></html>\n");
+            sb.append("<html><b>VERSION v0.5 - FINLAND (PUBLIC BUILD reviewed on 2021-04-10 at 16:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -818,9 +821,10 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t6. \"Check\" if loading the interface result in errors.\n");
             sb.append("\n");
             sb.append("\t- By using \"All resolutions\" you're ignoring target resolution when module being built.\n");
-            sb.append("\t- Feel free to take a view or edit feature values at table preview on \"Preview Values.\"\n");
-            sb.append("\t- Build module as an image with \"Build Module.\"\n");
-            sb.append("\t- Preview module in the window with \"Preview Module.\"\n");
+            sb.append("\t- Build module as an image with \"Build Module\".\n");
+            sb.append("\t- Preview module in the window with \"Preview Module\".\n");
+            sb.append("\t- Table has two tabs, interface features and rendering components\n");
+            sb.append("\t  which can be edited in either of these two mods.\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JOptionPane.showMessageDialog(this, sb.toString(), "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
@@ -893,8 +897,6 @@ public class GUI extends javax.swing.JFrame {
 
     // makes preview for the feature table
     private void featurePreview() {
-        btnAddFeat.setText("Add Feature");
-
         if (btnTogAllRes.isSelected()) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
@@ -1240,7 +1242,7 @@ public class GUI extends javax.swing.JFrame {
             if (glc.getFeatureKey() == featKey) {
                 mdlAnim.selected = glc;
                 mdlAnim.savedColor = glc.getColor();
-                mdlAnim.selected.setColor(new Vector4f(Vector3fColors.RED, 0.75f));
+                mdlAnim.selected.setColor(GLColor.awtColorToVec4(cfg.getSelectCol()));
                 break;
             }
         }
@@ -1248,8 +1250,6 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void componentsPreview() {
-        mdlAnim.selected = null;
-
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {

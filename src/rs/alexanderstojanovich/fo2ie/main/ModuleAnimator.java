@@ -24,7 +24,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.IOException;
-import javax.swing.JTable;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
@@ -44,7 +43,7 @@ import rs.alexanderstojanovich.fo2ie.util.GLCoords;
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class ModuleAnimator implements GLEventListener, MouseListener, MouseMotionListener {
+public abstract class ModuleAnimator implements GLEventListener, MouseListener, MouseMotionListener {
 
     private final Configuration config = Configuration.getInstance();
 
@@ -69,8 +68,6 @@ public class ModuleAnimator implements GLEventListener, MouseListener, MouseMoti
     protected boolean dragging = false;
     protected Vector4f savedColor = new Vector4f();
 
-    protected JTable table;
-
     /**
      * State of the machine
      */
@@ -89,10 +86,15 @@ public class ModuleAnimator implements GLEventListener, MouseListener, MouseMoti
 
     protected Mode mode = Mode.NO_ACTION;
 
-    public ModuleAnimator(FPSAnimator animator, Intrface intrface, JTable table) {
+    /**
+     * Create JOGL Animator of the built module
+     *
+     * @param animator parsed FPS animator
+     * @param intrface FOnline interface
+     */
+    public ModuleAnimator(FPSAnimator animator, Intrface intrface) {
         this.animator = animator;
         this.intrface = intrface;
-        this.table = table;
     }
 
     /**
@@ -282,12 +284,16 @@ public class ModuleAnimator implements GLEventListener, MouseListener, MouseMoti
                                 + " " + String.valueOf(Math.round(bottomRight.y)))
                 );
 
-                if (table.getSelectedRow() != -1 && table.getColumnCount() > 1) {
-                    table.setValueAt(featureValue.getStringValue(), table.getSelectedRow(), 1);
-                }
+                afterSelection();
             }
+
         }
     }
+
+    /**
+     * Action which takes place after selection
+     */
+    public abstract void afterSelection();
 
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -296,7 +302,7 @@ public class ModuleAnimator implements GLEventListener, MouseListener, MouseMoti
 
     @Override
     public void mouseExited(MouseEvent e) {
-        // ..IGNORE
+        // same as deselect from the GUI
         if (selected != null) {
             selected.setColor(savedColor);
         }
