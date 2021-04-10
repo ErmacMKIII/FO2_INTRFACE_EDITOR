@@ -31,7 +31,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
 import rs.alexanderstojanovich.fo2ie.feature.MyArray;
-import rs.alexanderstojanovich.fo2ie.feature.MyVector4;
+import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.feature.SingleValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
@@ -110,10 +110,10 @@ public abstract class FeatValueAdder extends JFrame {
                         featVal = new SingleValue();
                     }
                     break;
-                case VECTOR4:
+                case RECT4:
                     if (featKey.getType() == FeatureKey.Type.PIC_POS
                             || featKey.getType() == FeatureKey.Type.TXT) {
-                        featVal = new MyVector4();
+                        featVal = new MyRectangle();
                     }
                     break;
             }

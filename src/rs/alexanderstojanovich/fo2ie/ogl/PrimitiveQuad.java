@@ -22,6 +22,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Objects;
 import org.joml.Matrix4f;
+import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
@@ -30,9 +31,7 @@ import rs.alexanderstojanovich.fo2ie.main.GUI;
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class PrimitiveQuad implements GLComponent {
-
-    private final Type type = Type.PRIM;
+public class PrimitiveQuad { // text overlay (quad without texture)
 
     private int width;
     private int height;
@@ -92,7 +91,6 @@ public class PrimitiveQuad implements GLComponent {
         this.pos = pos;
     }
 
-    @Override
     public void unbuffer() {
         buffered = false;
     }
@@ -102,7 +100,6 @@ public class PrimitiveQuad implements GLComponent {
      *
      * @param gl20 GL20 binding
      */
-    @Override
     public void buffer(GL2 gl20) {
         fb.clear();
         for (int i = 0; i < VERTEX_COUNT; i++) {
@@ -144,8 +141,8 @@ public class PrimitiveQuad implements GLComponent {
         Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
 
-        float sx = giveRelativeWidth();
-        float sy = giveRelativeHeight();
+        float sx = getRelativeWidth();
+        float sy = getRelativeHeight();
         Matrix4f scaleMatrix = new Matrix4f().scaleXY(sx, sy);
 
         Matrix4f temp = new Matrix4f();
@@ -157,9 +154,9 @@ public class PrimitiveQuad implements GLComponent {
      * Render image
      *
      * @param gl20 GL2 binding
+     * @param projMat4 projection matrix
      * @param program shader program for images
      */
-    @Override
     public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram program) {
         if (enabled && buffered) {
             program.bind(gl20);
@@ -187,7 +184,6 @@ public class PrimitiveQuad implements GLComponent {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 61 * hash + Objects.hashCode(this.type);
         hash = 61 * hash + this.width;
         hash = 61 * hash + this.height;
         hash = 61 * hash + Objects.hashCode(this.color);
@@ -217,9 +213,6 @@ public class PrimitiveQuad implements GLComponent {
         if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
             return false;
         }
-        if (this.type != other.type) {
-            return false;
-        }
         if (!Objects.equals(this.color, other.color)) {
             return false;
         }
@@ -229,20 +222,21 @@ public class PrimitiveQuad implements GLComponent {
         return true;
     }
 
-    @Override
-    public Type getType() {
-        return type;
+    public float getRelativeWidth() {
+        return scale * width / (float) GUI.GL_CANVAS.getWidth();
     }
 
-    public float giveRelativeWidth() {
-        return scale * width / GUI.GL_CANVAS.getWidth();
+    public float getRelativeHeight() {
+        return scale * height / (float) GUI.GL_CANVAS.getHeight();
     }
 
-    public float giveRelativeHeight() {
-        return scale * height / GUI.GL_CANVAS.getHeight();
+    public Rectanglef getArea() {
+        float rw = getRelativeWidth();
+        float rh = getRelativeHeight();
+        Rectanglef rect = new Rectanglef(pos.x - rw, pos.y - rh, pos.x + rw, pos.y + rh);
+        return rect;
     }
 
-    @Override
     public int getWidth() {
         return width;
     }
@@ -251,7 +245,6 @@ public class PrimitiveQuad implements GLComponent {
         this.width = width;
     }
 
-    @Override
     public int getHeight() {
         return height;
     }
@@ -268,7 +261,6 @@ public class PrimitiveQuad implements GLComponent {
         this.scale = scale;
     }
 
-    @Override
     public Vector2f getPos() {
         return pos;
     }
@@ -289,7 +281,6 @@ public class PrimitiveQuad implements GLComponent {
         return VERTICES;
     }
 
-    @Override
     public boolean isBuffered() {
         return buffered;
     }
@@ -298,7 +289,6 @@ public class PrimitiveQuad implements GLComponent {
         this.pos = pos;
     }
 
-    @Override
     public Vector4f getColor() {
         return color;
     }

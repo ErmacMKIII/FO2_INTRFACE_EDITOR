@@ -38,4 +38,8 @@ public class ButtonRenderer implements TableCellRenderer {
         return button;
     }
 
+    public JButton getButton() {
+        return button;
+    }
+
 }

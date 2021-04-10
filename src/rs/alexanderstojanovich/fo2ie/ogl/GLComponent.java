@@ -18,8 +18,10 @@ package rs.alexanderstojanovich.fo2ie.ogl;
 
 import com.jogamp.opengl.GL2;
 import org.joml.Matrix4f;
+import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 
 /**
  *
@@ -31,8 +33,15 @@ public interface GLComponent {
      * Type of this GLComponent
      */
     public enum Type {
-        PRIM, PIC, ANIM, TXT
+        PIC, ANIM, TXT
     }
+
+    /**
+     * Gets Feature Key bound to this component.
+     *
+     * @return bound feature key.
+     */
+    public FeatureKey getFeatureKey();
 
     /**
      * Gets color of this component
@@ -42,11 +51,25 @@ public interface GLComponent {
     public Vector4f getColor();
 
     /**
+     * Sets color for this component
+     *
+     * @param color chosen color
+     */
+    public void setColor(Vector4f color);
+
+    /**
      * Gets OpenGL position of this component
      *
      * @return
      */
     public Vector2f getPos();
+
+    /**
+     * Sets OpenGL postion of this component to parsed.
+     *
+     * @param pos
+     */
+    public void setPos(Vector2f pos);
 
     /**
      * Get real width of this component
@@ -97,4 +120,25 @@ public interface GLComponent {
      * @return GLComponent type {PIC, TXT}
      */
     public Type getType();
+
+    /**
+     * Gets component relative width to the OpenGL canvas.
+     *
+     * @return GL width.
+     */
+    public float getRelativeWidth();
+
+    /**
+     * Gets component relative width to the OpenGL canvas.
+     *
+     * @return GL height.
+     */
+    public float getRelativeHeight();
+
+    /**
+     * Gets rectangular surface area of component
+     *
+     * @return
+     */
+    public Rectanglef getArea();
 }

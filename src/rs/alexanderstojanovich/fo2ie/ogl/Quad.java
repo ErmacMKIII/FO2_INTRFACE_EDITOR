@@ -22,8 +22,10 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Objects;
 import org.joml.Matrix4f;
+import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
 
 /**
@@ -32,6 +34,7 @@ import rs.alexanderstojanovich.fo2ie.main.GUI;
  */
 public class Quad implements GLComponent {
 
+    private final FeatureKey featureKey;
     private final Type type = Type.PIC;
 
     private int width;
@@ -71,12 +74,14 @@ public class Quad implements GLComponent {
     }
 
     /**
-     * Create new quad with resize factor with the default size. Default size is
+     * Create new quad with resize factor with the default size.Default size is
      * the size of the texture.
      *
+     * @param featureKey bound feature key
      * @param texture parsed texture
      */
-    public Quad(Texture texture) {
+    public Quad(FeatureKey featureKey, Texture texture) {
+        this.featureKey = featureKey;
         this.width = texture.getImage().getWidth();
         this.height = texture.getImage().getHeight();
         this.texture = texture;
@@ -84,13 +89,15 @@ public class Quad implements GLComponent {
     }
 
     /**
-     * Create new quad with resize factor with the default size. Default size is
+     * Create new quad with resize factor with the default size.Default size is
      * the size of the texture.
      *
+     * @param featureKey bound feature key
      * @param texture parsed texture
      * @param pos position of the quad center
      */
-    public Quad(Texture texture, Vector2f pos) {
+    public Quad(FeatureKey featureKey, Texture texture, Vector2f pos) {
+        this.featureKey = featureKey;
         this.width = texture.getImage().getWidth();
         this.height = texture.getImage().getHeight();
         this.texture = texture;
@@ -101,11 +108,13 @@ public class Quad implements GLComponent {
     /**
      * Create new quad with resize factor
      *
+     * @param featureKey bound feature key
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
      */
-    public Quad(int width, int height, Texture texture) {
+    public Quad(FeatureKey featureKey, int width, int height, Texture texture) {
+        this.featureKey = featureKey;
         this.width = width;
         this.height = height;
         this.texture = texture;
@@ -115,12 +124,14 @@ public class Quad implements GLComponent {
     /**
      * Create new quad with resize factor
      *
+     * @param featureKey bound feature key
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
      * @param pos position of the quad center
      */
-    public Quad(int width, int height, Texture texture, Vector2f pos) {
+    public Quad(FeatureKey featureKey, int width, int height, Texture texture, Vector2f pos) {
+        this.featureKey = featureKey;
         this.width = width;
         this.height = height;
         this.texture = texture;
@@ -202,6 +213,7 @@ public class Quad implements GLComponent {
      * Render image
      *
      * @param gl20 GL2 binding
+     * @param projMat4 projection matrix
      * @param program shader program for images
      */
     @Override
@@ -256,11 +268,11 @@ public class Quad implements GLComponent {
      * @param xinc x-advance
      * @param ydec y-drop (for multi-line text)
      * @param projMat4 projection matrix
-     * @param program shader program for fonts
+     * @param fntProgram shader program for fonts
      */
-    public void render(GL2 gl20, float xinc, float ydec, Matrix4f projMat4, ShaderProgram program) { // used for fonts
+    public void render(GL2 gl20, float xinc, float ydec, Matrix4f projMat4, ShaderProgram fntProgram) { // used for fonts
         if (enabled && buffered) {
-            program.bind(gl20);
+            fntProgram.bind(gl20);
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
 
@@ -268,14 +280,14 @@ public class Quad implements GLComponent {
             gl20.glEnableVertexAttribArray(1);
             gl20.glVertexAttribPointer(0, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 0); // this is for font pos
             gl20.glVertexAttribPointer(1, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 8); // this is for font uv                                     
-            program.bindAttribute(gl20, 0, "pos");
-            program.bindAttribute(gl20, 1, "uv");
+            fntProgram.bindAttribute(gl20, 0, "pos");
+            fntProgram.bindAttribute(gl20, 1, "uv");
 
             Matrix4f modelMat4 = calcModelMatrix(xinc, ydec);
-            program.updateUniform(gl20, projMat4, "projectionMatrix");
-            program.updateUniform(gl20, modelMat4, "modelMatrix");
-            program.updateUniform(gl20, color, "color");
-            texture.bind(gl20, 0, program, "colorMap");
+            fntProgram.updateUniform(gl20, projMat4, "projectionMatrix");
+            fntProgram.updateUniform(gl20, modelMat4, "modelMatrix");
+            fntProgram.updateUniform(gl20, color, "color");
+            texture.bind(gl20, 0, fntProgram, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
 
             Texture.unbind(gl20, 0);
@@ -352,6 +364,29 @@ public class Quad implements GLComponent {
     }
 
     @Override
+    public float getRelativeWidth() {
+        return scale * width / (float) GUI.GL_CANVAS.getWidth();
+    }
+
+    @Override
+    public float getRelativeHeight() {
+        return scale * height / (float) GUI.GL_CANVAS.getHeight();
+    }
+
+    @Override
+    public Rectanglef getArea() {
+        float rw = getRelativeWidth();
+        float rh = getRelativeHeight();
+        Rectanglef rect = new Rectanglef(pos.x - rw, pos.y - rh, pos.x + rw, pos.y + rh);
+        return rect;
+    }
+
+    @Override
+    public FeatureKey getFeatureKey() {
+        return featureKey;
+    }
+
+    @Override
     public int getWidth() {
         return width;
     }
@@ -415,6 +450,7 @@ public class Quad implements GLComponent {
         return uvs;
     }
 
+    @Override
     public void setPos(Vector2f pos) {
         this.pos = pos;
     }
@@ -424,6 +460,7 @@ public class Quad implements GLComponent {
         return color;
     }
 
+    @Override
     public void setColor(Vector4f color) {
         this.color = color;
     }

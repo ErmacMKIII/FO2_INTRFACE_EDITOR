@@ -45,7 +45,12 @@ public class ImageWrapper implements FeatureValue {
         this.value = value;
     }
 
-    public void loadImage() throws IOException {
+    /**
+     * Loads image from the filesystem. Call this after constructor.
+     *
+     * @throws IOException
+     */
+    public void loadImages() throws IOException {
         Configuration instance = Configuration.getInstance();
         File inDir = instance.getInDir();
         final File imgFile = new File(inDir.getPath() + File.separator + value);
@@ -152,6 +157,11 @@ public class ImageWrapper implements FeatureValue {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return getStringValue();
     }
 
     @Override

@@ -64,6 +64,11 @@ public class SingleValue implements FeatureValue {
     }
 
     @Override
+    public String toString() {
+        return getStringValue();
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + this.number;

@@ -24,13 +24,13 @@ import java.util.Arrays;
  */
 public class MyArray implements FeatureValue {
 
-    private float[] array;
+    private int[] array;
 
     @Override
     public String getStringValue() {
         StringBuilder sb = new StringBuilder();
         int index = 0;
-        for (float f : array) {
+        for (int f : array) {
             if (index < array.length) {
                 sb.append(f).append(" ");
             } else if (index == array.length) {
@@ -58,19 +58,19 @@ public class MyArray implements FeatureValue {
     @Override
     public void setStringValue(String value) {
         String[] split = value.trim().split("\\s+");
-        array = new float[split.length];
+        array = new int[split.length];
         int index = 0;
         for (String str : split) {
-            array[index++] = Float.parseFloat(str);
+            array[index++] = Integer.parseInt(str);
         }
     }
 
     /**
-     * Returns float array
+     * Returns int array
      *
-     * @return array of floats
+     * @return array of ints
      */
-    public float[] getArray() {
+    public int[] getArray() {
         return array;
     }
 
@@ -97,6 +97,11 @@ public class MyArray implements FeatureValue {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return getStringValue();
     }
 
 }

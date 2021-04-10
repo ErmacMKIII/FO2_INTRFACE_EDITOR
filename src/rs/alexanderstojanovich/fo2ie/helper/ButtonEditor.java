@@ -31,7 +31,6 @@ import javax.swing.table.TableCellEditor;
 public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
 
     private final JButton button;
-    private int row = -1;
 
     public ButtonEditor(JButton button) {
         this.button = button;
@@ -45,7 +44,6 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        this.row = row;
         return button;
     }
 

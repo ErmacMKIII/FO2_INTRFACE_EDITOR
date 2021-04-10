@@ -28,16 +28,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
-import rs.alexanderstojanovich.fo2ie.feature.MyVector4;
+import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.ogl.Animation;
@@ -57,6 +55,9 @@ import rs.alexanderstojanovich.fo2ie.util.MathUtils;
  */
 public class Intrface {
 
+    private int mainPicWidth = 800;
+    private int mainPicHeight = 600;
+
     private final StringBuilder errStrMsg = new StringBuilder();
     private int errorNum = 0;
 
@@ -69,15 +70,23 @@ public class Intrface {
     private final Vector4f qmarkColor = GLColor.awtColorToVec4(config.getQmarkCol());
 
     /**
-     * Mode for reading {STD = standard - loading common values; RES =
+     * ReadMode for reading {STD = standard - loading common values; RES =
      * resolution - loading from pragmas}
      */
-    public static enum Mode {
+    public static enum ReadMode {
         STD, RES
     }
 
+    /*{FROM COMMON MAP (ALL RES), FROM RES PRAGMA
+     * (TARGET RES}
+     */
+    public static enum BuildMode {
+        NONE, COMMON, PRAGMA
+    }
+
     private boolean initialized = false;
-    private Mode mode = Mode.STD;
+    private ReadMode readMode = ReadMode.STD;
+    private BuildMode buildMode = BuildMode.NONE;
 
     private final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.AimMainPic, FeatureKey.Aim.values());
     private final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.BarterMainPic, FeatureKey.Barter.values());
@@ -166,8 +175,8 @@ public class Intrface {
             return ok;
         }
 
-        // set standard (default) mode
-        mode = Mode.STD;
+        // set standard (default) readMode
+        readMode = ReadMode.STD;
         // reset error number
         errorNum = 0;
         errStrMsg.setLength(0);
@@ -196,13 +205,13 @@ public class Intrface {
                 // for now comments are ignored {#, ;} and so is the auto cursor
                 if (!line.isEmpty() && !line.startsWith("autocursor")) {
                     // if word resolution occurs 
-                    // switch mode, add it to custom resolution
+                    // switch readMode, add it to custom resolution
                     // and take control over it
                     if (line.startsWith("resolution")) {
                         String[] res = line.split(" ");
                         int width = Integer.parseInt(res[1]);
                         int height = Integer.parseInt(res[2]);
-                        mode = Mode.RES;
+                        readMode = ReadMode.RES;
 
                         rs = new ResolutionPragma(
                                 width,
@@ -229,7 +238,7 @@ public class Intrface {
                         }
 
                         if (fk != null && fv != null) {
-                            switch (mode) {
+                            switch (readMode) {
                                 case STD:
                                     commonFeatMap.put(fk, fv);
                                     break;
@@ -275,6 +284,8 @@ public class Intrface {
 
         initialized = ok;
 
+        buildMode = BuildMode.NONE;
+
         return ok;
     }
 
@@ -294,8 +305,8 @@ public class Intrface {
             return ok;
         }
 
-        // set standard (default) mode
-        mode = Mode.STD;
+        // set standard (default) readMode
+        readMode = ReadMode.STD;
         // reset error number
         errorNum = 0;
         errStrMsg.setLength(0);
@@ -326,13 +337,13 @@ public class Intrface {
                 // for now comments are ignored {#, ;} and so is the auto cursor
                 if (!line.isEmpty() && !line.startsWith("autocursor")) {
                     // if word resolution occurs 
-                    // switch mode, add it to custom resolution
+                    // switch readMode, add it to custom resolution
                     // and take control over it
                     if (line.startsWith("resolution")) {
                         String[] res = line.split(" ");
                         int width = Integer.parseInt(res[1]);
                         int height = Integer.parseInt(res[2]);
-                        mode = Mode.RES;
+                        readMode = ReadMode.RES;
 
                         rs = new ResolutionPragma(
                                 width,
@@ -359,7 +370,7 @@ public class Intrface {
                         }
 
                         if (fk != null && fv != null) {
-                            switch (mode) {
+                            switch (readMode) {
                                 case STD:
                                     commonFeatMap.put(fk, fv);
                                     break;
@@ -414,12 +425,15 @@ public class Intrface {
      * @param gl20 GL2 binding
      * @param fntTexture font texture for text rendering
      * @param unusedTexture unused texture (known as question mark texture)
-     * @return built list from all the features containg OpenGL components
+     * @return built list from all the features containing OpenGL components
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
     public List<GLComponent> buildAllRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
         progress = 0.0f;
+
+        buildMode = BuildMode.COMMON;
+
         final int screenWidth = GUI.GL_CANVAS.getWidth();
         final int screenHeight = GUI.GL_CANVAS.getHeight();
 
@@ -428,16 +442,16 @@ public class Intrface {
         final Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             FeatureKey mainPicKey = section.root.getMainPic();
-            MyVector4 mainPicPosVal = null;
+            MyRectangle mainPicPosVal = null;
 
             // it's intially assumed that picture is 800x600 unless specified otherwise
-            int mainPicWidth = 800;
-            int mainPicHeight = 600;
+            mainPicWidth = 800;
+            mainPicHeight = 600;
 
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) commonFeatMap.get(mainPicKey);
-                mainPicVal.loadImage();
+                mainPicVal.loadImages();
 
                 // texture for main picture
                 Texture rootTex;
@@ -457,200 +471,143 @@ public class Intrface {
                 // all positions are referred to this root (image)
                 // if position exists for the main (root) image
                 if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyVector4) commonFeatMap.get(mainPicPosKey);
-                    MyVector4 temp = new MyVector4();
-                    mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+                    mainPicPosVal = (MyRectangle) commonFeatMap.get(mainPicPosKey);
+                    MyRectangle temp = new MyRectangle();
+                    mainPicPosVal = mainPicPosVal.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
                 }
 
                 float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
                 float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                Quad root = new Quad(Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
+                Quad root = new Quad(mainPicPosKey, Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
                 result.add(root);
             }
 
-            // defining mutually exclusive sets for pictures, primitives (overlays) and text
-            final Set<GLComponent> picComps = new LinkedHashSet<>();
-            final Set<GLComponent> prmComps = new LinkedHashSet<>();
-            final Set<GLComponent> txtComps = new LinkedHashSet<>();
+            // defining mutually exclusive Lists for pictures, primitives (overlays) and text
+            final List<GLComponent> picComps = new ArrayList<>();
+            final List<GLComponent> txtComps = new ArrayList<>();
 
-            // iterating through the section keys (left side of assignment of features)
-            for (FeatureKey featKey : section.keys) {
-                FeatureKey.Type fkType = featKey.getType();
-                if (featKey != featKey.getMainPic()) {
-                    switch (fkType) {
-                        // if feat key is picture
-                        case PIC:
-                            FeatureValue picVal = commonFeatMap.get(featKey);
+            for (FeatureKey picPosKey : section.picpos) {
+                if (picPosKey != section.root.getMainPicPos()) {
+                    FeatureValue picPosVal = commonFeatMap.get(picPosKey);
+                    if (picPosVal instanceof MyRectangle) {
+                        MyRectangle picPosRect = (MyRectangle) picPosVal;
+                        MyRectangle temp = new MyRectangle();
+
+                        // scale rectangle to the drawing surface
+                        picPosRect = picPosRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+
+                        // determine position of this picture
+                        float posx = (picPosRect.minX + picPosRect.maxX) / 2.0f;
+                        float posy = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+
+                        // apply shift if Global Map (only Global Map has such a property)
+                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                            posx += mainPicPosVal.minX;
+                            posy += mainPicPosVal.minY;
+                        }
+
+                        // calc OpenGL coordinates
+                        Vector2f pos = new Vector2f(posx, posy);
+                        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
+
+                        List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
+                        for (FeatureKey picKey : pics) {
+                            FeatureValue picVal = commonFeatMap.get(picKey);
                             if (picVal instanceof ImageWrapper) {
-                                ImageWrapper picWrap = (ImageWrapper) picVal;
-                                String picPosStr = featKey.getStringValue().replaceAll(PIC_REGEX, "");
-                                if (!picPosStr.equalsIgnoreCase("LogSinglePlayer")) {
-                                    FeatureKey picPosKey = FeatureKey.valueOf(picPosStr);
-
-                                    if (picPosKey != null) {
-                                        FeatureValue picPosVal = commonFeatMap.get(picPosKey);
-                                        if (picPosVal instanceof MyVector4) {
-                                            MyVector4 picPosVec = (MyVector4) picPosVal;
-                                            MyVector4 temp = new MyVector4();
-                                            picPosVec = picPosVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-
-                                            float posx = (picPosVec.x + picPosVec.z) / 2.0f;
-                                            float posy = (picPosVec.y + picPosVec.w) / 2.0f;
-
-                                            if (mainPicPosVal != null) {
-                                                posx += mainPicPosVal.x;
-                                                posy += mainPicPosVal.y;
-                                            }
-
-                                            Vector2f pos = new Vector2f(posx, posy);
-                                            Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-
-                                            int width = Math.round(picPosVec.z - picPosVec.x);
-                                            int height = Math.round(picPosVec.w - picPosVec.y);
-
-                                            // load image from filesystem to the memory
-                                            picWrap.loadImage();
-                                            // get array of images (in that case it's FRM) otherwise 
-                                            // and in most case it's single image (.PNG for instance)
-                                            BufferedImage[] images = picWrap.getImages();
-
-                                            if (images != null && images.length > 0) {
-                                                if (images.length == 1) {
-                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue(), gl20, images[0]);
-                                                    Quad imgComp = new Quad(width, height, tex, posGL);
-                                                    picComps.add(imgComp);
-                                                } else {
-                                                    int index = 0;
-                                                    final Texture[] texas = new Texture[images.length];
-                                                    for (BufferedImage image : images) {
-                                                        texas[index] = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
-                                                        index++;
-                                                    }
-                                                    Animation anim = new Animation(picWrap.getFps(), width, height, texas, posGL);
-                                                    picComps.add(anim);
-                                                }
-                                            }
-                                        } else if (picPosVal != null) {
-                                            FO2IELogger.reportWarning("Unexisting cast for ("
-                                                    + featKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
+                                ImageWrapper iw = (ImageWrapper) picVal;
+                                iw.loadImages();
+                                BufferedImage[] images = iw.getImages();
+                                if (images != null && images.length > 0) {
+                                    int width, height; // dimension of picture/animation in pixels
+                                    if (images.length == 1) {
+                                        Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                        width = Math.round(images[0].getWidth() * screenWidth / (float) mainPicWidth);
+                                        height = Math.round(images[0].getHeight() * screenHeight / (float) mainPicHeight);
+                                        Quad imgComp = new Quad(picPosKey, width, height, tex, posGL);
+                                        picComps.add(imgComp);
+                                    } else {
+                                        int index = 0;
+                                        final Texture[] texas = new Texture[images.length];
+                                        for (BufferedImage image : images) {
+                                            texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
+                                            index++;
                                         }
-
+                                        width = picPosRect.lengthX();
+                                        height = picPosRect.lengthY();
+                                        Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, posGL);
+                                        picComps.add(anim);
                                     }
                                 }
                             } else if (picVal != null) {
                                 FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + featKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
+                                        + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
                             }
-                            break;
-                        // if feat key is picture positon
-                        case PIC_POS:
-                            FeatureValue picPosVal = commonFeatMap.get(featKey);
-                            if (picPosVal instanceof MyVector4) {
-                                MyVector4 picPosVec = (MyVector4) picPosVal;
-                                MyVector4 temp = new MyVector4();
-                                picPosVec = picPosVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-                                float posx = (picPosVec.x + picPosVec.z) / 2.0f;
-                                float posy = (picPosVec.y + picPosVec.w) / 2.0f;
+                        }
 
-                                if (mainPicPosVal != null) {
-                                    posx += mainPicPosVal.x;
-                                    posy += mainPicPosVal.y;
-                                }
-
-                                Vector2f pos = new Vector2f(posx, posy);
-                                Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-                                int width = Math.round(picPosVec.z - picPosVec.x);
-                                int height = Math.round(picPosVec.w - picPosVec.y);
-                                // gets the possible pictur keys
-                                List<FeatureKey> pics = FeatureKey.getPics(featKey);
-                                if (!pics.isEmpty()) {
-                                    for (FeatureKey fkPic : pics) {
-                                        if (fkPic != fkPic.getMainPic()) {
-                                            FeatureValue fvPic = commonFeatMap.get(fkPic);
-                                            if (fvPic instanceof ImageWrapper) {
-                                                ImageWrapper picWrapX = (ImageWrapper) fvPic;
-                                                picWrapX.loadImage();
-                                                BufferedImage[] images = picWrapX.getImages();
-                                                if (images != null && images.length > 0) {
-                                                    if (images.length == 1) {
-                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue(), gl20, images[0]);
-                                                        Quad imgComp = new Quad(width, height, tex, posGL);
-                                                        picComps.add(imgComp);
-                                                    } else {
-                                                        int index = 0;
-                                                        final Texture[] texas = new Texture[images.length];
-                                                        for (BufferedImage image : images) {
-                                                            texas[index] = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
-                                                            index++;
-                                                        }
-                                                        Animation anim = new Animation(picWrapX.getFps(), width, height, texas, posGL);
-                                                        picComps.add(anim);
-                                                    }
-                                                }
-                                            } else if (fvPic != null) {
-                                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                                        + featKey.getStringValue() + ", " + fvPic.getStringValue() + ")", null);
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    Quad imgComp = new Quad(width, height, unusedTexture, posGL);
-                                    imgComp.setColor(qmarkColor);
-                                    picComps.add(imgComp);
-                                }
-                            } else if (picPosVal != null) {
-                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + featKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
-                            }
-                            break;
-                        // if feat key is text position
-                        case TXT:
-                            FeatureValue txtVal = commonFeatMap.get(featKey);
-                            if (txtVal instanceof MyVector4) {
-                                MyVector4 txtValVec = (MyVector4) txtVal;
-                                MyVector4 ttemp = new MyVector4();
-                                txtValVec = txtValVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, ttemp);
-                                float tposx = (txtValVec.x + txtValVec.z) / 2.0f;
-                                float tposy = (txtValVec.y + txtValVec.w) / 2.0f;
-
-                                if (mainPicPosVal != null) {
-                                    tposx += mainPicPosVal.x;
-                                    tposy += mainPicPosVal.y;
-                                }
-
-                                Vector2f tpos = new Vector2f(tposx, tposy);
-                                Vector2f tposGL = GLCoords.getOpenGLCoordinates(tpos, screenWidth, screenHeight);
-                                int twidth = Math.round(txtValVec.z - txtValVec.x);
-                                int theight = Math.round(txtValVec.w - txtValVec.y);
-                                String regex = featKey.getPrefix() + "|" + "Text";
-                                String text = featKey.getStringValue().replaceAll(regex, "");
-                                // this is text (primitive) overlay representing the area which text is populating
-                                PrimitiveQuad txtOlay = new PrimitiveQuad(twidth, theight, tposGL);
-                                txtOlay.setColor(textOverlayColor);
-                                // text is set to the default (font) texture
-                                float swidth = MathUtils.getScaled(Text.STD_FONT_WIDTH, 0.0f, mainPicWidth, 0.0f, screenWidth);
-                                float sheight = MathUtils.getScaled(Text.STD_FONT_HEIGHT, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                                Text txtComp = new Text(fntTexture, text, tposGL, Math.round(swidth), Math.round(sheight));
-                                txtComp.setColor(textColor);
-                                txtComp.setAlignment(Text.ALIGNMENT_CENTER);
-                                prmComps.add(txtOlay);
-                                txtComps.add(txtComp);
-                            } else if (txtVal != null) {
-                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + featKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
-                            }
-                            break;
-
-                        default:
-                            break;
+                    } else if (picPosVal != null) {
+                        FO2IELogger.reportWarning("Unexisting cast for ("
+                                + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
                     }
                 }
 
-                progress += 100.0f / section.keys.length;
+                progress += 50.0f / section.picpos.size();
+            }
+
+            for (FeatureKey txtKey : section.text) {
+                FeatureValue txtVal = commonFeatMap.get(txtKey);
+                if (txtVal instanceof MyRectangle) {
+                    MyRectangle textRect = (MyRectangle) txtVal;
+                    MyRectangle temp = new MyRectangle();
+
+                    // scale rectangle to the drawing surface
+                    textRect = textRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+
+                    int width = textRect.lengthX();
+                    int height = textRect.lengthY();
+
+                    // determine position of this picture
+                    float posx = (textRect.minX + textRect.maxX) / 2.0f;
+                    float posy = (textRect.minY + textRect.maxY) / 2.0f;
+
+                    // apply shift if Global Map (only Global Map has such a property)
+                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                        posx += mainPicPosVal.minX;
+                        posy += mainPicPosVal.minY;
+                    }
+
+                    // calc OpenGL coordinates
+                    Vector2f pos = new Vector2f(posx, posy);
+                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
+
+                    // this is text (primitive) overlay representing the area which text is populating
+                    PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
+                    txtOlay.setColor(textOverlayColor);
+
+                    // text display (content)
+                    String regex = txtKey.getPrefix() + "|" + "Text";
+                    String content = txtKey.getStringValue().replaceAll(regex, "");
+
+                    // font char dimensions
+                    int fntWidth = Math.round(Text.STD_FONT_WIDTH * screenWidth / (float) mainPicWidth);
+                    int fntHeight = Math.round(Text.STD_FONT_HEIGHT * screenHeight / (float) mainPicHeight);
+
+                    // this is text component                    
+                    Text txt = new Text(txtKey, fntTexture, content, posGL, fntWidth, fntHeight);
+                    txt.setColor(textColor);
+                    txt.setAlignment(Text.ALIGNMENT_CENTER);
+                    txt.getOverlay().setColor(textOverlayColor);
+                    txt.getOverlay().setWidth(width);
+                    txt.getOverlay().setHeight(height);
+                    txtComps.add(txt);
+                } else if (txtVal != null) {
+                    FO2IELogger.reportWarning("Unexisting cast for ("
+                            + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
+                }
+
+                progress += 50.0f / section.text.size();
             }
 
             result.addAll(picComps);
-            result.addAll(prmComps);
             result.addAll(txtComps);
         }
 
@@ -664,13 +621,15 @@ public class Intrface {
      * @param gl20 GL2 binding
      * @param fntTexture font texture for text rendering
      * @param unusedTexture unused texture (known as question mark texture)
-     * @return built list from all the features containg OpenGL components
+     * @return built list from all the features containing OpenGL components
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
     public List<GLComponent> buildTargetRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
         progress = 0.0f;
         final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(commonFeatMap);
+
+        buildMode = BuildMode.PRAGMA;
 
         if (resolutionPragma != null) {
             for (FeatureKey custKey : resolutionPragma.customFeatMap.keySet()) {
@@ -691,16 +650,16 @@ public class Intrface {
         final Section section = this.nameToSectionMap.get(sectionName);
         if (section != null) {
             FeatureKey mainPicKey = section.root.getMainPic();
-            MyVector4 mainPicPosVal = null;
+            MyRectangle mainPicPosVal = null;
 
             // it's intially assumed that picture is 800x600 unless specified otherwise
-            int mainPicWidth = 800;
-            int mainPicHeight = 600;
+            mainPicWidth = 800;
+            mainPicHeight = 600;
 
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
-                mainPicVal.loadImage();
+                mainPicVal.loadImages();
 
                 // texture for main picture
                 Texture rootTex;
@@ -720,200 +679,143 @@ public class Intrface {
                 // all positions are referred to this root (image)
                 // if position exists for the main (root) image
                 if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyVector4) resFeatMap.get(mainPicPosKey);
-                    MyVector4 temp = new MyVector4();
-                    mainPicPosVal = mainPicPosVal.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+                    mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
+                    MyRectangle temp = new MyRectangle();
+                    mainPicPosVal = mainPicPosVal.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
                 }
 
                 float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
                 float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                Quad root = new Quad(Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
+                Quad root = new Quad(mainPicPosKey, Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
                 result.add(root);
             }
 
-            // defining mutually exclusive sets for pictures, primitives (overlays) and text
-            final Set<GLComponent> picComps = new LinkedHashSet<>();
-            final Set<GLComponent> prmComps = new LinkedHashSet<>();
-            final Set<GLComponent> txtComps = new LinkedHashSet<>();
+            // defining mutually exclusive Lists for pictures, primitives (overlays) and text
+            final List<GLComponent> picComps = new ArrayList<>();
+            final List<GLComponent> txtComps = new ArrayList<>();
 
-            // iterating through the section keys (left side of assignment of features)
-            for (FeatureKey featKey : section.keys) {
-                FeatureKey.Type fkType = featKey.getType();
-                if (featKey != featKey.getMainPic()) {
-                    switch (fkType) {
-                        // if feat key is picture
-                        case PIC:
-                            FeatureValue picVal = resFeatMap.get(featKey);
+            for (FeatureKey picPosKey : section.picpos) {
+                if (picPosKey != section.root.getMainPicPos()) {
+                    FeatureValue picPosVal = resFeatMap.get(picPosKey);
+                    if (picPosVal instanceof MyRectangle) {
+                        MyRectangle picPosRect = (MyRectangle) picPosVal;
+                        MyRectangle temp = new MyRectangle();
+
+                        // scale rectangle to the drawing surface
+                        picPosRect = picPosRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+
+                        // determine position of this picture
+                        float posx = (picPosRect.minX + picPosRect.maxX) / 2.0f;
+                        float posy = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+
+                        // apply shift if Global Map (only Global Map has such a property)
+                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                            posx += mainPicPosVal.minX;
+                            posy += mainPicPosVal.minY;
+                        }
+
+                        // calc OpenGL coordinates
+                        Vector2f pos = new Vector2f(posx, posy);
+                        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
+
+                        List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
+                        for (FeatureKey picKey : pics) {
+                            FeatureValue picVal = resFeatMap.get(picKey);
                             if (picVal instanceof ImageWrapper) {
-                                ImageWrapper picWrap = (ImageWrapper) picVal;
-                                String picPosStr = featKey.getStringValue().replaceAll(PIC_REGEX, "");
-                                if (!picPosStr.equalsIgnoreCase("LogSinglePlayer")) {
-                                    FeatureKey picPosKey = FeatureKey.valueOf(picPosStr);
-
-                                    if (picPosKey != null) {
-                                        FeatureValue picPosVal = resFeatMap.get(picPosKey);
-                                        if (picPosVal instanceof MyVector4) {
-                                            MyVector4 picPosVec = (MyVector4) picPosVal;
-                                            MyVector4 temp = new MyVector4();
-                                            picPosVec = picPosVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-
-                                            float posx = (picPosVec.x + picPosVec.z) / 2.0f;
-                                            float posy = (picPosVec.y + picPosVec.w) / 2.0f;
-
-                                            if (mainPicPosVal != null) {
-                                                posx += mainPicPosVal.x;
-                                                posy += mainPicPosVal.y;
-                                            }
-
-                                            Vector2f pos = new Vector2f(posx, posy);
-                                            Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-
-                                            int width = Math.round(picPosVec.z - picPosVec.x);
-                                            int height = Math.round(picPosVec.w - picPosVec.y);
-
-                                            // load image from filesystem to the memory
-                                            picWrap.loadImage();
-                                            // get array of images (in that case it's FRM) otherwise 
-                                            // and in most case it's single image (.PNG for instance)
-                                            BufferedImage[] images = picWrap.getImages();
-
-                                            if (images != null && images.length > 0) {
-                                                if (images.length == 1) {
-                                                    Texture tex = Texture.loadTexture(picWrap.getStringValue(), gl20, images[0]);
-                                                    Quad imgComp = new Quad(width, height, tex, posGL);
-                                                    picComps.add(imgComp);
-                                                } else {
-                                                    int index = 0;
-                                                    final Texture[] texas = new Texture[images.length];
-                                                    for (BufferedImage image : images) {
-                                                        texas[index] = Texture.loadTexture(picWrap.getStringValue() + index, gl20, image);
-                                                        index++;
-                                                    }
-                                                    Animation anim = new Animation(picWrap.getFps(), width, height, texas, posGL);
-                                                    picComps.add(anim);
-                                                }
-                                            }
-                                        } else if (picPosVal != null) {
-                                            FO2IELogger.reportWarning("Unexisting cast for ("
-                                                    + featKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
+                                ImageWrapper iw = (ImageWrapper) picVal;
+                                iw.loadImages();
+                                BufferedImage[] images = iw.getImages();
+                                if (images != null && images.length > 0) {
+                                    int width, height; // dimension of picture/animation in pixels
+                                    if (images.length == 1) {
+                                        Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                        width = Math.round(images[0].getWidth() * screenWidth / (float) mainPicWidth);
+                                        height = Math.round(images[0].getHeight() * screenHeight / (float) mainPicHeight);
+                                        Quad imgComp = new Quad(picPosKey, width, height, tex, posGL);
+                                        picComps.add(imgComp);
+                                    } else {
+                                        int index = 0;
+                                        final Texture[] texas = new Texture[images.length];
+                                        for (BufferedImage image : images) {
+                                            texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
+                                            index++;
                                         }
-
+                                        width = picPosRect.lengthX();
+                                        height = picPosRect.lengthY();
+                                        Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, posGL);
+                                        picComps.add(anim);
                                     }
                                 }
                             } else if (picVal != null) {
                                 FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + featKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
+                                        + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
                             }
-                            break;
-                        // if feat key is picture positon
-                        case PIC_POS:
-                            FeatureValue picPosVal = resFeatMap.get(featKey);
-                            if (picPosVal instanceof MyVector4) {
-                                MyVector4 picPosVec = (MyVector4) picPosVal;
-                                MyVector4 temp = new MyVector4();
-                                picPosVec = picPosVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-                                float posx = (picPosVec.x + picPosVec.z) / 2.0f;
-                                float posy = (picPosVec.y + picPosVec.w) / 2.0f;
+                        }
 
-                                if (mainPicPosVal != null) {
-                                    posx += mainPicPosVal.x;
-                                    posy += mainPicPosVal.y;
-                                }
-
-                                Vector2f pos = new Vector2f(posx, posy);
-                                Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-                                int width = Math.round(picPosVec.z - picPosVec.x);
-                                int height = Math.round(picPosVec.w - picPosVec.y);
-                                // gets the possible picture keys
-                                List<FeatureKey> pics = FeatureKey.getPics(featKey);
-                                if (!pics.isEmpty()) {
-                                    for (FeatureKey fkPic : pics) {
-                                        if (fkPic != fkPic.getMainPic()) {
-                                            FeatureValue fvPic = resFeatMap.get(fkPic);
-                                            if (fvPic instanceof ImageWrapper) {
-                                                ImageWrapper picWrapX = (ImageWrapper) fvPic;
-                                                picWrapX.loadImage();
-                                                BufferedImage[] images = picWrapX.getImages();
-                                                if (images != null && images.length > 0) {
-                                                    if (images.length == 1) {
-                                                        Texture tex = Texture.loadTexture(picWrapX.getStringValue(), gl20, images[0]);
-                                                        Quad imgComp = new Quad(width, height, tex, posGL);
-                                                        picComps.add(imgComp);
-                                                    } else {
-                                                        int index = 0;
-                                                        final Texture[] texas = new Texture[images.length];
-                                                        for (BufferedImage image : images) {
-                                                            texas[index] = Texture.loadTexture(picWrapX.getStringValue() + index, gl20, image);
-                                                            index++;
-                                                        }
-                                                        Animation anim = new Animation(picWrapX.getFps(), width, height, texas, posGL);
-                                                        picComps.add(anim);
-                                                    }
-                                                }
-                                            } else if (fvPic != null) {
-                                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                                        + featKey.getStringValue() + ", " + fvPic.getStringValue() + ")", null);
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    Quad imgComp = new Quad(width, height, unusedTexture, posGL);
-                                    imgComp.setColor(qmarkColor);
-                                    picComps.add(imgComp);
-                                }
-                            } else if (picPosVal != null) {
-                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + featKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
-                            }
-                            break;
-                        // if feat key is text position
-                        case TXT:
-                            FeatureValue txtVal = resFeatMap.get(featKey);
-                            if (txtVal instanceof MyVector4) {
-                                MyVector4 txtValVec = (MyVector4) txtVal;
-                                MyVector4 ttemp = new MyVector4();
-                                txtValVec = txtValVec.setScaled(mainPicWidth, mainPicHeight, screenWidth, screenHeight, ttemp);
-                                float tposx = (txtValVec.x + txtValVec.z) / 2.0f;
-                                float tposy = (txtValVec.y + txtValVec.w) / 2.0f;
-
-                                if (mainPicPosVal != null) {
-                                    tposx += mainPicPosVal.x;
-                                    tposy += mainPicPosVal.y;
-                                }
-
-                                Vector2f tpos = new Vector2f(tposx, tposy);
-                                Vector2f tposGL = GLCoords.getOpenGLCoordinates(tpos, screenWidth, screenHeight);
-                                int twidth = Math.round(txtValVec.z - txtValVec.x);
-                                int theight = Math.round(txtValVec.w - txtValVec.y);
-                                String regex = featKey.getPrefix() + "|" + "Text";
-                                String text = featKey.getStringValue().replaceAll(regex, "");
-                                // this is text (primitive) overlay representing the area which text is populating
-                                PrimitiveQuad txtOlay = new PrimitiveQuad(twidth, theight, tposGL);
-                                txtOlay.setColor(textOverlayColor);
-                                // text is set to the default (font) texture
-                                float swidth = MathUtils.getScaled(Text.STD_FONT_WIDTH, 0.0f, mainPicWidth, 0.0f, screenWidth);
-                                float sheight = MathUtils.getScaled(Text.STD_FONT_HEIGHT, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                                Text txtComp = new Text(fntTexture, text, tposGL, Math.round(swidth), Math.round(sheight));
-                                txtComp.setColor(textColor);
-                                txtComp.setAlignment(Text.ALIGNMENT_CENTER);
-                                prmComps.add(txtOlay);
-                                txtComps.add(txtComp);
-                            } else if (txtVal != null) {
-                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + featKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
-                            }
-                            break;
-
-                        default:
-                            break;
+                    } else if (picPosVal != null) {
+                        FO2IELogger.reportWarning("Unexisting cast for ("
+                                + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
                     }
                 }
 
-                progress += 100.0f / section.keys.length;
+                progress += 50.0f / section.picpos.size();
+            }
+
+            for (FeatureKey txtKey : section.text) {
+                FeatureValue txtVal = resFeatMap.get(txtKey);
+                if (txtVal instanceof MyRectangle) {
+                    MyRectangle textRect = (MyRectangle) txtVal;
+                    MyRectangle temp = new MyRectangle();
+
+                    // scale rectangle to the drawing surface
+                    textRect = textRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+
+                    int width = textRect.lengthX();
+                    int height = textRect.lengthY();
+
+                    // determine position of this picture
+                    float posx = (textRect.minX + textRect.maxX) / 2.0f;
+                    float posy = (textRect.minY + textRect.maxY) / 2.0f;
+
+                    // apply shift if Global Map (only Global Map has such a property)
+                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                        posx += mainPicPosVal.minX;
+                        posy += mainPicPosVal.minY;
+                    }
+
+                    // calc OpenGL coordinates
+                    Vector2f pos = new Vector2f(posx, posy);
+                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
+
+                    // this is text (primitive) overlay representing the area which text is populating
+                    PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
+                    txtOlay.setColor(textOverlayColor);
+
+                    // text display (content)
+                    String regex = txtKey.getPrefix() + "|" + "Text";
+                    String content = txtKey.getStringValue().replaceAll(regex, "");
+
+                    // font char dimensions
+                    int fntWidth = Math.round(Text.STD_FONT_WIDTH * screenWidth / (float) mainPicWidth);
+                    int fntHeight = Math.round(Text.STD_FONT_HEIGHT * screenHeight / (float) mainPicHeight);
+
+                    // this is text component                    
+                    Text txt = new Text(txtKey, fntTexture, content, posGL, fntWidth, fntHeight);
+                    txt.setColor(textColor);
+                    txt.setAlignment(Text.ALIGNMENT_CENTER);
+                    txt.getOverlay().setColor(textOverlayColor);
+                    txt.getOverlay().setWidth(width);
+                    txt.getOverlay().setHeight(height);
+                    txtComps.add(txt);
+                } else if (txtVal != null) {
+                    FO2IELogger.reportWarning("Unexisting cast for ("
+                            + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
+                }
+
+                progress += 50.0f / section.text.size();
             }
 
             result.addAll(picComps);
-            result.addAll(prmComps);
             result.addAll(txtComps);
         }
 
@@ -1072,6 +974,14 @@ public class Intrface {
         return result;
     }
 
+    public int getMainPicWidth() {
+        return mainPicWidth;
+    }
+
+    public int getMainPicHeight() {
+        return mainPicHeight;
+    }
+
     public void resetProgress() {
         progress = 0.0f;
     }
@@ -1084,8 +994,8 @@ public class Intrface {
         return progress;
     }
 
-    public Mode getMode() {
-        return mode;
+    public ReadMode getReadMode() {
+        return readMode;
     }
 
     public Section getAim() {
@@ -1270,6 +1180,14 @@ public class Intrface {
 
     public Vector4f getQmarkColor() {
         return qmarkColor;
+    }
+
+    public BuildMode getBuildMode() {
+        return buildMode;
+    }
+
+    public void setBuildMode(BuildMode buildMode) {
+        this.buildMode = buildMode;
     }
 
 }

@@ -30,7 +30,7 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
-import rs.alexanderstojanovich.fo2ie.feature.MyVector4;
+import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 
@@ -152,16 +152,16 @@ public abstract class FeatValueEditor extends JFrame {
                 });
                 this.getContentPane().add(btnCancel);
                 break;
-            case VECTOR4:
+            case RECT4:
                 this.setLayout(new GridLayout(3, 4));
-                MyVector4 vec4 = (MyVector4) featureValue;
+                MyRectangle myRect = (MyRectangle) featureValue;
 
                 JLabel lblTL = new JLabel("Top Left:");
-                JSpinner spinX = new JSpinner(new SpinnerNumberModel(Math.round(vec4.x), -5000, 5000, 1));
-                JSpinner spinY = new JSpinner(new SpinnerNumberModel(Math.round(vec4.y), -5000, 5000, 1));
+                JSpinner spinX = new JSpinner(new SpinnerNumberModel(Math.round(myRect.minX), -5000, 5000, 1));
+                JSpinner spinY = new JSpinner(new SpinnerNumberModel(Math.round(myRect.minY), -5000, 5000, 1));
                 JLabel lblBR = new JLabel("Bottom Right:");
-                JSpinner spinZ = new JSpinner(new SpinnerNumberModel(Math.round(vec4.z), -5000, 5000, 1));
-                JSpinner spinW = new JSpinner(new SpinnerNumberModel(Math.round(vec4.w), -5000, 5000, 1));
+                JSpinner spinZ = new JSpinner(new SpinnerNumberModel(Math.round(myRect.maxX), -5000, 5000, 1));
+                JSpinner spinW = new JSpinner(new SpinnerNumberModel(Math.round(myRect.maxY), -5000, 5000, 1));
                 JComponent[] comps = {lblTL, spinX, spinY, lblBR, spinZ, spinW};
                 for (JComponent comp : comps) {
                     this.getContentPane().add(comp);
@@ -169,11 +169,11 @@ public abstract class FeatValueEditor extends JFrame {
                 btnSet.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        MyVector4 vec4 = (MyVector4) featureValue;
-                        vec4.x = (int) spinX.getValue();
-                        vec4.y = (int) spinY.getValue();
-                        vec4.z = (int) spinZ.getValue();
-                        vec4.w = (int) spinW.getValue();
+                        MyRectangle myRect4 = (MyRectangle) featureValue;
+                        myRect4.minX = (int) spinX.getValue();
+                        myRect4.minY = (int) spinY.getValue();
+                        myRect4.maxX = (int) spinZ.getValue();
+                        myRect4.maxY = (int) spinW.getValue();
                         execute();
                         apply();
 
@@ -185,10 +185,10 @@ public abstract class FeatValueEditor extends JFrame {
                 btnReset.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        spinX.setValue(Math.round(vec4.x));
-                        spinY.setValue(Math.round(vec4.y));
-                        spinZ.setValue(Math.round(vec4.z));
-                        spinW.setValue(Math.round(vec4.w));
+                        spinX.setValue(Math.round(myRect.minX));
+                        spinY.setValue(Math.round(myRect.minY));
+                        spinZ.setValue(Math.round(myRect.maxX));
+                        spinW.setValue(Math.round(myRect.maxY));
                         featureValue.setStringValue(strFVal);
                     }
                 });

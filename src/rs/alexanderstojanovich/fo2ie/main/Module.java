@@ -24,6 +24,7 @@ import java.util.TimerTask;
 import org.joml.Matrix4f;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
+import rs.alexanderstojanovich.fo2ie.ogl.Text;
 
 /**
  *
@@ -46,7 +47,7 @@ public class Module {
         timer.schedule(unbufTask, 250L, 250L);
     }
 
-    protected final Timer timer = new Timer("Timer Util");
+    protected final Timer timer = new Timer("Module Timer Util");
 
     /**
      * Renders this module to the OpenGL canvas
@@ -64,19 +65,14 @@ public class Module {
             }
 
             switch (component.getType()) {
-                case PRIM:
-                    component.render(gl20, projMat4, prmSP);
-                    break;
                 case PIC:
-                    component.render(gl20, projMat4, imgSP);
-                    break;
-                case TXT:
-                    component.render(gl20, projMat4, fntSP);
-                    break;
                 case ANIM:
                     component.render(gl20, projMat4, imgSP);
                     break;
-
+                case TXT:
+                    Text text = (Text) component;
+                    text.render(gl20, projMat4, fntSP, prmSP);
+                    break;
             }
 
         }

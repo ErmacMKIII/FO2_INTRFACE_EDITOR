@@ -20,21 +20,31 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.FPSAnimator;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
+import javax.swing.JTable;
 import org.joml.Matrix4f;
+import org.joml.Rectanglef;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class ModuleAnimation implements GLEventListener {
+public class ModuleAnimator implements GLEventListener, MouseListener, MouseMotionListener {
 
     private final Configuration config = Configuration.getInstance();
 
@@ -54,6 +64,13 @@ public class ModuleAnimation implements GLEventListener {
     private final Matrix4f projMat4 = new Matrix4f().identity();
     private final FPSAnimator animator;
 
+    protected GLComponent selected;
+    protected Vector2f glMouseCoords = new Vector2f();
+    protected boolean dragging = false;
+    protected Vector4f savedColor = new Vector4f();
+
+    protected JTable table;
+
     /**
      * State of the machine
      */
@@ -72,9 +89,10 @@ public class ModuleAnimation implements GLEventListener {
 
     protected Mode mode = Mode.NO_ACTION;
 
-    public ModuleAnimation(FPSAnimator animator, Intrface intrface) {
+    public ModuleAnimator(FPSAnimator animator, Intrface intrface, JTable table) {
         this.animator = animator;
         this.intrface = intrface;
+        this.table = table;
     }
 
     /**
@@ -202,6 +220,122 @@ public class ModuleAnimation implements GLEventListener {
 
     }
 
+    //--------------------------------------------------------------------------
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // ..IGNORE
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (dragging) {
+            return;
+        }
+        dragging = true;
+
+        Vector2f scrnMouseCoords = new Vector2f(e.getX(), e.getY());
+        glMouseCoords = GLCoords.getOpenGLCoordinates(scrnMouseCoords, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (!dragging) {
+            return;
+        }
+        dragging = false;
+
+        // process mouse release
+        if (selected != null) {
+            // try to find corrseponding feature value
+            FeatureValue featureValue = null;
+            // based on module build mode do something..
+            if (intrface.getBuildMode() == Intrface.BuildMode.COMMON) {
+                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+            } else if (intrface.getBuildMode() == Intrface.BuildMode.PRAGMA) {
+                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
+                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+                } else {
+                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+                }
+            }
+
+            // try to set feature value with corresponding glMouseCoords
+            if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
+                Rectanglef area = selected.getArea();
+                Vector2f topLeftGL = new Vector2f(area.minX, area.maxY);
+                Vector2f bottomRightGL = new Vector2f(area.maxX, area.minY);
+
+                Vector2f topLeft = GLCoords.getScreenCoordinates(topLeftGL, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+                Vector2f bottomRight = GLCoords.getScreenCoordinates(bottomRightGL, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
+                topLeft.x *= intrface.getMainPicWidth() / (float) GUI.GL_CANVAS.getWidth();
+                topLeft.y *= intrface.getMainPicHeight() / (float) GUI.GL_CANVAS.getHeight();
+
+                bottomRight.x *= intrface.getMainPicWidth() / (float) GUI.GL_CANVAS.getWidth();
+                bottomRight.y *= intrface.getMainPicHeight() / (float) GUI.GL_CANVAS.getHeight();
+
+                featureValue.setStringValue(
+                        String.valueOf(Math.round(topLeft.x))
+                        + " " + String.valueOf(Math.round(topLeft.y))
+                        + " " + String.valueOf(Math.round(bottomRight.x)
+                                + " " + String.valueOf(Math.round(bottomRight.y)))
+                );
+
+                if (table.getSelectedRow() != -1 && table.getColumnCount() > 1) {
+                    table.setValueAt(featureValue.getStringValue(), table.getSelectedRow(), 1);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // ..IGNORE
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // ..IGNORE
+        if (selected != null) {
+            selected.setColor(savedColor);
+        }
+        selected = null;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (!dragging) {
+            return;
+        }
+
+        Vector2f scrnMouseCoords = new Vector2f(e.getX(), e.getY());
+        glMouseCoords = GLCoords.getOpenGLCoordinates(scrnMouseCoords, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
+        // move across the OpenGL render space
+        if (selected != null) {
+            selected.setPos(glMouseCoords);
+        }
+
+        dragging = true;
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        Vector2f scrnMouseCoords = new Vector2f(e.getX(), e.getY());
+        glMouseCoords = GLCoords.getOpenGLCoordinates(scrnMouseCoords, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+    }
+
+    //--------------------------------------------------------------------------
+    public Vector4f getSavedColor() {
+        return savedColor;
+    }
+
+    public void setSavedColor(Vector4f savedColor) {
+        this.savedColor = savedColor;
+    }
+
+    //--------------------------------------------------------------------------
     public Module getModule() {
         return module;
     }
@@ -256,6 +390,18 @@ public class ModuleAnimation implements GLEventListener {
 
     public FPSAnimator getAnimator() {
         return animator;
+    }
+
+    public GLComponent getSelected() {
+        return selected;
+    }
+
+    public Vector2f getGlMouseCoords() {
+        return glMouseCoords;
+    }
+
+    public boolean isDragging() {
+        return dragging;
     }
 
 }

@@ -32,7 +32,7 @@ public interface FeatureValue {
     public static final String NUMBER_ARRAY_REGEX = "^(\\s*-?\\d+(\\.\\d+)?)(\\s*\\s\\s*-?\\d+(\\.\\d+)?)*$";
 
     public enum Type {
-        IMAGE, VECTOR4, SINGLE_VALUE, ARRAY
+        IMAGE, RECT4, SINGLE_VALUE, ARRAY
     };
 
     public void setStringValue(String value);
@@ -69,7 +69,7 @@ public interface FeatureValue {
                     result = new SingleValue();
                     break;
                 case 4:
-                    result = new MyVector4();
+                    result = new MyRectangle();
                     break;
                 default:
                     result = new MyArray();

@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.joml.Matrix4f;
+import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
 
@@ -31,6 +33,8 @@ import rs.alexanderstojanovich.fo2ie.util.Pair;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class Text implements GLComponent {
+
+    private final FeatureKey featureKey;
 
     private final Type type = Type.TXT;
 
@@ -64,31 +68,66 @@ public class Text implements GLComponent {
     protected int charWidth = STD_FONT_WIDTH;
     protected int charHeight = STD_FONT_HEIGHT;
 
-    public Text(Texture texture, String content) {
+    protected final PrimitiveQuad overlay;
+
+    /**
+     * Constructs OpenGL text component
+     *
+     * @param featureKey bound feature key
+     * @param texture bound texture
+     * @param content display text
+     */
+    public Text(FeatureKey featureKey, Texture texture, String content) {
+        this.featureKey = featureKey;
         this.texture = texture;
         this.content = content;
+        this.overlay = new PrimitiveQuad(charWidth * content.length(), charHeight, pos);
         this.enabled = true;
     }
 
-    public Text(Texture texture, String content, Vector4f color, Vector2f pos) {
+    /**
+     * Constructs OpenGL text component
+     *
+     * @param featureKey bound feature key
+     * @param texture bound texture
+     * @param content display text
+     * @param color text color
+     * @param pos text pos
+     */
+    public Text(FeatureKey featureKey, Texture texture, String content, Vector4f color, Vector2f pos) {
+        this.featureKey = featureKey;
         this.texture = texture;
         this.content = content;
         this.color = color;
         this.pos = pos;
+        this.overlay = new PrimitiveQuad(charWidth * content.length(), charHeight, pos);
         this.enabled = true;
     }
 
-    public Text(Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
+    /**
+     * Constructs OpenGL text component
+     *
+     * @param featureKey bound feature key
+     * @param texture bound texture
+     * @param content display text
+     * @param pos text pos
+     * @param charWidth char width in pixels
+     * @param charHeight char height in pixels
+     */
+    public Text(FeatureKey featureKey, Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
+        this.featureKey = featureKey;
         this.texture = texture;
         this.content = content;
         this.pos = pos;
-        this.enabled = true;
         this.charWidth = charWidth;
         this.charHeight = charHeight;
+        this.overlay = new PrimitiveQuad(charWidth * content.length(), charHeight, pos);
+        this.enabled = true;
     }
 
     @Override
     public void unbuffer() {
+        this.overlay.unbuffer();
         buffered = false;
     }
 
@@ -105,12 +144,14 @@ public class Text implements GLComponent {
                 float cellU = (asciiCode % GRID_SIZE) * CELL_SIZE;
                 float cellV = (asciiCode / GRID_SIZE) * CELL_SIZE;
 
-                float xinc = (j - content.length() * alignment) * giveRelativeCharWidth();
-                float ydec = (k + l * LINE_SPACING) * giveRelativeCharHeight();
+                float xinc = (j - content.length() * alignment) * getRelativeCharWidth();
+                float ydec = (k + l * LINE_SPACING) * getRelativeCharHeight();
 
                 pairList.add(new Pair<>(xinc, ydec));
 
-                Quad quad = new Quad(charWidth, charHeight, texture);
+                // pass null feat key as it is only used for rendering charactters
+                Quad quad = new Quad(null, charWidth, charHeight, texture);
+
                 quad.setColor(color);
                 quad.setPos(pos);
                 quad.setScale(scale);
@@ -128,7 +169,6 @@ public class Text implements GLComponent {
                 quad.getUvs()[3].y = cellV;
 
                 quad.buffer(gl20);
-
                 quadList.add(quad);
             }
         }
@@ -142,6 +182,7 @@ public class Text implements GLComponent {
     @Override
     public void buffer(GL2 gl20) {
         init(gl20);
+        overlay.buffer(gl20);
         buffered = true;
     }
 
@@ -149,17 +190,43 @@ public class Text implements GLComponent {
      * Render this text with given shader program
      *
      * @param gl20 GL2 binding
-     * @param program shader program for binding
+     * @param projMat4 projection matrix
+     * @param fntProgram font shader program
      */
     @Override
-    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram program) {
+    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram fntProgram) {
         if (enabled && buffered) {
             int index = 0;
             for (Quad quad : quadList) {
                 Pair<Float, Float> pair = pairList.get(index);
                 float xinc = pair.getKey();
                 float ydec = pair.getValue();
-                quad.render(gl20, xinc, ydec, projMat4, program);
+                quad.render(gl20, xinc, ydec, projMat4, fntProgram);
+                index++;
+            }
+        }
+    }
+
+    /**
+     * Render this text with given shader program
+     *
+     * @param gl20 GL2 binding
+     * @param projMat4 projection matrix
+     * @param fntProgram font shader program
+     * @param prmProgram primitive (overlay) shader
+     */
+    public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram fntProgram, ShaderProgram prmProgram) {
+        if (overlay.isEnabled() && overlay.isBuffered()) {
+            overlay.render(gl20, projMat4, prmProgram);
+        }
+
+        if (enabled && buffered) {
+            int index = 0;
+            for (Quad quad : quadList) {
+                Pair<Float, Float> pair = pairList.get(index);
+                float xinc = pair.getKey();
+                float ydec = pair.getValue();
+                quad.render(gl20, xinc, ydec, projMat4, fntProgram);
                 index++;
             }
         }
@@ -167,7 +234,7 @@ public class Text implements GLComponent {
 
     @Override
     public int getWidth() {
-        return charWidth;
+        return charWidth * content.length();
     }
 
     @Override
@@ -175,16 +242,35 @@ public class Text implements GLComponent {
         return charHeight;
     }
 
+    @Override
     public float getRelativeWidth() {
-        return content.length() * getCharWidth();
+        return content.length() * getRelativeCharWidth();
     }
 
-    public float giveRelativeCharWidth() {
-        return scale * charWidth / GUI.GL_CANVAS.getWidth();
+    public float getRelativeCharWidth() {
+        return scale * charWidth / (float) GUI.GL_CANVAS.getWidth();
     }
 
-    public float giveRelativeCharHeight() {
-        return scale * charHeight / GUI.GL_CANVAS.getHeight();
+    public float getRelativeCharHeight() {
+        return scale * charHeight / (float) GUI.GL_CANVAS.getHeight();
+    }
+
+    @Override
+    public float getRelativeHeight() {
+        return getRelativeCharHeight();
+    }
+
+    @Override
+    public Rectanglef getArea() {
+        float rw = getRelativeWidth();
+        float rh = getRelativeHeight();
+        Rectanglef rect = new Rectanglef(
+                pos.x - rw,
+                pos.y - rh,
+                pos.x + rw,
+                pos.y + rh
+        );
+        return rect;
     }
 
     /**
@@ -192,13 +278,13 @@ public class Text implements GLComponent {
      * out or so) Notice - call this method only once!
      */
     public void alignToNextChar() {
-        float srw = scale * giveRelativeCharWidth(); // scaled relative width
-        float srh = scale * giveRelativeCharHeight(); // scaled relative height                                                                 
+        float rcw = getRelativeCharWidth(); // scaled relative width
+        float rch = getRelativeCharHeight(); // scaled relative height                                                                 
 
-        float xrem = pos.x % srw;
-        pos.x -= (pos.x < 0.0f) ? xrem : (xrem - srw);
+        float xrem = pos.x % rcw;
+        pos.x -= (pos.x < 0.0f) ? xrem : (xrem - rcw);
 
-        float yrem = pos.y % srh;
+        float yrem = pos.y % rch;
         pos.y -= yrem;
     }
 
@@ -262,6 +348,15 @@ public class Text implements GLComponent {
             return false;
         }
         return true;
+    }
+
+    public PrimitiveQuad getOverlay() {
+        return overlay;
+    }
+
+    @Override
+    public FeatureKey getFeatureKey() {
+        return featureKey;
     }
 
     public Texture getTexture() {
@@ -332,12 +427,15 @@ public class Text implements GLComponent {
         return color;
     }
 
+    @Override
     public void setColor(Vector4f color) {
         this.color = color;
     }
 
+    @Override
     public void setPos(Vector2f pos) {
         this.pos = pos;
+        this.overlay.setPos(pos);
         buffered = false;
     }
 
