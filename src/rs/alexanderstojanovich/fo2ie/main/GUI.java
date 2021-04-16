@@ -777,9 +777,13 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.9 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-16 at 21:30).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-16 at 21:30).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.0 BETA1 GOTHS:\n");
+            sb.append("\t- Fix for some modules (Barter, PipBoy etc.).\n");
+            sb.append("\t- Question mark is put as annotation for missing or unknown picture.\n");
             sb.append("\n");
             sb.append("Changelog since v0.5 FINLAND:\n");
             sb.append("\t- Modules are being build faster.\n");
@@ -1072,6 +1076,9 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:        
+        deselect();
+        featurePreview();
+        componentsPreview();
         workBuild();
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();

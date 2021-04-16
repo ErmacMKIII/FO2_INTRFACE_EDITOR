@@ -451,6 +451,7 @@ public class Intrface {
 
             // it is displayed on the small panel under some resolution, scaling is required
             Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
+
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) commonFeatMap.get(mainPicKey);
@@ -460,9 +461,8 @@ public class Intrface {
                 Texture rootTex;
                 // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    modeWidth = mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    modeHeight = mainPicHeight = mainPicVal.getImages()[0].getHeight();
-
+                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
                     // otherwise load missing question mark texture
                 } else {
@@ -471,24 +471,13 @@ public class Intrface {
 
                 scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
-
-                // defining root of the module (the main image)
-                // all positions are referred to this root (image)
-                // if position exists for the main (root) image
-                Vector2f rootPos = null;
                 if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) commonFeatMap.get(mainPicPosKey);
-                    MyRectangle rtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, rtemp);
-
-                    float rposx = (mainPicPosVal.minX + mainPicPosVal.maxX) / 2.0f;
-                    float rposy = (mainPicPosVal.minY + mainPicPosVal.maxY) / 2.0f;
-
-                    rootPos = new Vector2f(rposx, rposy);
-                } else {
-                    rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
+                    MyRectangle vtemp = new MyRectangle();
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
                 }
 
+                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
                 Quad root = new Quad(mainPicPosKey, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 result.add(root);
             }
@@ -528,6 +517,13 @@ public class Intrface {
                                             // pixel position
                                             pos.x = picPosRect.minX + width / 2.0f;
                                             pos.y = picPosRect.minY + height / 2.0f;
+
+                                            // Global Map special case
+                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                                pos.x += mainPicPosVal.minX;
+                                                pos.y += mainPicPosVal.minY;
+                                            }
+
                                             // texture from loaded image
                                             Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
                                             Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
@@ -539,6 +535,13 @@ public class Intrface {
                                             // pixel position (picPosRect is already scaled)
                                             pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
                                             pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+
+                                            // Global Map special case
+                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                                pos.x += mainPicPosVal.minX;
+                                                pos.y += mainPicPosVal.minY;
+                                            }
+
                                             int index = 0;
                                             // array of textures for an animation
                                             final Texture[] texas = new Texture[images.length];
@@ -558,7 +561,13 @@ public class Intrface {
 
                             // missing picture -> question mark for missing..
                             if (pics.isEmpty()) {
+                                // position is always center (half sum of coords)
                                 Vector2f pos = new Vector2f((picPosRect.minX + picPosRect.maxX) / 2.0f, (picPosRect.minY + picPosRect.maxY) / 2.0f);
+                                // Global Map special case
+                                if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                    pos.x += mainPicPosVal.minX;
+                                    pos.y += mainPicPosVal.minY;
+                                }
                                 Quad qmark = new Quad(
                                         picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
                                         Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
@@ -594,6 +603,12 @@ public class Intrface {
                         // determine position of this picture
                         float posx = (textRect.minX + textRect.maxX) / 2.0f;
                         float posy = (textRect.minY + textRect.maxY) / 2.0f;
+
+                        // Global Map special case
+                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                            posx += mainPicPosVal.minX;
+                            posy += mainPicPosVal.minY;
+                        }
 
                         // calc screen pixel coordinates
                         Vector2f pos = new Vector2f(posx, posy);
@@ -697,24 +712,13 @@ public class Intrface {
 
                 scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
-
-                // defining root of the module (the main image)
-                // all positions are referred to this root (image)
-                // if position exists for the main (root) image
-                Vector2f rootPos = null;
-                if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyRectangle) commonFeatMap.get(mainPicPosKey);
-                    MyRectangle rtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, rtemp);
-
-                    float rposx = (mainPicPosVal.minX + mainPicPosVal.maxX) / 2.0f;
-                    float rposy = (mainPicPosVal.minY + mainPicPosVal.maxY) / 2.0f;
-
-                    rootPos = new Vector2f(rposx, rposy);
-                } else {
-                    rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
+                if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
+                    mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
+                    MyRectangle vtemp = new MyRectangle();
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
                 }
 
+                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
                 Quad root = new Quad(mainPicPosKey, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 result.add(root);
             }
@@ -754,6 +758,13 @@ public class Intrface {
                                             // pixel position
                                             pos.x = picPosRect.minX + width / 2.0f;
                                             pos.y = picPosRect.minY + height / 2.0f;
+
+                                            // Global Map special case
+                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                                pos.x += mainPicPosVal.minX;
+                                                pos.y += mainPicPosVal.minY;
+                                            }
+
                                             // texture from loaded image
                                             Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
                                             Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
@@ -765,6 +776,13 @@ public class Intrface {
                                             // pixel position (picPosRect is already scaled)
                                             pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
                                             pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+
+                                            // Global Map special case
+                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                                pos.x += mainPicPosVal.minX;
+                                                pos.y += mainPicPosVal.minY;
+                                            }
+
                                             int index = 0;
                                             // array of textures for an animation
                                             final Texture[] texas = new Texture[images.length];
@@ -784,7 +802,13 @@ public class Intrface {
 
                             // missing picture -> question mark for missing..
                             if (pics.isEmpty()) {
+                                // position is always center (half sum of coords)
                                 Vector2f pos = new Vector2f((picPosRect.minX + picPosRect.maxX) / 2.0f, (picPosRect.minY + picPosRect.maxY) / 2.0f);
+                                // Global Map special case
+                                if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                    pos.x += mainPicPosVal.minX;
+                                    pos.y += mainPicPosVal.minY;
+                                }
                                 Quad qmark = new Quad(
                                         picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
                                         Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
@@ -820,6 +844,12 @@ public class Intrface {
                         // determine position of this picture
                         float posx = (textRect.minX + textRect.maxX) / 2.0f;
                         float posy = (textRect.minY + textRect.maxY) / 2.0f;
+
+                        // Global Map special case
+                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                            posx += mainPicPosVal.minX;
+                            posy += mainPicPosVal.minY;
+                        }
 
                         // calc screen pixel coordinates
                         Vector2f pos = new Vector2f(posx, posy);

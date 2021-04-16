@@ -30,15 +30,15 @@ public class ScalingUtils {
      * @param modeWidth resolution width
      * @param modeHeight resolution height
      * @param mainPicWidth referent main picture width
-     * @param mainPicHeight refererent main picture height
+     * @param mainPicHeight referent main picture height
      * @return Pair[SX, SY] is scaling for X-axis and Y-axis
      */
     public static Pair<Float, Float> scaleXYFactor(int modeWidth, int modeHeight, int mainPicWidth, int mainPicHeight) {
         final float sx = (GUI.GL_CANVAS.getWidth() * GUI.GL_CANVAS.getWidth()) / (float) (modeWidth * mainPicWidth);
         final float sy = (GUI.GL_CANVAS.getHeight() * GUI.GL_CANVAS.getHeight()) / (float) (modeHeight * mainPicHeight);
 
-        final float mx = modeWidth / (float) GUI.GL_CANVAS.getWidth();
-        final float my = modeHeight / (float) GUI.GL_CANVAS.getHeight();
+        final float mx = 1.0f + MathUtils.relativeChange(modeWidth, GUI.GL_CANVAS.getWidth());
+        final float my = 1.0f + MathUtils.relativeChange(modeHeight, GUI.GL_CANVAS.getHeight());
 
         float key = sx * mx;
         float value = sy * my;
