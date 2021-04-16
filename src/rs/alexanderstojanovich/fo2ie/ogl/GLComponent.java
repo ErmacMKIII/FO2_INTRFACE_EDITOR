@@ -33,7 +33,7 @@ public interface GLComponent {
      * Type of this GLComponent
      */
     public enum Type {
-        PIC, ANIM, TXT
+        PIC, ANIM, TXT, ADDR
     }
 
     /**
@@ -136,9 +136,16 @@ public interface GLComponent {
     public float getRelativeHeight();
 
     /**
-     * Gets rectangular surface area of component
+     * Gets rectangular pixel surface area of component
      *
-     * @return
+     * @return pixel rectangular surface
      */
-    public Rectanglef getArea();
+    public Rectanglef getPixelArea();
+
+    /**
+     * Gets rectangular pixel surface GL area of component
+     *
+     * @return pixel rectangular GL surface
+     */
+    public Rectanglef getGLArea();
 }

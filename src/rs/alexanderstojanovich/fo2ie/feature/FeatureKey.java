@@ -19,6 +19,7 @@ package rs.alexanderstojanovich.fo2ie.feature;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import rs.alexanderstojanovich.fo2ie.util.Pair;
 
 /**
  *
@@ -132,7 +133,7 @@ public interface FeatureKey {
                     return Type.TXT;
                 case AimPicX:
                 case AimPicY:
-                    return Type.VALUE;
+                    return Type.OFFSET;
                 default:
                     return Type.UNKNOWN;
             }
@@ -156,6 +157,48 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return AimMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{AimCancelPicDn, AimMainPic};
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{AimCancel, AimMain};
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                AimEyesProc,
+                AimEyesText,
+                AimGroinProc,
+                AimGroinText,
+                AimHeadProc,
+                AimHeadText,
+                AimLArmProc,
+                AimLArmText,
+                AimLLegProc,
+                AimLLegText,
+                AimRArmProc,
+                AimRArmText,
+                AimRLegProc,
+                AimRLegText,
+                AimTorsoProc,
+                AimTorsoText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return new FeatureKey[]{AimPicX, AimPicY};
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -304,6 +347,88 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return BarterMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                BarterButtonPic0,
+                BarterButtonPic1,
+                BarterButtonPic2,
+                BarterButtonPic3,
+                BarterButtonPic4,
+                BarterCont1ScrDnPicDn,
+                BarterCont1oScrDnPicDn,
+                BarterCont1oScrUpPicDn,
+                BarterCont1ScrUpPicDn,
+                BarterCont2oScrUpPicDn,
+                BarterCont2ScrUpPicDn,
+                BarterCont2ScrDnPicDn,
+                BarterCont2oScrDnPicDn,
+                BarterTalkPic,
+                BarterOfferPic,
+                BarterMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                BarterButton0,
+                BarterButton1,
+                BarterButton2,
+                BarterButton3,
+                BarterButton4,
+                BarterButtonOpponent0,
+                BarterButtonOpponent1,
+                BarterButtonOpponent2,
+                BarterButtonOpponent3,
+                BarterButtonOpponent4,
+                BarterChosen,
+                BarterCritter,
+                BarterCont1,
+                BarterCont2,
+                BarterCont1oScrDn,
+                BarterCont1oScrUp,
+                BarterCont2ScrDn,
+                BarterCont2ScrUp,
+                BarterCont2oScrDn,
+                BarterCont2oScrUp,
+                BarterCont1ScrDn,
+                BarterCont1ScrUp,
+                BarterCont1Pic,
+                BarterCont2Pic,
+                BarterMain,
+                BarterTalk,
+                BarterOffer,
+                BarterCont1o,
+                BarterCont2o
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                BarterCost1,
+                BarterCost2,
+                BarterOfferText,
+                BarterTalkText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                BarterCont1ItemHeight,
+                BarterCont1oItemHeight,
+                BarterCont2ItemHeight,
+                BarterCont2oItemHeight
+            };
         }
 
     }
@@ -513,6 +638,117 @@ public interface FeatureKey {
             return ChaMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                ChaAgeDownPicDn,
+                ChaAgeMainPic,
+                ChaAgePicDn,
+                ChaAgeUpPicDn,
+                ChaCancelPicDn,
+                ChaMainPic,
+                ChaNameMainPic,
+                ChaNamePicDn,
+                ChaOkPicDn,
+                ChaPrintPicDn,
+                ChaSexFemalePicDn,
+                ChaSexMainPic,
+                ChaSexMalePicDn,
+                ChaSliderPic,
+                ChaSliderMinusPicDn,
+                ChaSliderPlusPicDn,
+                ChaSwitchKarmaPic,
+                ChaSwitchScrDnPic,
+                ChaSwitchKillsPic,
+                ChaSwitchMaskPic,
+                ChaSwitchScrDnPicDn,
+                ChaSwitchPerksPic,
+                ChaSwitchScrUpPicDn,
+                ChaSwitchScrUpPic,
+                ChaSexPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                ChaAge,
+                ChaSex,
+                ChaName,
+                ChaMain,
+                ChaPrint,
+                ChaOk,
+                ChaCancel,
+                ChaSliderMinus,
+                ChaSliderPlus,
+                ChaAgeUp,
+                ChaAgeDown,
+                ChaAgeMain,
+                ChaNameMain,
+                ChaSexFemale,
+                ChaSexMale,
+                ChaSexMain,
+                ChaSwitch
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                ChaParamPic,
+                ChaCancelText,
+                ChaOkText,
+                ChaNamePassText,
+                ChaPrintText,
+                ChaLevel,
+                ChaExp,
+                ChaDmg,
+                ChaDmgLife,
+                ChaSpecialText,
+                ChaSpecialValue,
+                ChaSpecialLevel,
+                ChaNextLevel,
+                ChaStatsName,
+                ChaStatsValue,
+                ChaSwitchScrDn,
+                ChaSwitchScrUp,
+                ChaAgeAge,
+                ChaNameName,
+                ChaNameNameText,
+                ChaNamePass,
+                ChaSwitchText,
+                ChaSkillText,
+                ChaSkillValue,
+                ChaSkillName,
+                ChaParamDesc,
+                ChaParamName,
+                ChaSpecialParams,
+                ChaUnspentSP,
+                ChaUnspentSPText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                ChaDmgNextX,
+                ChaDmgNextY,
+                ChaSkillNextX,
+                ChaSkillNextY,
+                ChaSliderX,
+                ChaSliderY,
+                ChaSpecialNextX,
+                ChaSpecialNextY,
+                ChaStatsNextX,
+                ChaStatsNextY
+            };
+        }
+
     }
 
     // Chosen Tabs
@@ -562,6 +798,31 @@ public interface FeatureKey {
             return ChosenTab;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{ChosenTabPic};
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{ChosenTab};
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{ChosenTabStepX, ChosenTabStepY};
+        }
+
     }
 
     // Console
@@ -587,7 +848,7 @@ public interface FeatureKey {
                     return Type.TXT;
                 case ConsoleMainPicX:
                 case ConsoleMainPicY:
-                    return Type.VALUE;
+                    return Type.OFFSET;
                 default:
                     return Type.UNKNOWN;
             }
@@ -610,6 +871,31 @@ public interface FeatureKey {
 
         @Override
         public FeatureKey getMainPicPos() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{ConsoleMainPic};
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{ConsoleTextX, ConsoleTextY};
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return new FeatureKey[]{ConsoleTextX, ConsoleTextY};
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
             return null;
         }
 
@@ -691,7 +977,7 @@ public interface FeatureKey {
                     return Type.TXT;
                 case DlgNextAnswX:
                 case DlgNextAnswY:
-                    return Type.VALUE;
+                    return Type.OFFSET;
                 default:
                     return Type.UNKNOWN;
             }
@@ -715,6 +1001,66 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return DlgMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                DlgAnswPic,
+                DlgAvatar,
+                DlgBarterPicDn,
+                DlgMainPic,
+                DlgSayPicDn,
+                DlgScrDnPicDn,
+                DlgScrUpPicDn,
+                DlgboxButtonPicDn,
+                DlgboxBottomPic,
+                DlgboxMiddlePic,
+                DlgboxTopPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                DlgAnsw,
+                DlgBarter,
+                DlgSay,
+                DlgScrDn,
+                DlgScrUp,
+                DlgMain,
+                DlgboxButton,
+                DlgboxBottom,
+                DlgboxMiddle,
+                DlgboxTop
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                DlgAnswText,
+                DlgBarterText,
+                DlgMoney,
+                DlgSayText,
+                DlgTimer,
+                DlgText,
+                DlgboxButtonText,
+                DlgboxText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return new FeatureKey[]{
+                DlgNextAnswX,
+                DlgNextAnswY
+            };
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -775,6 +1121,42 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
             }
         }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{FactionMainPic};
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                FactionButton0,
+                FactionButton1,
+                FactionButton2,
+                FactionButton3,
+                FactionButton4,
+                FactionButton5
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                FactionLabel,
+                FactionMainText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
     }
 
     // Fix-boy
@@ -866,6 +1248,57 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return FixMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                FixButtonPic1,
+                FixButtonPic2,
+                FixButtonPic3,
+                FixButtonPic4,
+                FixButtonPic5,
+                FixDonePicDn,
+                FixDowPic,
+                FixFixPicDn,
+                FixMainPic,
+                FixScrDnPicDn,
+                FixScrUpPicDn,
+                FixUpPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                FixButton1,
+                FixButton2,
+                FixButton3,
+                FixButton4,
+                FixButton5,
+                FixDone,
+                FixDow,
+                FixFix,
+                FixMain,
+                FixScrDn,
+                FixScrUp,
+                FixUp
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{FixNum, FixWin};
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -974,13 +1407,14 @@ public interface FeatureKey {
                     return Type.TXT;
                 case GmapNameStepX:
                 case GmapNameStepY:
+                    return Type.VALUE;
                 case GmapTilesX:
                 case GmapTilesY:
                 case GmapTownInOffsX:
                 case GmapTownInOffsY:
                 case GmapTownViewOffsX:
                 case GmapTownViewOffsY:
-                    return Type.VALUE;
+                    return Type.OFFSET;
                 default:
                     return Type.UNKNOWN;
             }
@@ -1004,6 +1438,81 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return GmapMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                GmapChaPicDn,
+                GmapFixPicDn,
+                GmapFollowCritPic,
+                GmapFollowCritSelfPic,
+                GmapMainPic,
+                GmapMenuPicDn,
+                GmapPipPicDn,
+                GmapTownPicDn,
+                GmapTownViewPic,
+                GmapTownViewPicDn,
+                GmapTownViewPicMask,
+                GmapTownInPicDn,
+                GmapTownInPicMask,
+                GmapTabsScrDnPicDn,
+                GmapStayPic,
+                GmapStayPicDn,
+                GmapTabsScrUpPicDn,
+                GmapTownInPic,
+                GmapTilesPic,
+                GmapStayPicMask,
+                GmapDayTimeAnim,
+                GmapInvPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                GmapCha,
+                GmapFix,
+                GmapMain,
+                GmapPip,
+                GmapTown,
+                GmapCar,
+                GmapTabs,
+                GmapDayTime,
+                GmapInv,
+                GmapMap,
+                GmapMenu,
+                GmapPanel,
+                GmapTabsScrDn,
+                GmapTabsScrUp
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                GmapName,
+                GmapLock,
+                GmapMessageBox,
+                GmapTime
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return new FeatureKey[]{
+                GmapTilesX,
+                GmapTilesY,
+                GmapTownInOffsX,
+                GmapTownInOffsY,
+                GmapTownViewOffsX,
+                GmapTownViewOffsY
+            };
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{GmapNameStepX, GmapNameStepY};
         }
 
     }
@@ -1075,6 +1584,48 @@ public interface FeatureKey {
             }
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                GPickupCancelPicDn,
+                GPickupInvScrDnPic,
+                GPickupInvScrDnPicDn,
+                GPickupInvScrDnPicNa,
+                GPickupInvScrUpPic,
+                GPickupInvScrUpPicDn,
+                GPickupInvScrUpPicNa,
+                GPickupMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                GPickupCancel,
+                GPickupInv,
+                GPickupInvScrDn,
+                GPickupInvScrUp
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                GPickupWidthItem,
+                GPickupHeightItem
+            };
+        }
+
     }
 
     // Input box
@@ -1134,6 +1685,44 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return IboxMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                IboxCancelPicDn,
+                IboxDonePicDn,
+                IboxMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                IboxCancel,
+                IboxDone,
+                IboxMain
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                IboxCancelText,
+                IboxDoneText,
+                IboxText,
+                IboxTitle
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -1262,11 +1851,8 @@ public interface FeatureKey {
                 case IntMessLarge:
                 case IntApCost:
                 case IntHp:
-                    return Type.TXT;
                 case IntAc:
-                case IntApStepX:
-                case IntApStepY:
-                case IntApMax:
+                    return Type.TXT;
                 case IntAimX:
                 case IntAimY:
                 case IntUseX:
@@ -1274,6 +1860,10 @@ public interface FeatureKey {
                 case IntX:
                 case IntItemOffsX:
                 case IntItemOffsY:
+                    return Type.OFFSET;
+                case IntApMax:
+                case IntApStepX:
+                case IntApStepY:
                     return Type.VALUE;
                 default:
                     return Type.UNKNOWN;
@@ -1298,6 +1888,96 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return IntMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                IntAddMessPicDn,
+                IntAddMessWindowPic,
+                IntAimPic,
+                IntApGreenPic,
+                IntApRedPic,
+                IntApYellowPic,
+                IntBreakTimePic,
+                IntChangeSlotPicDn,
+                IntCombatEndPicDn,
+                IntChaPicDn,
+                IntCombatTurnPicDn,
+                IntFixPicDn,
+                IntInvPicDn,
+                IntItemPicDn,
+                IntMainPic,
+                IntMapPicDn,
+                IntMenuPicDn,
+                IntMessFilter1PicDn,
+                IntMessFilter2PicDn,
+                IntPipPicDn,
+                IntSkillPicDn,
+                IntCombatAnim
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                IntAddMess,
+                IntAddMessWindow,
+                IntAim,
+                IntBreakTime,
+                IntChangeSlot,
+                IntCombatEnd,
+                IntMessFilter1,
+                IntMessFilter2,
+                IntSkill,
+                IntPip,
+                IntFix,
+                IntMap,
+                IntInv,
+                IntCha,
+                IntMenu,
+                IntAmmoCount,
+                IntWearProcent,
+                IntAp,
+                IntCombat,
+                IntCombatTurn,
+                IntMain,
+                IntItem
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                IntAmmoCountText,
+                IntWearProcentText,
+                IntMess,
+                IntMessLarge,
+                IntApCost,
+                IntHp
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return new FeatureKey[]{
+                IntAimX,
+                IntAimY,
+                IntUseX,
+                IntUseY,
+                IntX,
+                IntItemOffsX,
+                IntItemOffsY
+            };
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                IntApMax,
+                IntApStepX,
+                IntApStepY
+            };
         }
 
     }
@@ -1380,6 +2060,51 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return InvMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                InvMainPic,
+                InvOkPic,
+                InvOkPicDn,
+                InvScrDnPic,
+                InvScrDnPicDn,
+                InvScrDnPicNa,
+                InvScrUpPic,
+                InvScrUpPicDn,
+                InvScrUpPicNa
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                InvMain,
+                InvOk,
+                InvInv,
+                InvChosen,
+                InvArmor,
+                InvScrDn,
+                InvScrUp,
+                InvSlot1,
+                InvSlot2
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{InvText};
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{InvHeightItem};
         }
 
     }
@@ -1504,6 +2229,72 @@ public interface FeatureKey {
             return null;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                LMenuBagPic,
+                LMenuBagPicDn,
+                LMenuBarterHidePic,
+                LMenuBarterHidePicDn,
+                LMenuBarterOpenPic,
+                LMenuBarterOpenPicDn,
+                LMenuCancelPic,
+                LMenuCancelPicDn,
+                LMenuDropPic,
+                LMenuDropPicDn,
+                LMenuGMFollowPic,
+                LMenuGMFollowPicDn,
+                LMenuGmapKickPic,
+                LMenuGmapKickPicDn,
+                LMenuGmapRulePic,
+                LMenuGmapRulePicDn,
+                LMenuLookPic,
+                LMenuLookPicDn,
+                LMenuPickItemPic,
+                LMenuPickItemPicDn,
+                LMenuPushPic,
+                LMenuPushPicDn,
+                LMenuRotatePic,
+                LMenuRotatePicDn,
+                LMenuSkillPic,
+                LMenuSkillPicDn,
+                LMenuSortDownPic,
+                LMenuSortDownPicDn,
+                LMenuSortUpPic,
+                LMenuSortUpPicDn,
+                LMenuTalkPic,
+                LMenuTalkPicDn,
+                LMenuUnloadPic,
+                LMenuUnloadPicDn,
+                LMenuUsePic,
+                LMenuUsePicDn,
+                LMenuVoteDownPic,
+                LMenuVoteDownPicDn,
+                LMenuVoteUpPic,
+                LMenuVoteUpPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{LMenuNodeHeight};
+        }
+
     }
 
     // Mini-map
@@ -1560,6 +2351,42 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return LmapMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                LmapLoHiPicDn,
+                LmapMainPic,
+                LmapOkPicDn,
+                LmapScanPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                LmapLoHi,
+                LmapMain,
+                LmapMap,
+                LmapOk,
+                LmapScan
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -1647,6 +2474,56 @@ public interface FeatureKey {
             return LogMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                LogCreditsPicDn,
+                LogExitPicDn,
+                LogMainPic,
+                LogOptionsPicDn,
+                LogPlayPicDn,
+                LogRegPicDn,
+                LogSingleplayerMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                LogCredits,
+                LogExit,
+                LogMain,
+                LogOptions,
+                LogPlay,
+                LogReg
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                LogMessageBox,
+                LogVersion,
+                LogCreditsText,
+                LogExitText,
+                LogName,
+                LogOptionsText,
+                LogPass,
+                LogPlayText,
+                LogRegText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
     }
 
     // Options
@@ -1711,6 +2588,46 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return MoptMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                MoptExitPicDn,
+                MoptLoadGamePicDn,
+                MoptMainPic,
+                MoptOptionsPicDn,
+                MoptResumePicDn,
+                MoptSaveGamePicDn,
+                MoptSingleplayerMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                MoptExit,
+                MoptLoadGame,
+                MoptMain,
+                MoptOptions,
+                MoptResume,
+                MoptSaveGame
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -1791,6 +2708,51 @@ public interface FeatureKey {
             return null;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                PSInvScrDnPic,
+                PSInvScrDnPicDn,
+                PSInvScrDnPicNa,
+                PSInvScrUpPic,
+                PSInvScrUpPicDn,
+                PSInvScrUpPicNa,
+                PSMainPic,
+                PScancelPicDn,
+                PSdonePicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                PSInvScrDn,
+                PSInvScrUp,
+                PSdone,
+                PScancel,
+                PSInv,
+                PSItem
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{PSValue};
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                PSHeightItem,
+                PSWidthItem
+            };
+        }
+
     }
 
     // Perk window
@@ -1869,6 +2831,50 @@ public interface FeatureKey {
             return PerkMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                PerkCancelPic,
+                PerkMainPic,
+                PerkOkPic,
+                PerkScrDnPic,
+                PerkScrUpPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                PerkCancel,
+                PerkMain,
+                PerkOk,
+                PerkScrDn,
+                PerkScrUp,
+                PerkPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                PerkCancelText,
+                PerkMainTitle,
+                PerkOkText,
+                PerkPerks,
+                PerkText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{PerkNextX, PerkNextY};
+        }
+
     }
 
     // Pip-boy
@@ -1934,6 +2940,45 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return PipMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                PipArchivesPicDn,
+                PipAutomapsPicDn,
+                PipClosePicDn,
+                PipMonitorPic,
+                PipStatusPicDn,
+                PipMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                PipArchives,
+                PipAutomaps,
+                PipClose,
+                PipMonitor,
+                PipMain,
+                PipStatus
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{PipTime};
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -2005,9 +3050,8 @@ public interface FeatureKey {
                 case PupCont2:
                 case PupOk:
                 case PupTakeAll:
-                    return Type.PIC_POS;
                 case PupInfo:
-                    return Type.TXT;
+                    return Type.PIC_POS;
                 case PupHeightCont1:
                 case PupHeightCont2:
                     return Type.VALUE;
@@ -2034,6 +3078,63 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return PupMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                PupMainPic,
+                PupNextCritLeftPic,
+                PupNextCritLeftPicDn,
+                PupNextCritRightPic,
+                PupScrDw1PicDn,
+                PupScrDw1PicOff,
+                PupNextCritRightPicDn,
+                PupScrDw2PicDn,
+                PupScrDw2PicOff,
+                PupScrUp1PicDn,
+                PupScrUp2PicDn,
+                PupScrUp1PicOff,
+                PupScrUp2PicOff,
+                PupTAPicDn,
+                PupOkPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                PupMain,
+                PupNextCritLeft,
+                PupNextCritRight,
+                PupScrUp1,
+                PupScrUp2,
+                PupScrDw1,
+                PupScrDw2,
+                PupCont1,
+                PupCont2,
+                PupOk,
+                PupTakeAll,
+                PupInfo
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                PupHeightCont1,
+                PupHeightCont2
+            };
         }
 
     }
@@ -2155,6 +3256,73 @@ public interface FeatureKey {
             return RadioMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                RadioBroadcastRecv1PicDn,
+                RadioBroadcastRecv2PicDn,
+                RadioBroadcastRecv3PicDn,
+                RadioBroadcastRecv4PicDn,
+                RadioBroadcastRecv5PicDn,
+                RadioBroadcastRecvPicDn,
+                RadioBroadcastSend1PicDn,
+                RadioBroadcastSend2PicDn,
+                RadioBroadcastSend3PicDn,
+                RadioBroadcastSend4PicDn,
+                RadioBroadcastSend5PicDn,
+                RadioBroadcastSendPicDn,
+                RadioMainPic,
+                RadioRefreshPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                RadioBroadcastRecv,
+                RadioBroadcastRecv1,
+                RadioBroadcastRecv2,
+                RadioBroadcastRecv3,
+                RadioBroadcastRecv4,
+                RadioBroadcastRecv5,
+                RadioBroadcastSend,
+                RadioBroadcastSend1,
+                RadioBroadcastSend2,
+                RadioBroadcastSend3,
+                RadioBroadcastSend4,
+                RadioBroadcastSend5,
+                RadioChannel,
+                RadioMain,
+                RadioRefresh
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                RadioBroadcast1Text,
+                RadioBroadcast2Text,
+                RadioBroadcast3Text,
+                RadioBroadcast4Text,
+                RadioBroadcast5Text,
+                RadioBroadcastRecvText,
+                RadioBroadcastSendText,
+                RadioChannelText,
+                RadioMainText,
+                RadioRefreshText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
     }
 
     // Registration
@@ -2239,6 +3407,56 @@ public interface FeatureKey {
             return RegMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                RegMainPic,
+                RegSpecialMinusPicDn,
+                RegSpecialPlusPicDn,
+                RegTagSkillPicDn,
+                RegTraitPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                RegMain,
+                RegSpecialMinus,
+                RegSpecialPlus,
+                RegTagSkill,
+                RegTraitL,
+                RegTraitR,
+                RegUnspentSpecial
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                RegTraitLText,
+                RegTraitRText,
+                RegUnspentSpecialText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{
+                RegSpecialNextX,
+                RegSpecialNextY,
+                RegTagSkillNextX,
+                RegTagSkillNextY,
+                RegTraitNextX,
+                RegTraitNextY
+            };
+        }
+
     }
 
     // Save/Load
@@ -2312,6 +3530,50 @@ public interface FeatureKey {
             return SaveLoadMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                SaveLoadBackPicDn,
+                SaveLoadDonePicDn,
+                SaveLoadMainPic,
+                SaveLoadPic,
+                SaveLoadScrUpPicDn,
+                SaveLoadScrDownPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                SaveLoadBack,
+                SaveLoadDone,
+                SaveLoadMain,
+                SaveLoadScrDown,
+                SaveLoadScrUp,
+                SaveLoadSlots
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                SaveLoadBackText,
+                SaveLoadDoneText,
+                SaveLoadInfo,
+                SaveLoadText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
     }
 
     // Say box
@@ -2371,6 +3633,44 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return SayMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                SayCancelPicDn,
+                SayMainPic,
+                SayOkPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                SayCancel,
+                SayMain,
+                SayOk,
+                SaySay
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                SayCancelText,
+                SayMainText,
+                SayOkText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -2474,6 +3774,64 @@ public interface FeatureKey {
             return SboxMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                SboxCancelPicDn,
+                SboxDoctorPicDn,
+                SboxFirstAidPicDn,
+                SboxLockpickPicDn,
+                SboxMainPic,
+                SboxRepairPicDn,
+                SboxSciencePicDn,
+                SboxSneakPicDn,
+                SboxStealPicDn,
+                SboxTrapPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                SboxCancel,
+                SboxDoctor,
+                SboxFirstAid,
+                SboxLockpick,
+                SboxMain,
+                SboxRepair,
+                SboxScience,
+                SboxSneak,
+                SboxSteal,
+                SboxTrap
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                SboxCancelText,
+                SboxFirstAidText,
+                SboxDoctorText,
+                SboxLockpickText,
+                SboxMainText,
+                SboxRepairText,
+                SboxScienceText,
+                SboxSneakText,
+                SboxStealText,
+                SboxTrapText
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
     }
 
     // Split
@@ -2545,6 +3903,49 @@ public interface FeatureKey {
             return SplitMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                SplitAllPicDn,
+                SplitCancelPic,
+                SplitDonePic,
+                SplitDownPicDn,
+                SplitMainPic,
+                SplitUpPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                SplitAll,
+                SplitCancel,
+                SplitDone,
+                SplitDown,
+                SplitMain,
+                SplitUp,
+                SplitItem
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                SplitTitle,
+                SplitValue
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
     }
 
     // Town view
@@ -2599,6 +4000,41 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return TViewMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                TViewBackPicDn,
+                TViewContoursPicDn,
+                TViewEnterPicDn,
+                TViewMainPic
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                TViewBack,
+                TViewContours,
+                TViewEnter,
+                TViewMain
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -2666,6 +4102,47 @@ public interface FeatureKey {
         @Override
         public FeatureKey getMainPicPos() {
             return TimerMain;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                TimerCancelPicDn,
+                TimerDonePicDn,
+                TimerDownPicDn,
+                TimerMainPic,
+                TimerUpPicDn
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                TimerCancel,
+                TimerDone,
+                TimerDown,
+                TimerUp,
+                TimerMain,
+                TimerItem
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return new FeatureKey[]{
+                TimerTitle,
+                TimerValue
+            };
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
         }
 
     }
@@ -2741,20 +4218,60 @@ public interface FeatureKey {
             return UseMain;
         }
 
+        @Override
+        public FeatureKey[] getPicValues() {
+            return new FeatureKey[]{
+                UseCancelPic,
+                UseCancelPicDn,
+                UseMainPic,
+                UseScrDownPic,
+                UseScrDownPicDn,
+                UseScrDownPicOff,
+                UseScrUpPic,
+                UseScrUpPicDn,
+                UseScrUpPicOff
+            };
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return new FeatureKey[]{
+                UseCancel,
+                UseChosen,
+                UseMain,
+                UseScrDown,
+                UseScrUp,
+                UseInv
+            };
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return new FeatureKey[]{UseHeightItem};
+        }
+
     }
 
     /**
      * Type used to determine this Feature Key
      */
     public static enum Type {
-        UNKNOWN, PIC, PIC_POS, TXT, VALUE
+        UNKNOWN, PIC, PIC_POS, TXT, VALUE, OFFSET
     }
 
-//    public static final String PIC_REGEX = ".*(Main)?Pic(Dn|Off|Mask|Na)?";
-//    public static final String PIC_SUFFIX = "Pic(Dn|Off|Mask|Na)?";
-//    public static final String PREFIX_REGEX = "$(Aim|Barter|Cha|Chosen|Console"
-//            + "|Dlg|Fix|Gmap|IBox|Int|LMenu|Lmap|Log|Mopt|PS|Perk|Pip|Pup"
-//            + "|Radio|Reg|SaveLoad|Say|Sbox|Split|TView|Timer|Use)";
+    public static final String SPLIT_REGEX = ".*(Width|Height)$";
+    public static final String OFFSET_REGEX = ".*(X|Y)?$";
+
     /**
      * Gets main picture (needed for module building)
      *
@@ -2789,6 +4306,41 @@ public interface FeatureKey {
      * @return feature key prefix
      */
     public String getPrefix();
+
+    /**
+     * Gets all feats keys which are pictures
+     *
+     * @return all pic values
+     */
+    public FeatureKey[] getPicValues();
+
+    /**
+     * Gets all feats keys which are picture positions
+     *
+     * @return all pic pos values
+     */
+    public FeatureKey[] getPicPosValues();
+
+    /**
+     * Gets all feats keys which are text positions
+     *
+     * @return all text positions
+     */
+    public FeatureKey[] getTextValues();
+
+    /**
+     * Gets all feats keys which are offsets
+     *
+     * @return all offsets
+     */
+    public FeatureKey[] getOffsetValues();
+
+    /**
+     * Gets all feats keys which are split values
+     *
+     * @return all split values
+     */
+    public FeatureKey[] getSplitValues();
 
     /**
      * Gets feature type of this feature key {PIC, PIC_POS, TXT, etc}
@@ -2915,17 +4467,92 @@ public interface FeatureKey {
             );
             final String regex = hasNumber ? begin + FeatureValue.NUMBER_REGEX : begin;
 
-            String prefix = picPos.getPrefix();
-            FeatureKey[] keys = valuesOf(prefix);
-            for (FeatureKey key : keys) {
-                if (key.getType() == Type.PIC
-                        && (key.getStringValue().matches(regex)
-                        || key.getStringValue().matches(altRegex))) {
+            for (FeatureKey key : picPos.getPicValues()) {
+                if (key.getStringValue().matches(regex)
+                        || key.getStringValue().matches(altRegex)) {
                     result.add(key);
                 }
             }
 
             return result;
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets Offset for the given this Feature Key
+     *
+     * @param fk feature key
+     * @return [X,Y] as pair
+     */
+    public static Pair<FeatureKey, FeatureKey> getOffset(FeatureKey fk) {
+        FeatureKey fkx = null;
+        FeatureKey fky = null;
+
+        int len = 0;
+        for (FeatureKey off : fk.getOffsetValues()) {
+            String offStr = off.getStringValue();
+            if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
+                continue;
+            }
+
+            if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
+                if (offStr.endsWith("X")) {
+                    fkx = off;
+                    len++;
+                } else if (offStr.endsWith("Y")) {
+                    fky = off;
+                    len++;
+                }
+            }
+
+            if (len == 2) {
+                break;
+            }
+        }
+
+        if (fkx != null || fky != null) {
+            return new Pair<>(fkx, fky);
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets Split Values for the given this Feature Key
+     *
+     * @param fk feature key
+     * @return [Width, Height] as pair
+     */
+    public static Pair<FeatureKey, FeatureKey> getSplitValues(FeatureKey fk) {
+        FeatureKey fkw = null;
+        FeatureKey fkh = null;
+
+        int len = 0;
+        for (FeatureKey split : fk.getSplitValues()) {
+            String offStr = split.getStringValue();
+            if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
+                continue;
+            }
+
+            if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
+                if (offStr.endsWith("Width")) {
+                    fkw = split;
+                    len++;
+                } else if (offStr.endsWith("Height")) {
+                    fkh = split;
+                    len++;
+                }
+            }
+
+            if (len == 2) {
+                break;
+            }
+        }
+
+        if (fkw != null || fkh != null) {
+            return new Pair<>(fkw, fkh);
         }
 
         return null;

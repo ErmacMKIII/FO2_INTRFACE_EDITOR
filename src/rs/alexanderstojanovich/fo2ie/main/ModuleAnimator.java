@@ -29,6 +29,7 @@ import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
+import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
@@ -37,7 +38,8 @@ import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.GLCoords;
+import rs.alexanderstojanovich.fo2ie.util.Pair;
+import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
 /**
  *
@@ -64,9 +66,9 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
     private final FPSAnimator animator;
 
     protected GLComponent selected;
-    protected Vector2f glMouseCoords = new Vector2f();
     protected boolean dragging = false;
     protected Vector4f savedColor = new Vector4f();
+    private Vector2f scrnMouseCoords;
 
     /**
      * State of the machine
@@ -235,8 +237,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
         }
         dragging = true;
 
-        Vector2f scrnMouseCoords = new Vector2f(e.getX(), e.getY());
-        glMouseCoords = GLCoords.getOpenGLCoordinates(scrnMouseCoords, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+        scrnMouseCoords = new Vector2f(e.getX(), e.getY());
     }
 
     @Override
@@ -264,25 +265,15 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
 
             // try to set feature value with corresponding glMouseCoords
             if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
-                Rectanglef area = selected.getArea();
-                Vector2f topLeftGL = new Vector2f(area.minX, area.maxY);
-                Vector2f bottomRightGL = new Vector2f(area.maxX, area.minY);
+                MyRectangle mr = (MyRectangle) featureValue;
+                Rectanglef xr = selected.getPixelArea();
 
-                Vector2f topLeft = GLCoords.getScreenCoordinates(topLeftGL, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
-                Vector2f bottomRight = GLCoords.getScreenCoordinates(bottomRightGL, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(intrface.getModeWidth(), intrface.getModeHeight(), intrface.getMainPicWidth(), intrface.getMainPicHeight());
 
-                topLeft.x *= intrface.getMainPicWidth() / (float) GUI.GL_CANVAS.getWidth();
-                topLeft.y *= intrface.getMainPicHeight() / (float) GUI.GL_CANVAS.getHeight();
-
-                bottomRight.x *= intrface.getMainPicWidth() / (float) GUI.GL_CANVAS.getWidth();
-                bottomRight.y *= intrface.getMainPicHeight() / (float) GUI.GL_CANVAS.getHeight();
-
-                featureValue.setStringValue(
-                        String.valueOf(Math.round(topLeft.x))
-                        + " " + String.valueOf(Math.round(topLeft.y))
-                        + " " + String.valueOf(Math.round(bottomRight.x)
-                                + " " + String.valueOf(Math.round(bottomRight.y)))
-                );
+                mr.minX = Math.round(xr.minX / skvp.getKey());
+                mr.maxX = Math.round(xr.maxX / skvp.getKey());
+                mr.minY = Math.round(xr.minY / skvp.getValue());
+                mr.maxY = Math.round(xr.maxY / skvp.getValue());
 
                 afterSelection();
             }
@@ -315,12 +306,11 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
             return;
         }
 
-        Vector2f scrnMouseCoords = new Vector2f(e.getX(), e.getY());
-        glMouseCoords = GLCoords.getOpenGLCoordinates(scrnMouseCoords, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+        scrnMouseCoords = new Vector2f(e.getX(), e.getY());
 
         // move across the OpenGL render space
         if (selected != null) {
-            selected.setPos(glMouseCoords);
+            selected.setPos(scrnMouseCoords);
         }
 
         dragging = true;
@@ -328,8 +318,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        Vector2f scrnMouseCoords = new Vector2f(e.getX(), e.getY());
-        glMouseCoords = GLCoords.getOpenGLCoordinates(scrnMouseCoords, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+        scrnMouseCoords = new Vector2f(e.getX(), e.getY());
     }
 
     //--------------------------------------------------------------------------
@@ -402,8 +391,8 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
         return selected;
     }
 
-    public Vector2f getGlMouseCoords() {
-        return glMouseCoords;
+    public Vector2f getScrnMouseCoords() {
+        return scrnMouseCoords;
     }
 
     public boolean isDragging() {

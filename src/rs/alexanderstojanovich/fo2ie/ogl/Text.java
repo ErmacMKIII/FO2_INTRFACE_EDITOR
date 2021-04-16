@@ -26,6 +26,7 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
 
 /**
@@ -69,21 +70,6 @@ public class Text implements GLComponent {
     protected int charHeight = STD_FONT_HEIGHT;
 
     protected final PrimitiveQuad overlay;
-
-    /**
-     * Constructs OpenGL text component
-     *
-     * @param featureKey bound feature key
-     * @param texture bound texture
-     * @param content display text
-     */
-    public Text(FeatureKey featureKey, Texture texture, String content) {
-        this.featureKey = featureKey;
-        this.texture = texture;
-        this.content = content;
-        this.overlay = new PrimitiveQuad(charWidth * content.length(), charHeight, pos);
-        this.enabled = true;
-    }
 
     /**
      * Constructs OpenGL text component
@@ -150,10 +136,9 @@ public class Text implements GLComponent {
                 pairList.add(new Pair<>(xinc, ydec));
 
                 // pass null feat key as it is only used for rendering charactters
-                Quad quad = new Quad(null, charWidth, charHeight, texture);
+                Quad quad = new Quad(null, charWidth, charHeight, texture, pos);
 
                 quad.setColor(color);
-                quad.setPos(pos);
                 quad.setScale(scale);
 
                 quad.getUvs()[0].x = cellU;
@@ -261,14 +246,26 @@ public class Text implements GLComponent {
     }
 
     @Override
-    public Rectanglef getArea() {
+    public Rectanglef getGLArea() {
+        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         float rw = getRelativeWidth();
         float rh = getRelativeHeight();
         Rectanglef rect = new Rectanglef(
-                pos.x - rw,
-                pos.y - rh,
-                pos.x + rw,
-                pos.y + rh
+                posGL.x - rw,
+                posGL.y - rh,
+                posGL.x + rw,
+                posGL.y + rh
+        );
+        return rect;
+    }
+
+    @Override
+    public Rectanglef getPixelArea() {
+        Rectanglef rect = new Rectanglef(
+                pos.x - charWidth * content.length() / 2.0f,
+                pos.y - charHeight / 2.0f,
+                pos.x + charWidth * content.length() / 2.0f,
+                pos.y + charHeight / 2.0f
         );
         return rect;
     }

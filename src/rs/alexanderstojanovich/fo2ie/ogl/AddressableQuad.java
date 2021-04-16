@@ -25,17 +25,23 @@ import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.main.GameTime;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class PrimitiveQuad { // text overlay (quad without texture)
+public class AddressableQuad implements GLComponent {
+
+    private final FeatureKey featureKey;
+    private final Type type = Type.ADDR;
 
     private int width;
     private int height;
+    private Texture texture;
 
     private Vector4f color = new Vector4f(Vector3fColors.WHITE, 1.0f);
     private float scale = 1.0f;
@@ -46,15 +52,18 @@ public class PrimitiveQuad { // text overlay (quad without texture)
     private static final Vector2f[] VERTICES = new Vector2f[4];
     private final FloatBuffer fb = GLBuffers.newDirectFloatBuffer(4 * VERTEX_SIZE);
 
+    private final Vector2f[] uvs = new Vector2f[4];
     private static final int[] INDICES = {0, 1, 2, 2, 3, 0};
     private static final IntBuffer CONST_INT_BUFFER = GLBuffers.newDirectIntBuffer(INDICES.length);
     private int vbo = 0;
     private static int ibo = 0;
 
-    public static final int VERTEX_SIZE = 2;
+    public static final int VERTEX_SIZE = 4;
     public static final int VERTEX_COUNT = 4;
 
     private boolean buffered = false;
+
+    private final GameTime gameTime = GameTime.getInstance();
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -67,20 +76,58 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         }
         CONST_INT_BUFFER.flip();
     }
+    private final float stepX;
+    private final float stepY;
+    private final Vector2f posMax;
 
     /**
-     * Create new quad with resize factor
+     * Create addressable new quad with resize factor
      *
+     * @param featureKey bound feature key
      * @param width quad width
      * @param height quad height
-     * @param pos position of the quad center (screen coordinates)
+     * @param texture parsed texture
+     * @param pos starting position
+     * @param stepX step X-coord for position
+     * @param stepY step Y-coord for positon
+     * @param posMax coordinates of max position (the furthest)
      */
-    public PrimitiveQuad(int width, int height, Vector2f pos) {
+    public AddressableQuad(FeatureKey featureKey, int width, int height, Texture texture, Vector2f pos, float stepX, float stepY, Vector2f posMax) {
+        this.featureKey = featureKey;
         this.width = width;
         this.height = height;
+        this.texture = texture;
+
         this.pos = pos;
+        this.stepX = stepX;
+        this.stepY = stepY;
+        this.posMax = posMax;
+        initUVs();
     }
 
+    private Vector2f nextPos() {
+        Vector2f res = new Vector2f(pos);
+
+        final int countX = (stepX == 0) ? 0 : Math.round(Math.abs(posMax.x - pos.x) / stepX);
+        final int countY = (stepY == 0) ? 0 : Math.round(Math.abs(posMax.y - pos.y) / stepY);
+
+        int i = (countX == 0) ? 0 : (int) Math.floorMod(Math.round(gameTime.getGameTicks()), countX);
+        int j = (countY == 0) ? 0 : (int) Math.floorMod(Math.round(gameTime.getGameTicks()), countY);
+
+        res.x = pos.x + i * stepX;
+        res.y = pos.y + j * stepY;
+
+        return res;
+    }
+
+    private void initUVs() {
+        uvs[0] = new Vector2f(0.0f, 1.0f); // (-1.0f, -1.0f)
+        uvs[1] = new Vector2f(1.0f, 1.0f); // (1.0f, -1.0f)
+        uvs[2] = new Vector2f(1.0f, 0.0f); // (1.0f, 1.0f)
+        uvs[3] = new Vector2f(0.0f, 0.0f); // (-1.0f, 1.0f)
+    }
+
+    @Override
     public void unbuffer() {
         buffered = false;
     }
@@ -90,11 +137,14 @@ public class PrimitiveQuad { // text overlay (quad without texture)
      *
      * @param gl20 GL20 binding
      */
+    @Override
     public void buffer(GL2 gl20) {
         fb.clear();
         for (int i = 0; i < VERTEX_COUNT; i++) {
             fb.put(VERTICES[i].x);
             fb.put(VERTICES[i].y);
+            fb.put(uvs[i].x);
+            fb.put(uvs[i].y);
         }
         fb.flip();
         if (vbo == 0) {
@@ -127,13 +177,12 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         buffered = true;
     }
 
-    private Matrix4f calcModelMatrix() {
-        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
-        Matrix4f translationMatrix = new Matrix4f().setTranslation(posGL.x, posGL.y, 0.0f);
+    private Matrix4f calcModelMatrix(Vector2f pos) {
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
 
-        float sx = getRelativeWidth();
-        float sy = getRelativeHeight();
+        float sx = giveRelativeWidth();
+        float sy = giveRelativeHeight();
         Matrix4f scaleMatrix = new Matrix4f().scaleXY(sx, sy);
 
         Matrix4f temp = new Matrix4f();
@@ -148,6 +197,7 @@ public class PrimitiveQuad { // text overlay (quad without texture)
      * @param projMat4 projection matrix
      * @param program shader program for images
      */
+    @Override
     public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram program) {
         if (enabled && buffered) {
             program.bind(gl20);
@@ -155,31 +205,106 @@ public class PrimitiveQuad { // text overlay (quad without texture)
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
 
             gl20.glEnableVertexAttribArray(0);
+            gl20.glEnableVertexAttribArray(1);
             gl20.glVertexAttribPointer(0, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 0); // this is for font pos
+            gl20.glVertexAttribPointer(1, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 8); // this is for font uv                                     
             program.bindAttribute(gl20, 0, "pos");
+            program.bindAttribute(gl20, 1, "uv");
 
-            Matrix4f modelMat4 = calcModelMatrix();
+            Matrix4f modelMat4 = calcModelMatrix(nextPos());
             program.updateUniform(gl20, projMat4, "projectionMatrix");
             program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
+            texture.bind(gl20, 0, program, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
+
+            Texture.unbind(gl20, 0);
 
             gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
             gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
             gl20.glDisableVertexAttribArray(0);
+            gl20.glDisableVertexAttribArray(1);
+
+            ShaderProgram.unbind(gl20);
+        }
+    }
+
+    private Matrix4f calcModelMatrix(Vector2f pos, float xinc, float ydec) {
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x + xinc, pos.y + ydec, 0.0f);
+        Matrix4f rotationMatrix = new Matrix4f().identity();
+
+        float sx = giveRelativeWidth();
+        float sy = giveRelativeHeight();
+        Matrix4f scaleMatrix = new Matrix4f().scaleXY(sx, sy);
+
+        Matrix4f temp = new Matrix4f();
+        Matrix4f modelMatrix = translationMatrix.mul(rotationMatrix.mul(scaleMatrix, temp), temp);
+        return modelMatrix;
+    }
+
+    /**
+     * Render font
+     *
+     * @param gl20 GL2 binding
+     * @param xinc x-advance
+     * @param ydec y-drop (for multi-line text)
+     * @param projMat4 projection matrix
+     * @param fntProgram shader program for fonts
+     */
+    public void render(GL2 gl20, float xinc, float ydec, Matrix4f projMat4, ShaderProgram fntProgram) { // used for fonts
+        if (enabled && buffered) {
+            fntProgram.bind(gl20);
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo);
+            gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+            gl20.glEnableVertexAttribArray(0);
+            gl20.glEnableVertexAttribArray(1);
+            gl20.glVertexAttribPointer(0, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 0); // this is for font pos
+            gl20.glVertexAttribPointer(1, 2, GL2.GL_FLOAT, false, VERTEX_SIZE * Float.BYTES, 8); // this is for font uv                                     
+            fntProgram.bindAttribute(gl20, 0, "pos");
+            fntProgram.bindAttribute(gl20, 1, "uv");
+
+            Matrix4f modelMat4 = calcModelMatrix(nextPos(), xinc, ydec);
+            fntProgram.updateUniform(gl20, projMat4, "projectionMatrix");
+            fntProgram.updateUniform(gl20, modelMat4, "modelMatrix");
+            fntProgram.updateUniform(gl20, color, "color");
+            texture.bind(gl20, 0, fntProgram, "colorMap");
+            gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
+
+            Texture.unbind(gl20, 0);
+
+            gl20.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+            gl20.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
+            gl20.glDisableVertexAttribArray(0);
+            gl20.glDisableVertexAttribArray(1);
 
             ShaderProgram.unbind(gl20);
         }
     }
 
     @Override
+    public Type getType() {
+        return type;
+    }
+
+    public float giveRelativeWidth() {
+        return scale * width / GUI.GL_CANVAS.getWidth();
+    }
+
+    public float giveRelativeHeight() {
+        return scale * height / GUI.GL_CANVAS.getHeight();
+    }
+
+    @Override
     public int hashCode() {
         int hash = 3;
-        hash = 61 * hash + this.width;
-        hash = 61 * hash + this.height;
-        hash = 61 * hash + Objects.hashCode(this.color);
-        hash = 61 * hash + Float.floatToIntBits(this.scale);
-        hash = 61 * hash + Objects.hashCode(this.pos);
+        hash = 41 * hash + Objects.hashCode(this.type);
+        hash = 41 * hash + this.width;
+        hash = 41 * hash + this.height;
+        hash = 41 * hash + Objects.hashCode(this.texture);
+        hash = 41 * hash + Objects.hashCode(this.color);
+        hash = 41 * hash + Float.floatToIntBits(this.scale);
+        hash = 41 * hash + Objects.hashCode(this.pos);
         return hash;
     }
 
@@ -194,7 +319,7 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final PrimitiveQuad other = (PrimitiveQuad) obj;
+        final AddressableQuad other = (AddressableQuad) obj;
         if (this.width != other.width) {
             return false;
         }
@@ -202,6 +327,12 @@ public class PrimitiveQuad { // text overlay (quad without texture)
             return false;
         }
         if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
+            return false;
+        }
+        if (this.type != other.type) {
+            return false;
+        }
+        if (!Objects.equals(this.texture, other.texture)) {
             return false;
         }
         if (!Objects.equals(this.color, other.color)) {
@@ -213,14 +344,17 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         return true;
     }
 
+    @Override
     public float getRelativeWidth() {
         return scale * width / (float) GUI.GL_CANVAS.getWidth();
     }
 
+    @Override
     public float getRelativeHeight() {
         return scale * height / (float) GUI.GL_CANVAS.getHeight();
     }
 
+    @Override
     public Rectanglef getGLArea() {
         Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         float rw = getRelativeWidth();
@@ -229,11 +363,18 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         return rect;
     }
 
+    @Override
     public Rectanglef getPixelArea() {
         Rectanglef rect = new Rectanglef(pos.x - width / 2.0f, pos.y - height / 2.0f, pos.x + width / 2.0f, pos.y + height / 2.0f);
         return rect;
     }
 
+    @Override
+    public FeatureKey getFeatureKey() {
+        return featureKey;
+    }
+
+    @Override
     public int getWidth() {
         return width;
     }
@@ -242,12 +383,21 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         this.width = width;
     }
 
+    @Override
     public int getHeight() {
         return height;
     }
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void setTexture(Texture texture) {
+        this.texture = texture;
     }
 
     public float getScale() {
@@ -258,6 +408,7 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         this.scale = scale;
     }
 
+    @Override
     public Vector2f getPos() {
         return pos;
     }
@@ -278,18 +429,26 @@ public class PrimitiveQuad { // text overlay (quad without texture)
         return VERTICES;
     }
 
+    @Override
     public boolean isBuffered() {
         return buffered;
     }
 
+    public Vector2f[] getUvs() {
+        return uvs;
+    }
+
+    @Override
     public void setPos(Vector2f pos) {
         this.pos = pos;
     }
 
+    @Override
     public Vector4f getColor() {
         return color;
     }
 
+    @Override
     public void setColor(Vector4f color) {
         this.color = color;
     }
@@ -299,7 +458,23 @@ public class PrimitiveQuad { // text overlay (quad without texture)
     }
 
     public static void setIbo(int ibo) {
-        PrimitiveQuad.ibo = ibo;
+        AddressableQuad.ibo = ibo;
+    }
+
+    public GameTime getGameTime() {
+        return gameTime;
+    }
+
+    public float getStepX() {
+        return stepX;
+    }
+
+    public float getStepY() {
+        return stepY;
+    }
+
+    public Vector2f getPosMax() {
+        return posMax;
     }
 
 }

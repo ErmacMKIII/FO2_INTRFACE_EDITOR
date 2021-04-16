@@ -354,7 +354,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - FINLAND");
+        setTitle("FOnline2 S3 Interface Editor - GOTHS");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(640, 360));
@@ -646,10 +646,10 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnChoosePathOutActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
+        mdlAnim.getModule().components.clear();
         loadFromButton();
         featurePreview();
         componentsPreview();
-        mdlAnim.getModule().components.clear();
     }//GEN-LAST:event_btnLoadActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
@@ -777,7 +777,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v0.5 - FINLAND (PUBLIC BUILD reviewed on 2021-04-10 at 16:00).</b></html>\n");
+            sb.append("<html><b>VERSION v0.9 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-16 at 21:30).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");

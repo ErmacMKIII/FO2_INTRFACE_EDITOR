@@ -46,8 +46,8 @@ import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
-import rs.alexanderstojanovich.fo2ie.util.GLCoords;
-import rs.alexanderstojanovich.fo2ie.util.MathUtils;
+import rs.alexanderstojanovich.fo2ie.util.Pair;
+import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
 /**
  *
@@ -55,19 +55,16 @@ import rs.alexanderstojanovich.fo2ie.util.MathUtils;
  */
 public class Intrface {
 
-    private int mainPicWidth = 800;
-    private int mainPicHeight = 600;
+    protected final StringBuilder errStrMsg = new StringBuilder();
+    protected int errorNum = 0;
 
-    private final StringBuilder errStrMsg = new StringBuilder();
-    private int errorNum = 0;
-
-    private final Configuration config = Configuration.getInstance();
+    protected final Configuration config = Configuration.getInstance();
 
     public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Dow|Off|Mask|Na)?";
 
-    private final Vector4f textColor = GLColor.awtColorToVec4(config.getTxtCol());
-    private final Vector4f textOverlayColor = GLColor.awtColorToVec4(config.getTxtOverlayCol());
-    private final Vector4f qmarkColor = GLColor.awtColorToVec4(config.getQmarkCol());
+    protected final Vector4f textColor = GLColor.awtColorToVec4(config.getTxtCol());
+    protected final Vector4f textOverlayColor = GLColor.awtColorToVec4(config.getTxtOverlayCol());
+    protected final Vector4f qmarkColor = GLColor.awtColorToVec4(config.getQmarkCol());
 
     /**
      * ReadMode for reading {STD = standard - loading common values; RES =
@@ -77,58 +74,63 @@ public class Intrface {
         STD, RES
     }
 
-    /*{FROM COMMON MAP (ALL RES), FROM RES PRAGMA
-     * (TARGET RES}
+    /* Build mode { FROM COMMON MAP (ALL RES), FROM RES PRAGMA (TARGET RES) }
      */
     public static enum BuildMode {
         NONE, COMMON, PRAGMA
     }
 
-    private boolean initialized = false;
-    private ReadMode readMode = ReadMode.STD;
-    private BuildMode buildMode = BuildMode.NONE;
+    protected boolean initialized = false;
+    protected ReadMode readMode = ReadMode.STD;
+    protected BuildMode buildMode = BuildMode.NONE;
 
-    private final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.AimMainPic, FeatureKey.Aim.values());
-    private final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.BarterMainPic, FeatureKey.Barter.values());
-    private final Section character = new Section(Section.SectionName.Character, FeatureKey.Character.ChaMainPic, FeatureKey.Character.values());
-    private final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Chosen.ChosenTabPic, FeatureKey.Chosen.values());
-    private final Section console = new Section(Section.SectionName.Console, FeatureKey.Console.ConsoleMainPic, FeatureKey.Console.values());
-    private final Section dialogBox = new Section(Section.SectionName.DialogBox, FeatureKey.Dialog.DlgMainPic, FeatureKey.Dialog.values());
-    private final Section faction = new Section(Section.SectionName.Faction, FeatureKey.Faction.FactionMainPic, FeatureKey.Faction.values());
-    private final Section fixBoy = new Section(Section.SectionName.FixBoy, FeatureKey.FixBoy.FixMainPic, FeatureKey.FixBoy.values());
-    private final Section globalMap = new Section(Section.SectionName.GlobalMap, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GlobalMap.values());
-    private final Section groundPickup = new Section(Section.SectionName.GroundPickup, FeatureKey.GroundPickup.GPickupMainPic, FeatureKey.GroundPickup.values());
-    private final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.IboxMainPic, FeatureKey.InputBox.values());
-    private final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.IntMainPic, FeatureKey.Interface.values());
-    private final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.InvMainPic, FeatureKey.Inventory.values());
-    private final Section popUp = new Section(Section.SectionName.PopUp, FeatureKey.Radio.PriceSetup.PSMainPic, FeatureKey.PopUp.values());
-    private final Section miniMap = new Section(Section.SectionName.MiniMap, FeatureKey.MiniMap.LmapMainPic, FeatureKey.MiniMap.values());
-    private final Section login = new Section(Section.SectionName.Login, FeatureKey.Login.LogMainPic, FeatureKey.Login.values());
-    private final Section options = new Section(Section.SectionName.Options, FeatureKey.Options.MoptMainPic, FeatureKey.Options.values());
-    private final Section priceSetup = new Section(Section.SectionName.PriceSetup, FeatureKey.PriceSetup.PSMainPic, FeatureKey.PriceSetup.values());
-    private final Section perk = new Section(Section.SectionName.Perk, FeatureKey.Perk.PerkMainPic, FeatureKey.Perk.values());
-    private final Section pipBoy = new Section(Section.SectionName.PipBoy, FeatureKey.PipBoy.PipMainPic, FeatureKey.PipBoy.values());
-    private final Section pickUp = new Section(Section.SectionName.PickUp, FeatureKey.PickUp.PupMainPic, FeatureKey.PickUp.values());
-    private final Section radio = new Section(Section.SectionName.Radio, FeatureKey.Radio.RadioMainPic, FeatureKey.Radio.values());
-    private final Section registration = new Section(Section.SectionName.Registration, FeatureKey.Registration.RegMainPic, FeatureKey.Registration.values());
-    private final Section saveLoad = new Section(Section.SectionName.SaveLoad, FeatureKey.SaveLoad.SaveLoadMainPic, FeatureKey.SaveLoad.values());
-    private final Section sayBox = new Section(Section.SectionName.SayBox, FeatureKey.SayBox.SayMainPic, FeatureKey.SayBox.values());
-    private final Section skillBox = new Section(Section.SectionName.SkillBox, FeatureKey.SkillBox.SboxMainPic, FeatureKey.SkillBox.values());
-    private final Section split = new Section(Section.SectionName.Split, FeatureKey.Split.SplitMainPic, FeatureKey.Split.values());
-    private final Section townView = new Section(Section.SectionName.TownView, FeatureKey.TownView.TViewMainPic, FeatureKey.TownView.values());
-    private final Section timer = new Section(Section.SectionName.Timer, FeatureKey.Timer.TimerMainPic, FeatureKey.Timer.values());
-    private final Section use = new Section(Section.SectionName.Use, FeatureKey.Use.UseMainPic, FeatureKey.Use.values());
+    protected final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.AimMainPic, FeatureKey.Aim.values());
+    protected final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.BarterMainPic, FeatureKey.Barter.values());
+    protected final Section character = new Section(Section.SectionName.Character, FeatureKey.Character.ChaMainPic, FeatureKey.Character.values());
+    protected final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Chosen.ChosenTabPic, FeatureKey.Chosen.values());
+    protected final Section console = new Section(Section.SectionName.Console, FeatureKey.Console.ConsoleMainPic, FeatureKey.Console.values());
+    protected final Section dialogBox = new Section(Section.SectionName.DialogBox, FeatureKey.Dialog.DlgMainPic, FeatureKey.Dialog.values());
+    protected final Section faction = new Section(Section.SectionName.Faction, FeatureKey.Faction.FactionMainPic, FeatureKey.Faction.values());
+    protected final Section fixBoy = new Section(Section.SectionName.FixBoy, FeatureKey.FixBoy.FixMainPic, FeatureKey.FixBoy.values());
+    protected final Section globalMap = new Section(Section.SectionName.GlobalMap, FeatureKey.GlobalMap.GmapMainPic, FeatureKey.GlobalMap.values());
+    protected final Section groundPickup = new Section(Section.SectionName.GroundPickup, FeatureKey.GroundPickup.GPickupMainPic, FeatureKey.GroundPickup.values());
+    protected final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.IboxMainPic, FeatureKey.InputBox.values());
+    protected final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.IntMainPic, FeatureKey.Interface.values());
+    protected final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.InvMainPic, FeatureKey.Inventory.values());
+    protected final Section popUp = new Section(Section.SectionName.PopUp, null, FeatureKey.PopUp.values());
+    protected final Section miniMap = new Section(Section.SectionName.MiniMap, FeatureKey.MiniMap.LmapMainPic, FeatureKey.MiniMap.values());
+    protected final Section login = new Section(Section.SectionName.Login, FeatureKey.Login.LogMainPic, FeatureKey.Login.values());
+    protected final Section options = new Section(Section.SectionName.Options, FeatureKey.Options.MoptMainPic, FeatureKey.Options.values());
+    protected final Section priceSetup = new Section(Section.SectionName.PriceSetup, FeatureKey.PriceSetup.PSMainPic, FeatureKey.PriceSetup.values());
+    protected final Section perk = new Section(Section.SectionName.Perk, FeatureKey.Perk.PerkMainPic, FeatureKey.Perk.values());
+    protected final Section pipBoy = new Section(Section.SectionName.PipBoy, FeatureKey.PipBoy.PipMainPic, FeatureKey.PipBoy.values());
+    protected final Section pickUp = new Section(Section.SectionName.PickUp, FeatureKey.PickUp.PupMainPic, FeatureKey.PickUp.values());
+    protected final Section radio = new Section(Section.SectionName.Radio, FeatureKey.Radio.RadioMainPic, FeatureKey.Radio.values());
+    protected final Section registration = new Section(Section.SectionName.Registration, FeatureKey.Registration.RegMainPic, FeatureKey.Registration.values());
+    protected final Section saveLoad = new Section(Section.SectionName.SaveLoad, FeatureKey.SaveLoad.SaveLoadMainPic, FeatureKey.SaveLoad.values());
+    protected final Section sayBox = new Section(Section.SectionName.SayBox, FeatureKey.SayBox.SayMainPic, FeatureKey.SayBox.values());
+    protected final Section skillBox = new Section(Section.SectionName.SkillBox, FeatureKey.SkillBox.SboxMainPic, FeatureKey.SkillBox.values());
+    protected final Section split = new Section(Section.SectionName.Split, FeatureKey.Split.SplitMainPic, FeatureKey.Split.values());
+    protected final Section townView = new Section(Section.SectionName.TownView, FeatureKey.TownView.TViewMainPic, FeatureKey.TownView.values());
+    protected final Section timer = new Section(Section.SectionName.Timer, FeatureKey.Timer.TimerMainPic, FeatureKey.Timer.values());
+    protected final Section use = new Section(Section.SectionName.Use, FeatureKey.Use.UseMainPic, FeatureKey.Use.values());
 
-    private final Map<SectionName, Section> nameToSectionMap = new HashMap<>();
-    private final Map<Section, String> sectionToPrefixMap = new HashMap<>();
+    protected final Map<SectionName, Section> nameToSectionMap = new HashMap<>();
+    protected final Map<Section, String> sectionToPrefixMap = new HashMap<>();
 
     protected final Map<FeatureKey, FeatureValue> commonFeatMap = new LinkedHashMap<>();
-    private final List<ResolutionPragma> customResolutions = new ArrayList<>();
+    protected final List<ResolutionPragma> customResolutions = new ArrayList<>();
 
-    private SectionName sectionName;
-    private ResolutionPragma resolutionPragma;
+    protected SectionName sectionName;
+    protected ResolutionPragma resolutionPragma;
 
-    private float progress = 0.0f;
+    protected float progress = 0.0f;
+
+    protected int modeWidth = 800;
+    protected int modeHeight = 600;
+
+    protected int mainPicWidth = 800;
+    protected int mainPicHeight = 600;
 
     public Intrface() {
         initMap();
@@ -434,8 +436,11 @@ public class Intrface {
 
         buildMode = BuildMode.COMMON;
 
-        final int screenWidth = GUI.GL_CANVAS.getWidth();
-        final int screenHeight = GUI.GL_CANVAS.getHeight();
+        modeWidth = 800;
+        modeHeight = 600;
+
+        mainPicWidth = 800;
+        mainPicHeight = 600;
 
         // final result is array list of components
         final List<GLComponent> result = new ArrayList<>();
@@ -444,10 +449,8 @@ public class Intrface {
             FeatureKey mainPicKey = section.root.getMainPic();
             MyRectangle mainPicPosVal = null;
 
-            // it's intially assumed that picture is 800x600 unless specified otherwise
-            mainPicWidth = 800;
-            mainPicHeight = 600;
-
+            // it is displayed on the small panel under some resolution, scaling is required
+            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) commonFeatMap.get(mainPicKey);
@@ -457,28 +460,36 @@ public class Intrface {
                 Texture rootTex;
                 // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                    modeWidth = mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                    modeHeight = mainPicHeight = mainPicVal.getImages()[0].getHeight();
+
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
                     // otherwise load missing question mark texture
                 } else {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
+                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
 
                 // defining root of the module (the main image)
                 // all positions are referred to this root (image)
                 // if position exists for the main (root) image
+                Vector2f rootPos = null;
                 if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) commonFeatMap.get(mainPicPosKey);
-                    MyRectangle temp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+                    MyRectangle rtemp = new MyRectangle();
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, rtemp);
+
+                    float rposx = (mainPicPosVal.minX + mainPicPosVal.maxX) / 2.0f;
+                    float rposy = (mainPicPosVal.minY + mainPicPosVal.maxY) / 2.0f;
+
+                    rootPos = new Vector2f(rposx, rposy);
+                } else {
+                    rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
                 }
 
-                float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
-                float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                Quad root = new Quad(mainPicPosKey, Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
+                Quad root = new Quad(mainPicPosKey, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 result.add(root);
             }
 
@@ -486,125 +497,134 @@ public class Intrface {
             final List<GLComponent> picComps = new ArrayList<>();
             final List<GLComponent> txtComps = new ArrayList<>();
 
-            for (FeatureKey picPosKey : section.picpos) {
-                if (picPosKey != section.root.getMainPicPos()) {
-                    FeatureValue picPosVal = commonFeatMap.get(picPosKey);
-                    if (picPosVal instanceof MyRectangle) {
-                        MyRectangle picPosRect = (MyRectangle) picPosVal;
+            FeatureKey[] picPosValues = section.root.getPicPosValues();
+            if (picPosValues != null) {
+                for (FeatureKey picPosKey : picPosValues) {
+                    if (picPosKey != section.root.getMainPicPos()) {
+                        FeatureValue picPosVal = commonFeatMap.get(picPosKey);
+                        if (picPosVal instanceof MyRectangle) {
+                            MyRectangle picPosRect = (MyRectangle) picPosVal;
+                            MyRectangle temp = new MyRectangle();
+
+                            // scale rectangle to the drawing surface
+                            picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+
+                            List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
+                            for (FeatureKey picKey : pics) {
+                                FeatureValue picVal = commonFeatMap.get(picKey);
+                                if (picVal instanceof ImageWrapper) {
+                                    ImageWrapper iw = (ImageWrapper) picVal;
+                                    iw.loadImages();
+                                    BufferedImage[] images = iw.getImages();
+                                    if (images != null && images.length > 0) {
+                                        // dimension of picture/animation in pixels
+                                        int width, height;
+                                        // pixel (screen) coordinates
+                                        Vector2f pos = new Vector2f();
+                                        if (images.length == 1) {
+                                            // pixel dimension
+                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            // pixel position
+                                            pos.x = picPosRect.minX + width / 2.0f;
+                                            pos.y = picPosRect.minY + height / 2.0f;
+                                            // texture from loaded image
+                                            Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                            Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
+                                            picComps.add(imgComp);
+                                        } else {
+                                            // pixel dimension
+                                            width = picPosRect.lengthX();
+                                            height = picPosRect.lengthY();
+                                            // pixel position (picPosRect is already scaled)
+                                            pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
+                                            pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+                                            int index = 0;
+                                            // array of textures for an animation
+                                            final Texture[] texas = new Texture[images.length];
+                                            for (BufferedImage image : images) {
+                                                texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
+                                                index++;
+                                            }
+                                            Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
+                                            picComps.add(anim);
+                                        }
+                                    }
+                                } else if (picVal != null) {
+                                    FO2IELogger.reportWarning("Unexisting cast for ("
+                                            + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
+                                }
+                            }
+
+                            // missing picture -> question mark for missing..
+                            if (pics.isEmpty()) {
+                                Vector2f pos = new Vector2f((picPosRect.minX + picPosRect.maxX) / 2.0f, (picPosRect.minY + picPosRect.maxY) / 2.0f);
+                                Quad qmark = new Quad(
+                                        picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
+                                        Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
+                                );
+                                qmark.setColor(qmarkColor);
+                                picComps.add(qmark);
+                            }
+
+                        } else if (picPosVal != null) {
+                            FO2IELogger.reportWarning("Unexisting cast for ("
+                                    + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
+                        }
+                    }
+
+                    progress += 50.0f / picPosValues.length;
+                }
+            }
+
+            FeatureKey[] textValues = section.root.getTextValues();
+            if (textValues != null) {
+                for (FeatureKey txtKey : textValues) {
+                    FeatureValue txtVal = commonFeatMap.get(txtKey);
+                    if (txtVal instanceof MyRectangle) {
+                        MyRectangle textRect = (MyRectangle) txtVal;
                         MyRectangle temp = new MyRectangle();
 
                         // scale rectangle to the drawing surface
-                        picPosRect = picPosRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+                        textRect = textRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+
+                        int width = textRect.lengthX();
+                        int height = textRect.lengthY();
 
                         // determine position of this picture
-                        float posx = (picPosRect.minX + picPosRect.maxX) / 2.0f;
-                        float posy = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+                        float posx = (textRect.minX + textRect.maxX) / 2.0f;
+                        float posy = (textRect.minY + textRect.maxY) / 2.0f;
 
-                        // apply shift if Global Map (only Global Map has such a property)
-                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                            posx += mainPicPosVal.minX;
-                            posy += mainPicPosVal.minY;
-                        }
-
-                        // calc OpenGL coordinates
+                        // calc screen pixel coordinates
                         Vector2f pos = new Vector2f(posx, posy);
-                        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
 
-                        List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
-                        for (FeatureKey picKey : pics) {
-                            FeatureValue picVal = commonFeatMap.get(picKey);
-                            if (picVal instanceof ImageWrapper) {
-                                ImageWrapper iw = (ImageWrapper) picVal;
-                                iw.loadImages();
-                                BufferedImage[] images = iw.getImages();
-                                if (images != null && images.length > 0) {
-                                    int width, height; // dimension of picture/animation in pixels
-                                    if (images.length == 1) {
-                                        Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                        width = Math.round(images[0].getWidth() * screenWidth / (float) mainPicWidth);
-                                        height = Math.round(images[0].getHeight() * screenHeight / (float) mainPicHeight);
-                                        Quad imgComp = new Quad(picPosKey, width, height, tex, posGL);
-                                        picComps.add(imgComp);
-                                    } else {
-                                        int index = 0;
-                                        final Texture[] texas = new Texture[images.length];
-                                        for (BufferedImage image : images) {
-                                            texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
-                                            index++;
-                                        }
-                                        width = picPosRect.lengthX();
-                                        height = picPosRect.lengthY();
-                                        Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, posGL);
-                                        picComps.add(anim);
-                                    }
-                                }
-                            } else if (picVal != null) {
-                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
-                            }
-                        }
+                        // this is text (primitive) overlay representing the area which text is populating
+                        PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
+                        txtOlay.setColor(textOverlayColor);
 
-                    } else if (picPosVal != null) {
+                        // text display (content)
+                        String regex = txtKey.getPrefix() + "|" + "Text";
+                        String content = txtKey.getStringValue().replaceAll(regex, "");
+
+                        // font char dimensions
+                        int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
+                        int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
+
+                        // this is text component                    
+                        Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
+                        txt.setColor(textColor);
+                        txt.setAlignment(Text.ALIGNMENT_CENTER);
+                        txt.getOverlay().setColor(textOverlayColor);
+                        txt.getOverlay().setWidth(width);
+                        txt.getOverlay().setHeight(height);
+                        txtComps.add(txt);
+                    } else if (txtVal != null) {
                         FO2IELogger.reportWarning("Unexisting cast for ("
-                                + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
-                    }
-                }
-
-                progress += 50.0f / section.picpos.size();
-            }
-
-            for (FeatureKey txtKey : section.text) {
-                FeatureValue txtVal = commonFeatMap.get(txtKey);
-                if (txtVal instanceof MyRectangle) {
-                    MyRectangle textRect = (MyRectangle) txtVal;
-                    MyRectangle temp = new MyRectangle();
-
-                    // scale rectangle to the drawing surface
-                    textRect = textRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-
-                    int width = textRect.lengthX();
-                    int height = textRect.lengthY();
-
-                    // determine position of this picture
-                    float posx = (textRect.minX + textRect.maxX) / 2.0f;
-                    float posy = (textRect.minY + textRect.maxY) / 2.0f;
-
-                    // apply shift if Global Map (only Global Map has such a property)
-                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                        posx += mainPicPosVal.minX;
-                        posy += mainPicPosVal.minY;
+                                + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
                     }
 
-                    // calc OpenGL coordinates
-                    Vector2f pos = new Vector2f(posx, posy);
-                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-
-                    // this is text (primitive) overlay representing the area which text is populating
-                    PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
-                    txtOlay.setColor(textOverlayColor);
-
-                    // text display (content)
-                    String regex = txtKey.getPrefix() + "|" + "Text";
-                    String content = txtKey.getStringValue().replaceAll(regex, "");
-
-                    // font char dimensions
-                    int fntWidth = Math.round(Text.STD_FONT_WIDTH * screenWidth / (float) mainPicWidth);
-                    int fntHeight = Math.round(Text.STD_FONT_HEIGHT * screenHeight / (float) mainPicHeight);
-
-                    // this is text component                    
-                    Text txt = new Text(txtKey, fntTexture, content, posGL, fntWidth, fntHeight);
-                    txt.setColor(textColor);
-                    txt.setAlignment(Text.ALIGNMENT_CENTER);
-                    txt.getOverlay().setColor(textOverlayColor);
-                    txt.getOverlay().setWidth(width);
-                    txt.getOverlay().setHeight(height);
-                    txtComps.add(txt);
-                } else if (txtVal != null) {
-                    FO2IELogger.reportWarning("Unexisting cast for ("
-                            + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
+                    progress += 50.0f / textValues.length;
                 }
-
-                progress += 50.0f / section.text.size();
             }
 
             result.addAll(picComps);
@@ -642,8 +662,11 @@ public class Intrface {
             }
         }
 
-        final int screenWidth = GUI.GL_CANVAS.getWidth();
-        final int screenHeight = GUI.GL_CANVAS.getHeight();
+        modeWidth = (resolutionPragma == null) ? 800 : resolutionPragma.getWidth();
+        modeHeight = (resolutionPragma == null) ? 600 : resolutionPragma.getHeight();
+
+        mainPicWidth = 800;
+        mainPicHeight = 600;
 
         // final result is array list of components
         final List<GLComponent> result = new ArrayList<>();
@@ -652,9 +675,8 @@ public class Intrface {
             FeatureKey mainPicKey = section.root.getMainPic();
             MyRectangle mainPicPosVal = null;
 
-            // it's intially assumed that picture is 800x600 unless specified otherwise
-            mainPicWidth = 800;
-            mainPicHeight = 600;
+            // it is displayed on the small panel under some resolution, scaling is required
+            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
 
             // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
@@ -673,20 +695,27 @@ public class Intrface {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
+                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
 
                 // defining root of the module (the main image)
                 // all positions are referred to this root (image)
                 // if position exists for the main (root) image
-                if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
-                    MyRectangle temp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+                Vector2f rootPos = null;
+                if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
+                    mainPicPosVal = (MyRectangle) commonFeatMap.get(mainPicPosKey);
+                    MyRectangle rtemp = new MyRectangle();
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, rtemp);
+
+                    float rposx = (mainPicPosVal.minX + mainPicPosVal.maxX) / 2.0f;
+                    float rposy = (mainPicPosVal.minY + mainPicPosVal.maxY) / 2.0f;
+
+                    rootPos = new Vector2f(rposx, rposy);
+                } else {
+                    rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
                 }
 
-                float scMainPicWidth = MathUtils.getScaled(mainPicWidth, 0.0f, mainPicWidth, 0.0f, screenWidth);
-                float scMainPicHeight = MathUtils.getScaled(mainPicHeight, 0.0f, mainPicHeight, 0.0f, screenHeight);
-                Quad root = new Quad(mainPicPosKey, Math.round(scMainPicWidth), Math.round(scMainPicHeight), rootTex);
+                Quad root = new Quad(mainPicPosKey, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 result.add(root);
             }
 
@@ -694,125 +723,134 @@ public class Intrface {
             final List<GLComponent> picComps = new ArrayList<>();
             final List<GLComponent> txtComps = new ArrayList<>();
 
-            for (FeatureKey picPosKey : section.picpos) {
-                if (picPosKey != section.root.getMainPicPos()) {
-                    FeatureValue picPosVal = resFeatMap.get(picPosKey);
-                    if (picPosVal instanceof MyRectangle) {
-                        MyRectangle picPosRect = (MyRectangle) picPosVal;
+            FeatureKey[] picPosValues = section.root.getPicPosValues();
+            if (picPosValues != null) {
+                for (FeatureKey picPosKey : picPosValues) {
+                    if (picPosKey != section.root.getMainPicPos()) {
+                        FeatureValue picPosVal = resFeatMap.get(picPosKey);
+                        if (picPosVal instanceof MyRectangle) {
+                            MyRectangle picPosRect = (MyRectangle) picPosVal;
+                            MyRectangle temp = new MyRectangle();
+
+                            // scale rectangle to the drawing surface
+                            picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+
+                            List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
+                            for (FeatureKey picKey : pics) {
+                                FeatureValue picVal = resFeatMap.get(picKey);
+                                if (picVal instanceof ImageWrapper) {
+                                    ImageWrapper iw = (ImageWrapper) picVal;
+                                    iw.loadImages();
+                                    BufferedImage[] images = iw.getImages();
+                                    if (images != null && images.length > 0) {
+                                        // dimension of picture/animation in pixels
+                                        int width, height;
+                                        // pixel (screen) coordinates
+                                        Vector2f pos = new Vector2f();
+                                        if (images.length == 1) {
+                                            // pixel dimension
+                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            // pixel position
+                                            pos.x = picPosRect.minX + width / 2.0f;
+                                            pos.y = picPosRect.minY + height / 2.0f;
+                                            // texture from loaded image
+                                            Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                            Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
+                                            picComps.add(imgComp);
+                                        } else {
+                                            // pixel dimension
+                                            width = picPosRect.lengthX();
+                                            height = picPosRect.lengthY();
+                                            // pixel position (picPosRect is already scaled)
+                                            pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
+                                            pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+                                            int index = 0;
+                                            // array of textures for an animation
+                                            final Texture[] texas = new Texture[images.length];
+                                            for (BufferedImage image : images) {
+                                                texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
+                                                index++;
+                                            }
+                                            Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
+                                            picComps.add(anim);
+                                        }
+                                    }
+                                } else if (picVal != null) {
+                                    FO2IELogger.reportWarning("Unexisting cast for ("
+                                            + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
+                                }
+                            }
+
+                            // missing picture -> question mark for missing..
+                            if (pics.isEmpty()) {
+                                Vector2f pos = new Vector2f((picPosRect.minX + picPosRect.maxX) / 2.0f, (picPosRect.minY + picPosRect.maxY) / 2.0f);
+                                Quad qmark = new Quad(
+                                        picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
+                                        Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
+                                );
+                                qmark.setColor(qmarkColor);
+                                picComps.add(qmark);
+                            }
+
+                        } else if (picPosVal != null) {
+                            FO2IELogger.reportWarning("Unexisting cast for ("
+                                    + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
+                        }
+                    }
+
+                    progress += 50.0f / picPosValues.length;
+                }
+            }
+
+            FeatureKey[] textValues = section.root.getTextValues();
+            if (textValues != null) {
+                for (FeatureKey txtKey : textValues) {
+                    FeatureValue txtVal = resFeatMap.get(txtKey);
+                    if (txtVal instanceof MyRectangle) {
+                        MyRectangle textRect = (MyRectangle) txtVal;
                         MyRectangle temp = new MyRectangle();
 
                         // scale rectangle to the drawing surface
-                        picPosRect = picPosRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
+                        textRect = textRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+
+                        int width = textRect.lengthX();
+                        int height = textRect.lengthY();
 
                         // determine position of this picture
-                        float posx = (picPosRect.minX + picPosRect.maxX) / 2.0f;
-                        float posy = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+                        float posx = (textRect.minX + textRect.maxX) / 2.0f;
+                        float posy = (textRect.minY + textRect.maxY) / 2.0f;
 
-                        // apply shift if Global Map (only Global Map has such a property)
-                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                            posx += mainPicPosVal.minX;
-                            posy += mainPicPosVal.minY;
-                        }
-
-                        // calc OpenGL coordinates
+                        // calc screen pixel coordinates
                         Vector2f pos = new Vector2f(posx, posy);
-                        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
 
-                        List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
-                        for (FeatureKey picKey : pics) {
-                            FeatureValue picVal = resFeatMap.get(picKey);
-                            if (picVal instanceof ImageWrapper) {
-                                ImageWrapper iw = (ImageWrapper) picVal;
-                                iw.loadImages();
-                                BufferedImage[] images = iw.getImages();
-                                if (images != null && images.length > 0) {
-                                    int width, height; // dimension of picture/animation in pixels
-                                    if (images.length == 1) {
-                                        Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                        width = Math.round(images[0].getWidth() * screenWidth / (float) mainPicWidth);
-                                        height = Math.round(images[0].getHeight() * screenHeight / (float) mainPicHeight);
-                                        Quad imgComp = new Quad(picPosKey, width, height, tex, posGL);
-                                        picComps.add(imgComp);
-                                    } else {
-                                        int index = 0;
-                                        final Texture[] texas = new Texture[images.length];
-                                        for (BufferedImage image : images) {
-                                            texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
-                                            index++;
-                                        }
-                                        width = picPosRect.lengthX();
-                                        height = picPosRect.lengthY();
-                                        Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, posGL);
-                                        picComps.add(anim);
-                                    }
-                                }
-                            } else if (picVal != null) {
-                                FO2IELogger.reportWarning("Unexisting cast for ("
-                                        + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
-                            }
-                        }
+                        // this is text (primitive) overlay representing the area which text is populating
+                        PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
+                        txtOlay.setColor(textOverlayColor);
 
-                    } else if (picPosVal != null) {
+                        // text display (content)
+                        String regex = txtKey.getPrefix() + "|" + "Text";
+                        String content = txtKey.getStringValue().replaceAll(regex, "");
+
+                        // font char dimensions
+                        int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
+                        int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
+
+                        // this is text component                    
+                        Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
+                        txt.setColor(textColor);
+                        txt.setAlignment(Text.ALIGNMENT_CENTER);
+                        txt.getOverlay().setColor(textOverlayColor);
+                        txt.getOverlay().setWidth(width);
+                        txt.getOverlay().setHeight(height);
+                        txtComps.add(txt);
+                    } else if (txtVal != null) {
                         FO2IELogger.reportWarning("Unexisting cast for ("
-                                + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
-                    }
-                }
-
-                progress += 50.0f / section.picpos.size();
-            }
-
-            for (FeatureKey txtKey : section.text) {
-                FeatureValue txtVal = resFeatMap.get(txtKey);
-                if (txtVal instanceof MyRectangle) {
-                    MyRectangle textRect = (MyRectangle) txtVal;
-                    MyRectangle temp = new MyRectangle();
-
-                    // scale rectangle to the drawing surface
-                    textRect = textRect.scalex(mainPicWidth, mainPicHeight, screenWidth, screenHeight, temp);
-
-                    int width = textRect.lengthX();
-                    int height = textRect.lengthY();
-
-                    // determine position of this picture
-                    float posx = (textRect.minX + textRect.maxX) / 2.0f;
-                    float posy = (textRect.minY + textRect.maxY) / 2.0f;
-
-                    // apply shift if Global Map (only Global Map has such a property)
-                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                        posx += mainPicPosVal.minX;
-                        posy += mainPicPosVal.minY;
+                                + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
                     }
 
-                    // calc OpenGL coordinates
-                    Vector2f pos = new Vector2f(posx, posy);
-                    Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, screenWidth, screenHeight);
-
-                    // this is text (primitive) overlay representing the area which text is populating
-                    PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, posGL);
-                    txtOlay.setColor(textOverlayColor);
-
-                    // text display (content)
-                    String regex = txtKey.getPrefix() + "|" + "Text";
-                    String content = txtKey.getStringValue().replaceAll(regex, "");
-
-                    // font char dimensions
-                    int fntWidth = Math.round(Text.STD_FONT_WIDTH * screenWidth / (float) mainPicWidth);
-                    int fntHeight = Math.round(Text.STD_FONT_HEIGHT * screenHeight / (float) mainPicHeight);
-
-                    // this is text component                    
-                    Text txt = new Text(txtKey, fntTexture, content, posGL, fntWidth, fntHeight);
-                    txt.setColor(textColor);
-                    txt.setAlignment(Text.ALIGNMENT_CENTER);
-                    txt.getOverlay().setColor(textOverlayColor);
-                    txt.getOverlay().setWidth(width);
-                    txt.getOverlay().setHeight(height);
-                    txtComps.add(txt);
-                } else if (txtVal != null) {
-                    FO2IELogger.reportWarning("Unexisting cast for ("
-                            + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
+                    progress += 50.0f / textValues.length;
                 }
-
-                progress += 50.0f / section.text.size();
             }
 
             result.addAll(picComps);
@@ -972,14 +1010,6 @@ public class Intrface {
         }
 
         return result;
-    }
-
-    public int getMainPicWidth() {
-        return mainPicWidth;
-    }
-
-    public int getMainPicHeight() {
-        return mainPicHeight;
     }
 
     public void resetProgress() {
@@ -1188,6 +1218,22 @@ public class Intrface {
 
     public void setBuildMode(BuildMode buildMode) {
         this.buildMode = buildMode;
+    }
+
+    public int getModeWidth() {
+        return modeWidth;
+    }
+
+    public int getModeHeight() {
+        return modeHeight;
+    }
+
+    public int getMainPicWidth() {
+        return mainPicWidth;
+    }
+
+    public int getMainPicHeight() {
+        return mainPicHeight;
     }
 
 }

@@ -28,6 +28,7 @@ import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.main.GameTime;
+import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
  *
@@ -182,7 +183,8 @@ public class Animation implements GLComponent {
     }
 
     private Matrix4f calcModelMatrix() {
-        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
+        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(posGL.x, posGL.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
 
         float sx = giveRelativeWidth();
@@ -234,7 +236,8 @@ public class Animation implements GLComponent {
     }
 
     private Matrix4f calcModelMatrix(float xinc, float ydec) {
-        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x + xinc, pos.y + ydec, 0.0f);
+        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(posGL.x + xinc, posGL.y + ydec, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
 
         float sx = giveRelativeWidth();
@@ -360,10 +363,17 @@ public class Animation implements GLComponent {
     }
 
     @Override
-    public Rectanglef getArea() {
+    public Rectanglef getGLArea() {
+        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         float rw = getRelativeWidth();
         float rh = getRelativeHeight();
-        Rectanglef rect = new Rectanglef(pos.x - rw, pos.y - rh, pos.x + rw, pos.y + rh);
+        Rectanglef rect = new Rectanglef(posGL.x - rw, posGL.y - rh, posGL.x + rw, posGL.y + rh);
+        return rect;
+    }
+
+    @Override
+    public Rectanglef getPixelArea() {
+        Rectanglef rect = new Rectanglef(pos.x - width / 2.0f, pos.y - height / 2.0f, pos.x + width / 2.0f, pos.y + height / 2.0f);
         return rect;
     }
 

@@ -17,6 +17,8 @@
 package rs.alexanderstojanovich.fo2ie.feature;
 
 import org.joml.Rectanglei;
+import rs.alexanderstojanovich.fo2ie.util.Pair;
+import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
 /**
  *
@@ -46,17 +48,53 @@ public class MyRectangle extends Rectanglei implements FeatureValue {
     /**
      * Scale my rectangle so it can be rendered on the screen
      *
-     * @param mainPicWidth main picture width
-     * @param mainPicHeight main picture height
-     * @param screenWidth rendered screen width
-     * @param screenHeight rendered screen height
+     * @param sx X-axis scaling
+     * @param sy Y-axis scaling
      * @return this rectangle (modified)
      */
-    public MyRectangle scalex(int mainPicWidth, int mainPicHeight, int screenWidth, int screenHeight) {
-        minX = Math.round(minX * screenWidth / (float) mainPicWidth);
-        minY = Math.round(minY * screenHeight / (float) mainPicHeight);
-        maxX = Math.round(maxX * screenWidth / (float) mainPicWidth);
-        maxY = Math.round(maxY * screenHeight / (float) mainPicHeight);
+    public MyRectangle scaleXY(float sx, float sy) {
+        minX = Math.round(minX * sx);
+        minY = Math.round(minY * sy);
+        maxX = Math.round(maxX * sx);
+        maxY = Math.round(maxY * sy);
+
+        return this;
+    }
+
+    /**
+     * Scale my rectangle so it can be rendered on the screen
+     *
+     * @param sx X-axis scaling
+     * @param sy Y-axis scaling
+     * @param temp temporary rectangle
+     * @return temp rectangle
+     */
+    public MyRectangle scaleXY(float sx, float sy, MyRectangle temp) {
+        temp.minX = Math.round(minX * sx);
+        temp.minY = Math.round(minY * sy);
+        temp.maxX = Math.round(maxX * sx);
+        temp.maxY = Math.round(maxY * sy);
+
+        return temp;
+    }
+
+    /**
+     * Scale my rectangle so it can be rendered on the screen
+     *
+     * @param mainPicWidth main picture width
+     * @param mainPicHeight main picture height
+     * @param modeWidth rendered screen width
+     * @param modeHeight rendered screen height
+     * @return this rectangle (modified)
+     */
+    public MyRectangle scaleXY(int mainPicWidth, int mainPicHeight, int modeWidth, int modeHeight) {
+
+        Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
+
+        minX = Math.round(minX * skvp.getKey());
+        minY = Math.round(minY * skvp.getValue());
+        maxX = Math.round(maxX * skvp.getKey());
+        maxY = Math.round(maxY * skvp.getValue());
 
         return this;
     }
@@ -66,16 +104,19 @@ public class MyRectangle extends Rectanglei implements FeatureValue {
      *
      * @param mainPicWidth main picture width
      * @param mainPicHeight main picture height
-     * @param screenWidth rendered screen width
-     * @param screenHeight rendered screen height
-     * @param temp temporary vector
-     * @return temp vector
+     * @param modeWidth rendered screen width
+     * @param modeHeight rendered screen height
+     * @param temp temporary rectangle
+     * @return temp rectangle
      */
-    public MyRectangle scalex(int mainPicWidth, int mainPicHeight, int screenWidth, int screenHeight, MyRectangle temp) {
-        temp.minX = Math.round(minX * screenWidth / (float) mainPicWidth);
-        temp.minY = Math.round(minY * screenHeight / (float) mainPicHeight);
-        temp.maxX = Math.round(maxX * screenWidth / (float) mainPicWidth);
-        temp.maxY = Math.round(maxY * screenHeight / (float) mainPicHeight);
+    public MyRectangle scaleXY(int mainPicWidth, int mainPicHeight, int modeWidth, int modeHeight, MyRectangle temp) {
+
+        Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
+
+        temp.minX = Math.round(minX * skvp.getKey());
+        temp.minY = Math.round(minY * skvp.getValue());
+        temp.maxX = Math.round(maxX * skvp.getKey());
+        temp.maxY = Math.round(maxY * skvp.getValue());
 
         return temp;
     }

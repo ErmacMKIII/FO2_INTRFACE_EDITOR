@@ -16,8 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.intrface;
 
-import java.util.ArrayList;
-import java.util.List;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 
 /**
@@ -38,11 +36,6 @@ public class Section {
 
     protected final SectionName sectionName;
 
-    protected List<FeatureKey> pics = new ArrayList<>();
-    protected List<FeatureKey> picpos = new ArrayList<>();
-    protected List<FeatureKey> text = new ArrayList<>();
-    protected List<FeatureKey> vals = new ArrayList<>();
-
     /**
      * Creates new section with given section name.One section should be created
      * only once unless it's resolution section.
@@ -55,29 +48,6 @@ public class Section {
         this.sectionName = sectionName;
         this.root = root;
         this.keys = keys;
-        init(); // initalize split lists
-    }
-
-    /**
-     * Creates separates lists of pics, pic pos and text
-     */
-    private void init() {
-        for (FeatureKey fk : keys) {
-            switch (fk.getType()) {
-                case PIC:
-                    pics.add(fk);
-                    break;
-                case PIC_POS:
-                    picpos.add(fk);
-                    break;
-                case TXT:
-                    text.add(fk);
-                    break;
-                case VALUE:
-                    vals.add(fk);
-                    break;
-            }
-        }
     }
 
     /**
