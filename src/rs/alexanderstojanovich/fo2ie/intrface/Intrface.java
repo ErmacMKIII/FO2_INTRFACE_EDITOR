@@ -36,8 +36,10 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
+import rs.alexanderstojanovich.fo2ie.feature.SingleValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.ogl.AddressableQuad;
 import rs.alexanderstojanovich.fo2ie.ogl.Animation;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
@@ -498,6 +500,25 @@ public class Intrface {
                             // scale rectangle to the drawing surface
                             picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
 
+                            Pair<FeatureKey, FeatureKey> splitValues = FeatureKey.getSplitValues(picPosKey);
+                            float splitW = 0.0f, splitH = 0.0f;
+                            if (splitValues != null) {
+                                FeatureKey keyW = splitValues.getKey();
+                                if (keyW != null) {
+                                    FeatureValue valW = commonFeatMap.get(keyW);
+                                    if (valW instanceof SingleValue) {
+                                        splitW = ((SingleValue) valW).getNumber();
+                                    }
+                                }
+                                FeatureKey keyH = splitValues.getValue();
+                                if (keyH != null) {
+                                    FeatureValue valH = commonFeatMap.get(keyH);
+                                    if (valH instanceof SingleValue) {
+                                        splitH = ((SingleValue) valH).getNumber();
+                                    }
+                                }
+                            }
+
                             List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
                             for (FeatureKey picKey : pics) {
                                 FeatureValue picVal = commonFeatMap.get(picKey);
@@ -510,7 +531,7 @@ public class Intrface {
                                         int width, height;
                                         // pixel (screen) coordinates
                                         Vector2f pos = new Vector2f();
-                                        if (images.length == 1) {
+                                        if (images.length == 1 && splitW == 0.0f && splitH == 0.0f) {
                                             // pixel dimension
                                             width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
                                             height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
@@ -528,6 +549,23 @@ public class Intrface {
                                             Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
                                             Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
                                             picComps.add(imgComp);
+                                        } else if (splitW != 0.0f || splitH != 0.0f) {
+                                            // pixel dimension
+                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            // pixel position (picPosRect is already scaled)
+
+                                            pos.x = picPosRect.minX + width / 2.0f;
+                                            pos.y = picPosRect.minY + height / 2.0f;
+
+                                            Vector2f posMax = new Vector2f(
+                                                    picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
+                                            );
+
+                                            // texture from loaded image
+                                            Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                            AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                            picComps.add(aq);
                                         } else {
                                             // pixel dimension
                                             width = picPosRect.lengthX();
@@ -739,6 +777,25 @@ public class Intrface {
                             // scale rectangle to the drawing surface
                             picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
 
+                            Pair<FeatureKey, FeatureKey> splitValues = FeatureKey.getSplitValues(picPosKey);
+                            float splitW = 0.0f, splitH = 0.0f;
+                            if (splitValues != null) {
+                                FeatureKey keyW = splitValues.getKey();
+                                if (keyW != null) {
+                                    FeatureValue valW = resFeatMap.get(keyW);
+                                    if (valW instanceof SingleValue) {
+                                        splitW = ((SingleValue) valW).getNumber();
+                                    }
+                                }
+                                FeatureKey keyH = splitValues.getValue();
+                                if (keyH != null) {
+                                    FeatureValue valH = resFeatMap.get(keyH);
+                                    if (valH instanceof SingleValue) {
+                                        splitH = ((SingleValue) valH).getNumber();
+                                    }
+                                }
+                            }
+
                             List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
                             for (FeatureKey picKey : pics) {
                                 FeatureValue picVal = resFeatMap.get(picKey);
@@ -751,7 +808,7 @@ public class Intrface {
                                         int width, height;
                                         // pixel (screen) coordinates
                                         Vector2f pos = new Vector2f();
-                                        if (images.length == 1) {
+                                        if (images.length == 1 && splitW == 0.0f && splitH == 0.0f) {
                                             // pixel dimension
                                             width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
                                             height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
@@ -769,6 +826,23 @@ public class Intrface {
                                             Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
                                             Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
                                             picComps.add(imgComp);
+                                        } else if (splitW != 0.0f || splitH != 0.0f) {
+                                            // pixel dimension
+                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            // pixel position (picPosRect is already scaled)
+
+                                            pos.x = picPosRect.minX + width / 2.0f;
+                                            pos.y = picPosRect.minY + height / 2.0f;
+
+                                            Vector2f posMax = new Vector2f(
+                                                    picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
+                                            );
+
+                                            // texture from loaded image
+                                            Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                            AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                            picComps.add(aq);
                                         } else {
                                             // pixel dimension
                                             width = picPosRect.lengthX();

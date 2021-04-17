@@ -4490,32 +4490,35 @@ public interface FeatureKey {
         FeatureKey fkx = null;
         FeatureKey fky = null;
 
-        int len = 0;
-        for (FeatureKey off : fk.getOffsetValues()) {
-            String offStr = off.getStringValue();
-            if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
-                continue;
-            }
+        FeatureKey[] offsetValues = fk.getOffsetValues();
+        if (offsetValues != null) {
+            int len = 0;
+            for (FeatureKey off : fk.getOffsetValues()) {
+                String offStr = off.getStringValue();
+                if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
+                    continue;
+                }
 
-            if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
-                if (offStr.endsWith("X")) {
-                    fkx = off;
-                    len++;
-                } else if (offStr.endsWith("Y")) {
-                    fky = off;
-                    len++;
+                if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
+                    if (offStr.endsWith("X")) {
+                        fkx = off;
+                        len++;
+                    } else if (offStr.endsWith("Y")) {
+                        fky = off;
+                        len++;
+                    }
+                }
+
+                if (len == 2) {
+                    break;
                 }
             }
 
-            if (len == 2) {
-                break;
+            if (fkx != null || fky != null) {
+                return new Pair<>(fkx, fky);
             }
-        }
 
-        if (fkx != null || fky != null) {
-            return new Pair<>(fkx, fky);
         }
-
         return null;
     }
 
@@ -4529,30 +4532,33 @@ public interface FeatureKey {
         FeatureKey fkw = null;
         FeatureKey fkh = null;
 
-        int len = 0;
-        for (FeatureKey split : fk.getSplitValues()) {
-            String offStr = split.getStringValue();
-            if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
-                continue;
-            }
+        FeatureKey[] splitValues = fk.getSplitValues();
+        if (splitValues != null) {
+            int len = 0;
+            for (FeatureKey split : splitValues) {
+                String offStr = split.getStringValue();
+                if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
+                    continue;
+                }
 
-            if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
-                if (offStr.endsWith("Width")) {
-                    fkw = split;
-                    len++;
-                } else if (offStr.endsWith("Height")) {
-                    fkh = split;
-                    len++;
+                if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
+                    if (offStr.endsWith("Width") || offStr.endsWith("StepX")) {
+                        fkw = split;
+                        len++;
+                    } else if (offStr.endsWith("Height") || offStr.endsWith("StepY")) {
+                        fkh = split;
+                        len++;
+                    }
+                }
+
+                if (len == 2) {
+                    break;
                 }
             }
 
-            if (len == 2) {
-                break;
+            if (fkw != null || fkh != null) {
+                return new Pair<>(fkw, fkh);
             }
-        }
-
-        if (fkw != null || fkh != null) {
-            return new Pair<>(fkw, fkh);
         }
 
         return null;

@@ -178,7 +178,8 @@ public class AddressableQuad implements GLComponent {
     }
 
     private Matrix4f calcModelMatrix(Vector2f pos) {
-        Matrix4f translationMatrix = new Matrix4f().setTranslation(pos.x, pos.y, 0.0f);
+        Vector2f posGL = GLCoords.getOpenGLCoordinates(pos, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+        Matrix4f translationMatrix = new Matrix4f().setTranslation(posGL.x, posGL.y, 0.0f);
         Matrix4f rotationMatrix = new Matrix4f().identity();
 
         float sx = giveRelativeWidth();

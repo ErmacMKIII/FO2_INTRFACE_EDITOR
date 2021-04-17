@@ -67,6 +67,7 @@ public class Module {
             switch (component.getType()) {
                 case PIC:
                 case ANIM:
+                case ADDR:
                     component.render(gl20, projMat4, imgSP);
                     break;
                 case TXT:
