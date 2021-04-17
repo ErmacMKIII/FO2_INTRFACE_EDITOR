@@ -118,21 +118,29 @@ public class GUI extends javax.swing.JFrame {
     public static final String FEAT_ICON = "feat_icon.png";
     public static final String COMP_ICON = "comp_icon.png";
 
+    public static final String SPLASH_FILE_NAME = "fo2ie_splash.png";
+
     private File targetIniFile;
+
+    private static float progress = 0.0f;
 
     /**
      * Creates new form GUI
      */
     public GUI() {
+        progress += 25.0f;
         initComponents(); // netbeans loading components        
+        progress += 25.0f;
 
         initLogos4App(); // logos for app
         initPaths(); // set paths from config
+        progress += 25.0f;
         initGL(); // sets GL canvas 
         initIntEn(); // init enable intrface panel components {comboxes, buildTargetRes module, preview values etc}
         initPosition(); // centers the GUI
         initMenuDialogs(); // init menu dialogs
         initTabPaneIcons(); // init tab icons
+        progress += 25.0f;
     }
 
     // init both logos
@@ -1318,6 +1326,14 @@ public class GUI extends javax.swing.JFrame {
     public static void main(String args[]) {
         FO2IELogger.init(args.length > 0 && args[0].equals("-debug"));
         cfg.readConfigFile();
+
+        // start splash screen now!
+        GUISplashScreen splashScreen = new GUISplashScreen();
+        splashScreen.setUp();
+        Thread splashUpdater = new Thread(splashScreen, "Splash Screen Updater");
+        splashUpdater.start();
+
+        // Load Palette for FRMs
         Palette.load("Fallout Palette.act");
 
         // to measure elapsed time in interval [0, 120) cycled
@@ -1337,7 +1353,6 @@ public class GUI extends javax.swing.JFrame {
         //</editor-fold>
 
         //</editor-fold>
-
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -1354,6 +1369,11 @@ public class GUI extends javax.swing.JFrame {
                 cfg.writeConfigFile();
             }
         });
+
+    }
+
+    public static float getProgress() {
+        return progress;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
