@@ -4486,6 +4486,7 @@ public interface FeatureKey {
      * @param fk feature key
      * @return [X,Y] as pair
      */
+    @Deprecated
     public static Pair<FeatureKey, FeatureKey> getOffset(FeatureKey fk) {
         FeatureKey fkx = null;
         FeatureKey fky = null;
@@ -4529,36 +4530,17 @@ public interface FeatureKey {
      * @return [Width, Height] as pair
      */
     public static Pair<FeatureKey, FeatureKey> getSplitValues(FeatureKey fk) {
-        FeatureKey fkw = null;
-        FeatureKey fkh = null;
 
-        FeatureKey[] splitValues = fk.getSplitValues();
-        if (splitValues != null) {
-            int len = 0;
-            for (FeatureKey split : splitValues) {
-                String offStr = split.getStringValue();
-                if (!offStr.contains(fk.getStringValue().replaceAll(PIC_REGEX, "").replaceAll("Text", ""))) {
-                    continue;
-                }
-
-                if (fk.getType() == FeatureKey.Type.PIC || fk.getType() == FeatureKey.Type.PIC_POS || fk.getType() == FeatureKey.Type.TXT) {
-                    if (offStr.endsWith("Width") || offStr.endsWith("StepX")) {
-                        fkw = split;
-                        len++;
-                    } else if (offStr.endsWith("Height") || offStr.endsWith("StepY")) {
-                        fkh = split;
-                        len++;
-                    }
-                }
-
-                if (len == 2) {
-                    break;
-                }
-            }
-
-            if (fkw != null || fkh != null) {
-                return new Pair<>(fkw, fkh);
-            }
+        if (fk == Inventory.InvInv) {
+            return new Pair<>(null, Inventory.InvHeightItem);
+        } else if (fk == Use.UseInv) {
+            return new Pair<>(null, Use.UseHeightItem);
+        } else if (fk == PriceSetup.PSInv) {
+            return new Pair<>(PriceSetup.PSWidthItem, PriceSetup.PSHeightItem);
+        } else if (fk == GroundPickup.GPickupInv) {
+            return new Pair<>(GroundPickup.GPickupWidthItem, GroundPickup.GPickupHeightItem);
+        } else if (fk == Interface.IntAp) {
+            return new Pair<>(Interface.IntApStepX, Interface.IntApStepY);
         }
 
         return null;

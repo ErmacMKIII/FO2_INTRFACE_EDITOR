@@ -134,8 +134,8 @@ public class GUI extends javax.swing.JFrame {
 
         initLogos4App(); // logos for app
         initPaths(); // set paths from config
-        progress += 25.0f;
         initGL(); // sets GL canvas 
+        progress += 25.0f;
         initIntEn(); // init enable intrface panel components {comboxes, buildTargetRes module, preview values etc}
         initPosition(); // centers the GUI
         initMenuDialogs(); // init menu dialogs
@@ -785,13 +785,14 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-17 at 16:00).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-18 at 02:30).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
             sb.append("Changelog since v1.0 BETA1 GOTHS:\n");
             sb.append("\t- Fix for some modules (Barter, PipBoy etc.).\n");
             sb.append("\t- Question mark is put as annotation for missing or unknown picture.\n");
+            sb.append("\t- Pictures with variable location on the screen for inventory and action points.\n");
             sb.append("\n");
             sb.append("Changelog since v0.5 FINLAND:\n");
             sb.append("\t- Modules are being build faster.\n");

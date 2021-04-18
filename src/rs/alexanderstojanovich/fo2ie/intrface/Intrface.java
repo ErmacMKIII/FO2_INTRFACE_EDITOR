@@ -599,19 +599,46 @@ public class Intrface {
 
                             // missing picture -> question mark for missing..
                             if (pics.isEmpty()) {
-                                // position is always center (half sum of coords)
-                                Vector2f pos = new Vector2f((picPosRect.minX + picPosRect.maxX) / 2.0f, (picPosRect.minY + picPosRect.maxY) / 2.0f);
-                                // Global Map special case
-                                if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                    pos.x += mainPicPosVal.minX;
-                                    pos.y += mainPicPosVal.minY;
+                                if (splitW != 0.0f || splitH != 0.0f) {
+                                    // pixel dimension
+                                    int width = (splitW != 0.0f) ? Math.round(splitW) : picPosRect.lengthX();
+                                    int height = (splitH != 0.0f) ? Math.round(splitH) : picPosRect.lengthY();
+                                    // pixel position (picPosRect is already scaled)
+
+                                    Vector2f pos = new Vector2f(
+                                            picPosRect.minX + width / 2.0f,
+                                            picPosRect.minY + height / 2.0f
+                                    );
+
+                                    Vector2f posMax = new Vector2f(
+                                            picPosRect.maxX - width / 2.0f,
+                                            picPosRect.maxY - height / 2.0f
+                                    );
+
+                                    // texture is missing texture
+                                    Texture aqtex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
+                                    AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                    aq.setColor(qmarkColor);
+                                    picComps.add(aq);
+                                } else {
+                                    // position is always center (half sum of coords)
+                                    Vector2f pos = new Vector2f(
+                                            (picPosRect.minX + picPosRect.maxX) / 2.0f,
+                                            (picPosRect.minY + picPosRect.maxY) / 2.0f
+                                    );
+                                    // Global Map special case
+                                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                        pos.x += mainPicPosVal.minX;
+                                        pos.y += mainPicPosVal.minY;
+                                    }
+                                    Quad qmark = new Quad(
+                                            picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
+                                            Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
+                                    );
+                                    qmark.setColor(qmarkColor);
+                                    picComps.add(qmark);
                                 }
-                                Quad qmark = new Quad(
-                                        picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
-                                        Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
-                                );
-                                qmark.setColor(qmarkColor);
-                                picComps.add(qmark);
+
                             }
 
                         } else if (picPosVal != null) {
@@ -876,19 +903,46 @@ public class Intrface {
 
                             // missing picture -> question mark for missing..
                             if (pics.isEmpty()) {
-                                // position is always center (half sum of coords)
-                                Vector2f pos = new Vector2f((picPosRect.minX + picPosRect.maxX) / 2.0f, (picPosRect.minY + picPosRect.maxY) / 2.0f);
-                                // Global Map special case
-                                if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                    pos.x += mainPicPosVal.minX;
-                                    pos.y += mainPicPosVal.minY;
+                                if (splitW != 0.0f || splitH != 0.0f) {
+                                    // pixel dimension
+                                    int width = (splitW != 0.0f) ? Math.round(splitW) : picPosRect.lengthX();
+                                    int height = (splitH != 0.0f) ? Math.round(splitH) : picPosRect.lengthY();
+                                    // pixel position (picPosRect is already scaled)
+
+                                    Vector2f pos = new Vector2f(
+                                            picPosRect.minX + width / 2.0f,
+                                            picPosRect.minY + height / 2.0f
+                                    );
+
+                                    Vector2f posMax = new Vector2f(
+                                            picPosRect.maxX - width / 2.0f,
+                                            picPosRect.maxY - height / 2.0f
+                                    );
+
+                                    // texture is missing texture
+                                    Texture aqtex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
+                                    AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                    aq.setColor(qmarkColor);
+                                    picComps.add(aq);
+                                } else {
+                                    // position is always center (half sum of coords)
+                                    Vector2f pos = new Vector2f(
+                                            (picPosRect.minX + picPosRect.maxX) / 2.0f,
+                                            (picPosRect.minY + picPosRect.maxY) / 2.0f
+                                    );
+                                    // Global Map special case
+                                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
+                                        pos.x += mainPicPosVal.minX;
+                                        pos.y += mainPicPosVal.minY;
+                                    }
+                                    Quad qmark = new Quad(
+                                            picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
+                                            Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
+                                    );
+                                    qmark.setColor(qmarkColor);
+                                    picComps.add(qmark);
                                 }
-                                Quad qmark = new Quad(
-                                        picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
-                                        Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
-                                );
-                                qmark.setColor(qmarkColor);
-                                picComps.add(qmark);
+
                             }
 
                         } else if (picPosVal != null) {
