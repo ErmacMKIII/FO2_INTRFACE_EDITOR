@@ -119,8 +119,11 @@ public class GUI extends javax.swing.JFrame {
     public static final String COMP_ICON = "comp_icon.png";
 
     public static final String SPLASH_FILE_NAME = "fo2ie_splash.png";
+    public static final String SCREENSHOT_DIR = "screenshots";
 
     private File targetIniFile;
+
+    private File savedScreenshot;
 
     private static float progress = 0.0f;
 
@@ -350,6 +353,8 @@ public class GUI extends javax.swing.JFrame {
         fileMenuSaveAs = new javax.swing.JMenuItem();
         fileMenuSep1 = new javax.swing.JPopupMenu.Separator();
         fileMenuExit = new javax.swing.JMenuItem();
+        mainMenuTools = new javax.swing.JMenu();
+        toolsScreenshot = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
         infoMenuAbout = new javax.swing.JMenuItem();
         infoMenuHelp = new javax.swing.JMenuItem();
@@ -618,6 +623,18 @@ public class GUI extends javax.swing.JFrame {
 
         mainMenu.add(mainMenuFile);
 
+        mainMenuTools.setText("Tools");
+
+        toolsScreenshot.setText("Take Screenshot");
+        toolsScreenshot.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolsScreenshotActionPerformed(evt);
+            }
+        });
+        mainMenuTools.add(toolsScreenshot);
+
+        mainMenu.add(mainMenuTools);
+
         mainMenuInfo.setText("Info");
 
         infoMenuAbout.setText("About");
@@ -785,7 +802,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-18 at 02:30).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-19 at 04:30).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -793,6 +810,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Fix for some modules (Barter, PipBoy etc.).\n");
             sb.append("\t- Question mark is put as annotation for missing or unknown picture.\n");
             sb.append("\t- Pictures with variable location on the screen for inventory and action points.\n");
+            sb.append("\t- Feature to take screenshot of the module.\n");
             sb.append("\n");
             sb.append("Changelog since v0.5 FINLAND:\n");
             sb.append("\t- Modules are being build faster.\n");
@@ -919,7 +937,7 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // makes preview for the feature table
-    private void featurePreview() {
+    private synchronized void featurePreview() {
         if (btnTogAllRes.isSelected()) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
@@ -1210,6 +1228,11 @@ public class GUI extends javax.swing.JFrame {
         addFeature(); // add feature
     }//GEN-LAST:event_btnAddFeatXDeselectActionPerformed
 
+    private void toolsScreenshotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsScreenshotActionPerformed
+        // TODO add your handling code here:
+        mdlAnim.state = ModuleAnimator.State.SCREENSHOT;
+    }//GEN-LAST:event_toolsScreenshotActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1275,7 +1298,7 @@ public class GUI extends javax.swing.JFrame {
 
     }
 
-    private void componentsPreview() {
+    private synchronized void componentsPreview() {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -1408,6 +1431,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mainMenuFile;
     private javax.swing.JMenu mainMenuInfo;
+    private javax.swing.JMenu mainMenuTools;
     private javax.swing.JPanel panelModule;
     private javax.swing.JPanel pnlFilePaths;
     private javax.swing.JPanel pnlIntrface;
@@ -1417,6 +1441,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTabbedPane tabPaneBrowser;
     private javax.swing.JTable tblComps;
     private javax.swing.JTable tblFeats;
+    private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;
     // End of variables declaration//GEN-END:variables

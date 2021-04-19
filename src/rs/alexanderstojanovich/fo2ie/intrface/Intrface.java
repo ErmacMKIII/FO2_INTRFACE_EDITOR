@@ -447,7 +447,7 @@ public class Intrface {
         // final result is array list of components
         final List<GLComponent> result = new ArrayList<>();
         final Section section = this.nameToSectionMap.get(sectionName);
-        if (section != null) {
+        if (section != null && section != popUp) {
             FeatureKey mainPicKey = section.root.getMainPic();
             MyRectangle mainPicPosVal = null;
 
@@ -751,7 +751,7 @@ public class Intrface {
         // final result is array list of components
         final List<GLComponent> result = new ArrayList<>();
         final Section section = this.nameToSectionMap.get(sectionName);
-        if (section != null) {
+        if (section != null && section != popUp) {
             FeatureKey mainPicKey = section.root.getMainPic();
             MyRectangle mainPicPosVal = null;
 

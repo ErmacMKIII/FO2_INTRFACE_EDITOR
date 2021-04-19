@@ -20,10 +20,17 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.GLBuffers;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
+import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
@@ -74,7 +81,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * State of the machine
      */
     public static enum State {
-        INIT, BUILD, RENDER;
+        INIT, BUILD, SCREENSHOT, RENDER;
     }
 
     protected State state = State.INIT;
@@ -117,7 +124,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * @param glad drawable object from interface
      */
     @Override
-    public synchronized void init(GLAutoDrawable glad) {
+    public void init(GLAutoDrawable glad) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -160,7 +167,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * @param glad drawable object from interface
      */
     @Override
-    public synchronized void dispose(GLAutoDrawable glad) {
+    public void dispose(GLAutoDrawable glad) {
         // cancel unbuffer timer
 //        module.unbufTask.cancel();
 
@@ -180,7 +187,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * @param i3 height
      */
     @Override
-    public synchronized void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
+    public void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
         GL2 gl20 = glad.getGL().getGL2();
         gl20.glViewport(0, 0, i2, i3);
         if (config.isKeepAspectRatio()) {
@@ -195,7 +202,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * @param glad drawable object from interface
      */
     @Override
-    public synchronized void display(GLAutoDrawable glad) {
+    public void display(GLAutoDrawable glad) {
         try {
             GL2 gl20 = glad.getGL().getGL2();
             gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
@@ -212,6 +219,16 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
                     }
                     state = State.RENDER;
                     break;
+                // invoked from the menu > tools > take screenshot
+                case SCREENSHOT:
+                    BufferedImage screenshot = createScreenshot(gl20);
+                    boolean ok = saveScreenshot(screenshot);
+                    if (ok) {
+                        JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot saved.", "Module Screenshot", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot failed!", "Module Screenshot", JOptionPane.ERROR_MESSAGE);
+                    }
+                    state = State.RENDER;
                 // otherwise render the module
                 case RENDER:
                     module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
@@ -222,6 +239,77 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
             FO2IELogger.reportError(ex.getMessage(), ex);
         }
 
+    }
+
+    //--------------------------------------------------------------------------
+    /**
+     * Read pixels and create screenshot as an image.
+     *
+     * @param gl20 GL20
+     * @return screenshot as buffered image
+     */
+    public static BufferedImage createScreenshot(GL2 gl20) {
+        final int rgba = 4;
+
+        final int width = GUI.GL_CANVAS.getWidth();
+        final int height = GUI.GL_CANVAS.getHeight();
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * rgba);
+
+        gl20.glReadBuffer(GL2.GL_FRONT);
+        gl20.glReadPixels(0, 0, width, height, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, buffer);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int i = (x + (width * y)) * rgba;
+                int r = buffer.get(i) & 0xFF;
+                int g = buffer.get(i + 1) & 0xFF;
+                int b = buffer.get(i + 2) & 0xFF;
+                int a = buffer.get(i + 3) & 0xFF;
+                image.setRGB(x, height - (y + 1), (a << 24) | (r << 16) | (g << 8) | b);
+            }
+        }
+
+        return image;
+    }
+
+    /**
+     * Save screenshot image to the external image file.Image will be stored in
+     * screenshot directory with in PNG format.
+     *
+     * @param buffImg screenshot
+     * @return operation success.
+     */
+    public static boolean saveScreenshot(BufferedImage buffImg) {
+        boolean ok = false;
+
+        File screenDir = new File(GUI.SCREENSHOT_DIR);
+        if (!screenDir.isDirectory() && !screenDir.exists()) {
+            screenDir.mkdir();
+        }
+        LocalDateTime now = LocalDateTime.now();
+        File screenshot = new File(GUI.SCREENSHOT_DIR + File.separator
+                + "fo2_intrfaceditor-" + now.getYear()
+                + "-" + now.getMonthValue()
+                + "-" + now.getDayOfMonth()
+                + "_" + now.getHour()
+                + "-" + now.getMinute()
+                + "-" + now.getSecond()
+                + "-" + now.getNano() / 1E6 // one million
+                + ".png");
+        if (screenshot.exists()) {
+            screenshot.delete();
+        }
+
+        try {
+            ImageIO.write(buffImg, "PNG", screenshot);
+            ok = true;
+        } catch (IOException ex) {
+            FO2IELogger.reportError(ex.getMessage(), ex);
+        }
+
+        return ok;
     }
 
     //--------------------------------------------------------------------------
