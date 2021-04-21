@@ -43,7 +43,7 @@ public interface FeatureKey {
     public static final String INPUT_BOX = "Ibox";
     public static final String INTRFACE = "Int";
     public static final String INVENTORY = "Inv";
-    public static final String POP_UP = "LMenu";
+
     public static final String MINI_MAP = "Lmap";
     public static final String LOGIN = "Log";
     public static final String OPTIONS = "Mopt";
@@ -52,6 +52,7 @@ public interface FeatureKey {
     public static final String PIP_BOY = "Pip";
 
     public static final String PICK_UP = "Pup";
+    public static final String POP_UP = "LMenu";
     public static final String RADIO = "Radio";
     public static final String REGISTRATION = "Reg";
     public static final String SAVE_LOAD = "SaveLoad";
@@ -65,8 +66,8 @@ public interface FeatureKey {
 
     public static final String[] ABBRS = {
         AIM, BARTER, CHARACTER, CHOSEN, CONSOLE, DIALOG_BOX, FACTION, FIX_BOY, GLOBAL_MAP, GROUND_PICKUP,
-        INPUT_BOX, INTRFACE, INVENTORY, POP_UP, MINI_MAP, LOGIN, OPTIONS, PRICE_SETUP, PERK, PIP_BOY,
-        PICK_UP, RADIO, REGISTRATION, SAVE_LOAD, SAY_BOX, SKILL_BOX, SPLIT,
+        INPUT_BOX, INTRFACE, INVENTORY, MINI_MAP, LOGIN, OPTIONS, PRICE_SETUP, PERK, PICK_UP, PIP_BOY,
+        POP_UP, RADIO, REGISTRATION, SAVE_LOAD, SAY_BOX, SKILL_BOX, SPLIT,
         TOWN_VIEW, TIMER, USE
     };
 
@@ -4455,15 +4456,19 @@ public interface FeatureKey {
      */
     public static List<FeatureKey> getPics(FeatureKey picPos) {
         if (picPos.getType() == Type.PIC_POS) {
+
+            // this is the special base case
+            String str = picPos.getStringValue().replaceAll("TakeAll", "TA");
+
             List<FeatureKey> result = new ArrayList<>();
 
-            String begin = picPos.getStringValue() + PIC_REGEX;
+            String begin = str + PIC_REGEX;
             final String altRegex = begin;
 
             begin = begin.replaceAll(FeatureValue.NUMBER_REGEX, "");
             begin = begin.replaceAll("Opponent", "");
-            final boolean hasNumber = picPos.getStringValue().matches(
-                    picPos.getStringValue().replaceAll(FeatureValue.NUMBER_REGEX, "") + FeatureValue.NUMBER_REGEX
+            final boolean hasNumber = str.matches(
+                    str.replaceAll(FeatureValue.NUMBER_REGEX, "") + FeatureValue.NUMBER_REGEX
             );
             final String regex = hasNumber ? begin + FeatureValue.NUMBER_REGEX : begin;
 
@@ -4531,7 +4536,15 @@ public interface FeatureKey {
      */
     public static Pair<FeatureKey, FeatureKey> getSplitValues(FeatureKey fk) {
 
-        if (fk == Inventory.InvInv) {
+        if (fk == Barter.BarterCont1) {
+            return new Pair<>(null, Barter.BarterCont1ItemHeight);
+        } else if (fk == Barter.BarterCont2) {
+            return new Pair<>(null, Barter.BarterCont2ItemHeight);
+        } else if (fk == Barter.BarterCont1o) {
+            return new Pair<>(null, Barter.BarterCont1oItemHeight);
+        } else if (fk == Barter.BarterCont2o) {
+            return new Pair<>(null, Barter.BarterCont2oItemHeight);
+        } else if (fk == Inventory.InvInv) {
             return new Pair<>(null, Inventory.InvHeightItem);
         } else if (fk == Use.UseInv) {
             return new Pair<>(null, Use.UseHeightItem);
@@ -4539,6 +4552,10 @@ public interface FeatureKey {
             return new Pair<>(PriceSetup.PSWidthItem, PriceSetup.PSHeightItem);
         } else if (fk == GroundPickup.GPickupInv) {
             return new Pair<>(GroundPickup.GPickupWidthItem, GroundPickup.GPickupHeightItem);
+        } else if (fk == PickUp.PupCont1) {
+            return new Pair<>(null, PickUp.PupHeightCont1);
+        } else if (fk == PickUp.PupCont2) {
+            return new Pair<>(null, PickUp.PupHeightCont2);
         } else if (fk == Interface.IntAp) {
             return new Pair<>(Interface.IntApStepX, Interface.IntApStepY);
         }

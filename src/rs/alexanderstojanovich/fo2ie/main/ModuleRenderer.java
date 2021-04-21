@@ -25,6 +25,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -52,13 +54,16 @@ import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public abstract class ModuleAnimator implements GLEventListener, MouseListener, MouseMotionListener {
+public abstract class ModuleRenderer implements GLEventListener, MouseListener, MouseMotionListener {
+
+    public static final Object OBJ_SYNC = new Object();
 
     private final Configuration config = Configuration.getInstance();
 
     public static final int DEF_WIDTH = 800;
     public static final int DEF_HEIGHT = 600;
 
+    // essentials
     protected final Module module = new Module();
     protected final Intrface intrface;
 
@@ -67,9 +72,13 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
     private ShaderProgram imgSProgram;
     private ShaderProgram fntSProgram;
 
+    // textures
     protected Texture fntTexture;
     protected Texture qmarkTexture;
+    // projection matrix
     private final Matrix4f projMat4 = new Matrix4f().identity();
+
+    // animator used for rendering in the loop
     private final FPSAnimator animator;
 
     protected GLComponent selected;
@@ -81,19 +90,19 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * State of the machine
      */
     public static enum State {
-        INIT, BUILD, SCREENSHOT, RENDER;
+        INIT, RENDER, BUILD, SCREENSHOT
     }
 
     protected State state = State.INIT;
 
     /**
-     * Build mode
+     * Build mode {ALL_RES, TARGET_RES}
      */
-    public static enum Mode {
-        NO_ACTION, ALL_RES, TARGET_RES;
-    }
+    public static enum BuildMode {
+        ALL_RES, TARGET_RES;
+    };
 
-    protected Mode mode = Mode.NO_ACTION;
+    protected BuildMode buildMode = BuildMode.TARGET_RES;
 
     /**
      * Create JOGL Animator of the built module
@@ -101,7 +110,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      * @param animator parsed FPS animator
      * @param intrface FOnline interface
      */
-    public ModuleAnimator(FPSAnimator animator, Intrface intrface) {
+    public ModuleRenderer(FPSAnimator animator, Intrface intrface) {
         this.animator = animator;
         this.intrface = intrface;
     }
@@ -157,8 +166,7 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
         }
 
         this.animator.start();
-
-        state = State.BUILD;
+        state = State.RENDER;
     }
 
     /**
@@ -193,7 +201,6 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
         if (config.isKeepAspectRatio()) {
             setPerspective();
         }
-        state = State.BUILD;
     }
 
     /**
@@ -203,42 +210,53 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
      */
     @Override
     public void display(GLAutoDrawable glad) {
-        try {
-            GL2 gl20 = glad.getGL().getGL2();
-            gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-
-            switch (state) {
-                // invoked when user desired to buildTargetRes the module
-                case BUILD:
-                    Texture.TEXTURE_MAP.clear();
-                    module.components.clear();
-                    if (mode == Mode.ALL_RES) {
-                        module.components.addAll(intrface.buildAllRes(gl20, fntTexture, qmarkTexture));
-                    } else if (mode == Mode.TARGET_RES) {
-                        module.components.addAll(intrface.buildTargetRes(gl20, fntTexture, qmarkTexture));
-                    }
-                    state = State.RENDER;
-                    break;
-                // invoked from the menu > tools > take screenshot
-                case SCREENSHOT:
-                    BufferedImage screenshot = createScreenshot(gl20);
-                    boolean ok = saveScreenshot(screenshot);
-                    if (ok) {
-                        JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot saved.", "Module Screenshot", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot failed!", "Module Screenshot", JOptionPane.ERROR_MESSAGE);
-                    }
-                    state = State.RENDER;
-                // otherwise render the module
-                case RENDER:
-                    module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
-                    break;
-            }
-        } catch (IOException ex) {
-            FO2IELogger.reportError("Error occurred during during module build", null);
-            FO2IELogger.reportError(ex.getMessage(), ex);
+        GL2 gl20 = glad.getGL().getGL2();
+        switch (state) {
+            case RENDER:
+                gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+                module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
+                break;
+            case BUILD:
+                gl20.getContext().release();
+                buildComponents(gl20);
+                gl20.getContext().makeCurrent();
+                state = State.RENDER;
+                break;
+            case SCREENSHOT:
+                BufferedImage screenshot = createScreenshot(gl20);
+                boolean ok = saveScreenshot(screenshot);
+                if (ok) {
+                    JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot saved.", "Module Screenshot", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot failed!", "Module Screenshot", JOptionPane.ERROR_MESSAGE);
+                }
+                state = State.RENDER;
+            default:
+                break;
         }
+    }
 
+    //--------------------------------------------------------------------------
+    private void buildComponents(GL2 gl20) {
+        final ProgressWindow window = new ProgressWindow();
+        ModuleBuildTask task = new ModuleBuildTask(intrface.getSectionName(), intrface, module, buildMode, gl20, fntTexture, qmarkTexture) {
+            @Override
+            protected void done() {
+                afterModuleBuild();
+                window.dispose();
+                state = State.RENDER;
+            }
+        };
+        task.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("progress".equals(evt.getPropertyName())) {
+                    window.progressBar.setValue(Math.round((float) evt.getNewValue()));
+                    window.progressBar.validate();
+                }
+            }
+        });
+        task.execute();
     }
 
     //--------------------------------------------------------------------------
@@ -340,16 +358,16 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
             // try to find corrseponding feature value
             FeatureValue featureValue = null;
             // based on module build mode do something..
-            if (intrface.getBuildMode() == Intrface.BuildMode.COMMON) {
-                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-            } else if (intrface.getBuildMode() == Intrface.BuildMode.PRAGMA) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
-                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-                } else {
-                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-                }
-            }
+//            if (mode == Mode.ALL_RES) {
+//                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+//            } else if (mode == Mode.TARGET_RES) {
+//                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+//                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
+//                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//                } else {
+//                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+//                }
+//            }
 
             // try to set feature value with corresponding glMouseCoords
             if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
@@ -368,6 +386,11 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
 
         }
     }
+
+    /**
+     * Action which takes place after module build
+     */
+    public abstract void afterModuleBuild();
 
     /**
      * Action which takes place after selection
@@ -465,10 +488,6 @@ public abstract class ModuleAnimator implements GLEventListener, MouseListener, 
 
     public Configuration getConfig() {
         return config;
-    }
-
-    public Mode getMode() {
-        return mode;
     }
 
     public FPSAnimator getAnimator() {

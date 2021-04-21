@@ -16,8 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.intrface;
 
-import com.jogamp.opengl.GL2;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,26 +28,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
-import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
-import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
-import rs.alexanderstojanovich.fo2ie.feature.SingleValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
-import rs.alexanderstojanovich.fo2ie.main.GUI;
-import rs.alexanderstojanovich.fo2ie.ogl.AddressableQuad;
-import rs.alexanderstojanovich.fo2ie.ogl.Animation;
-import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
-import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
-import rs.alexanderstojanovich.fo2ie.ogl.Quad;
-import rs.alexanderstojanovich.fo2ie.ogl.Text;
-import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
-import rs.alexanderstojanovich.fo2ie.util.Pair;
-import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
 /**
  *
@@ -76,15 +60,8 @@ public class Intrface {
         STD, RES
     }
 
-    /* Build mode { FROM COMMON MAP (ALL RES), FROM RES PRAGMA (TARGET RES) }
-     */
-    public static enum BuildMode {
-        NONE, COMMON, PRAGMA
-    }
-
     protected boolean initialized = false;
     protected ReadMode readMode = ReadMode.STD;
-    protected BuildMode buildMode = BuildMode.NONE;
 
     protected final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.AimMainPic, FeatureKey.Aim.values());
     protected final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.BarterMainPic, FeatureKey.Barter.values());
@@ -126,13 +103,11 @@ public class Intrface {
     protected SectionName sectionName;
     protected ResolutionPragma resolutionPragma;
 
-    protected float progress = 0.0f;
+    public int modeWidth = 800;
+    public int modeHeight = 600;
 
-    protected int modeWidth = 800;
-    protected int modeHeight = 600;
-
-    protected int mainPicWidth = 800;
-    protected int mainPicHeight = 600;
+    public int mainPicWidth = 800;
+    public int mainPicHeight = 600;
 
     public Intrface() {
         initMap();
@@ -288,8 +263,6 @@ public class Intrface {
 
         initialized = ok;
 
-        buildMode = BuildMode.NONE;
-
         return ok;
     }
 
@@ -421,602 +394,6 @@ public class Intrface {
         initialized = ok;
 
         return ok;
-    }
-
-    /**
-     * Builds components list from common section based on all resolutions
-     *
-     * @param gl20 GL2 binding
-     * @param fntTexture font texture for text rendering
-     * @param unusedTexture unused texture (known as question mark texture)
-     * @return built list from all the features containing OpenGL components
-     * @throws java.io.IOException if building the module fails due to missing
-     * image
-     */
-    public List<GLComponent> buildAllRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
-        progress = 0.0f;
-
-        buildMode = BuildMode.COMMON;
-
-        modeWidth = 800;
-        modeHeight = 600;
-
-        mainPicWidth = 800;
-        mainPicHeight = 600;
-
-        // final result is array list of components
-        final List<GLComponent> result = new ArrayList<>();
-        final Section section = this.nameToSectionMap.get(sectionName);
-        if (section != null && section != popUp) {
-            FeatureKey mainPicKey = section.root.getMainPic();
-            MyRectangle mainPicPosVal = null;
-
-            // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
-
-            // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null && commonFeatMap.containsKey(mainPicKey)) {
-                ImageWrapper mainPicVal = (ImageWrapper) commonFeatMap.get(mainPicKey);
-                mainPicVal.loadImages();
-
-                // texture for main picture
-                Texture rootTex;
-                // if main picture holds the image load the texture
-                if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
-                    rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
-                    // otherwise load missing question mark texture
-                } else {
-                    rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
-                }
-
-                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
-                FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
-                if (mainPicPosKey != null && commonFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyRectangle) commonFeatMap.get(mainPicPosKey);
-                    MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
-                }
-
-                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
-                result.add(root);
-            }
-
-            // defining mutually exclusive Lists for pictures, primitives (overlays) and text
-            final List<GLComponent> picComps = new ArrayList<>();
-            final List<GLComponent> txtComps = new ArrayList<>();
-
-            FeatureKey[] picPosValues = section.root.getPicPosValues();
-            if (picPosValues != null) {
-                for (FeatureKey picPosKey : picPosValues) {
-                    if (picPosKey != section.root.getMainPicPos()) {
-                        FeatureValue picPosVal = commonFeatMap.get(picPosKey);
-                        if (picPosVal instanceof MyRectangle) {
-                            MyRectangle picPosRect = (MyRectangle) picPosVal;
-                            MyRectangle temp = new MyRectangle();
-
-                            // scale rectangle to the drawing surface
-                            picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
-
-                            Pair<FeatureKey, FeatureKey> splitValues = FeatureKey.getSplitValues(picPosKey);
-                            float splitW = 0.0f, splitH = 0.0f;
-                            if (splitValues != null) {
-                                FeatureKey keyW = splitValues.getKey();
-                                if (keyW != null) {
-                                    FeatureValue valW = commonFeatMap.get(keyW);
-                                    if (valW instanceof SingleValue) {
-                                        splitW = ((SingleValue) valW).getNumber();
-                                    }
-                                }
-                                FeatureKey keyH = splitValues.getValue();
-                                if (keyH != null) {
-                                    FeatureValue valH = commonFeatMap.get(keyH);
-                                    if (valH instanceof SingleValue) {
-                                        splitH = ((SingleValue) valH).getNumber();
-                                    }
-                                }
-                            }
-
-                            List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
-                            for (FeatureKey picKey : pics) {
-                                FeatureValue picVal = commonFeatMap.get(picKey);
-                                if (picVal instanceof ImageWrapper) {
-                                    ImageWrapper iw = (ImageWrapper) picVal;
-                                    iw.loadImages();
-                                    BufferedImage[] images = iw.getImages();
-                                    if (images != null && images.length > 0) {
-                                        // dimension of picture/animation in pixels
-                                        int width, height;
-                                        // pixel (screen) coordinates
-                                        Vector2f pos = new Vector2f();
-                                        if (images.length == 1 && splitW == 0.0f && splitH == 0.0f) {
-                                            // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
-                                            // pixel position
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
-
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
-                                            }
-
-                                            // texture from loaded image
-                                            Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
-                                            picComps.add(imgComp);
-                                        } else if (splitW != 0.0f || splitH != 0.0f) {
-                                            // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
-                                            // pixel position (picPosRect is already scaled)
-
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
-
-                                            Vector2f posMax = new Vector2f(
-                                                    picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
-                                            );
-
-                                            // texture from loaded image
-                                            Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
-                                            picComps.add(aq);
-                                        } else {
-                                            // pixel dimension
-                                            width = picPosRect.lengthX();
-                                            height = picPosRect.lengthY();
-                                            // pixel position (picPosRect is already scaled)
-                                            pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
-                                            pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
-
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
-                                            }
-
-                                            int index = 0;
-                                            // array of textures for an animation
-                                            final Texture[] texas = new Texture[images.length];
-                                            for (BufferedImage image : images) {
-                                                texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
-                                                index++;
-                                            }
-                                            Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
-                                            picComps.add(anim);
-                                        }
-                                    }
-                                } else if (picVal != null) {
-                                    FO2IELogger.reportWarning("Unexisting cast for ("
-                                            + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
-                                }
-                            }
-
-                            // missing picture -> question mark for missing..
-                            if (pics.isEmpty()) {
-                                if (splitW != 0.0f || splitH != 0.0f) {
-                                    // pixel dimension
-                                    int width = (splitW != 0.0f) ? Math.round(splitW) : picPosRect.lengthX();
-                                    int height = (splitH != 0.0f) ? Math.round(splitH) : picPosRect.lengthY();
-                                    // pixel position (picPosRect is already scaled)
-
-                                    Vector2f pos = new Vector2f(
-                                            picPosRect.minX + width / 2.0f,
-                                            picPosRect.minY + height / 2.0f
-                                    );
-
-                                    Vector2f posMax = new Vector2f(
-                                            picPosRect.maxX - width / 2.0f,
-                                            picPosRect.maxY - height / 2.0f
-                                    );
-
-                                    // texture is missing texture
-                                    Texture aqtex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
-                                    AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
-                                    aq.setColor(qmarkColor);
-                                    picComps.add(aq);
-                                } else {
-                                    // position is always center (half sum of coords)
-                                    Vector2f pos = new Vector2f(
-                                            (picPosRect.minX + picPosRect.maxX) / 2.0f,
-                                            (picPosRect.minY + picPosRect.maxY) / 2.0f
-                                    );
-                                    // Global Map special case
-                                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                        pos.x += mainPicPosVal.minX;
-                                        pos.y += mainPicPosVal.minY;
-                                    }
-                                    Quad qmark = new Quad(
-                                            picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
-                                            Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
-                                    );
-                                    qmark.setColor(qmarkColor);
-                                    picComps.add(qmark);
-                                }
-
-                            }
-
-                        } else if (picPosVal != null) {
-                            FO2IELogger.reportWarning("Unexisting cast for ("
-                                    + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
-                        }
-                    }
-
-                    progress += 50.0f / picPosValues.length;
-                }
-            }
-
-            FeatureKey[] textValues = section.root.getTextValues();
-            if (textValues != null) {
-                for (FeatureKey txtKey : textValues) {
-                    FeatureValue txtVal = commonFeatMap.get(txtKey);
-                    if (txtVal instanceof MyRectangle) {
-                        MyRectangle textRect = (MyRectangle) txtVal;
-                        MyRectangle temp = new MyRectangle();
-
-                        // scale rectangle to the drawing surface
-                        textRect = textRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
-
-                        int width = textRect.lengthX();
-                        int height = textRect.lengthY();
-
-                        // determine position of this picture
-                        float posx = (textRect.minX + textRect.maxX) / 2.0f;
-                        float posy = (textRect.minY + textRect.maxY) / 2.0f;
-
-                        // Global Map special case
-                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                            posx += mainPicPosVal.minX;
-                            posy += mainPicPosVal.minY;
-                        }
-
-                        // calc screen pixel coordinates
-                        Vector2f pos = new Vector2f(posx, posy);
-
-                        // this is text (primitive) overlay representing the area which text is populating
-                        PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
-                        txtOlay.setColor(textOverlayColor);
-
-                        // text display (content)
-                        String regex = txtKey.getPrefix() + "|" + "Text";
-                        String content = txtKey.getStringValue().replaceAll(regex, "");
-
-                        // font char dimensions
-                        int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
-                        int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
-
-                        // this is text component                    
-                        Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
-                        txt.setColor(textColor);
-                        txt.setAlignment(Text.ALIGNMENT_CENTER);
-                        txt.getOverlay().setColor(textOverlayColor);
-                        txt.getOverlay().setWidth(width);
-                        txt.getOverlay().setHeight(height);
-                        txtComps.add(txt);
-                    } else if (txtVal != null) {
-                        FO2IELogger.reportWarning("Unexisting cast for ("
-                                + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
-                    }
-
-                    progress += 50.0f / textValues.length;
-                }
-            }
-
-            result.addAll(picComps);
-            result.addAll(txtComps);
-        }
-
-        progress = 100.0f;
-        return result;
-    }
-
-    /**
-     * Builds components list from current section based on resolution
-     *
-     * @param gl20 GL2 binding
-     * @param fntTexture font texture for text rendering
-     * @param unusedTexture unused texture (known as question mark texture)
-     * @return built list from all the features containing OpenGL components
-     * @throws java.io.IOException if building the module fails due to missing
-     * image
-     */
-    public List<GLComponent> buildTargetRes(GL2 gl20, Texture fntTexture, Texture unusedTexture) throws IOException {
-        progress = 0.0f;
-        final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(commonFeatMap);
-
-        buildMode = BuildMode.PRAGMA;
-
-        if (resolutionPragma != null) {
-            for (FeatureKey custKey : resolutionPragma.customFeatMap.keySet()) {
-                FeatureValue custVal = resolutionPragma.customFeatMap.get(custKey);
-                if (resFeatMap.containsKey(custKey)) {
-                    resFeatMap.replace(custKey, custVal);
-                } else {
-                    resFeatMap.put(custKey, custVal);
-                }
-            }
-        }
-
-        modeWidth = (resolutionPragma == null) ? 800 : resolutionPragma.getWidth();
-        modeHeight = (resolutionPragma == null) ? 600 : resolutionPragma.getHeight();
-
-        mainPicWidth = 800;
-        mainPicHeight = 600;
-
-        // final result is array list of components
-        final List<GLComponent> result = new ArrayList<>();
-        final Section section = this.nameToSectionMap.get(sectionName);
-        if (section != null && section != popUp) {
-            FeatureKey mainPicKey = section.root.getMainPic();
-            MyRectangle mainPicPosVal = null;
-
-            // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
-
-            // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
-                ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
-                mainPicVal.loadImages();
-
-                // texture for main picture
-                Texture rootTex;
-                // if main picture holds the image load the texture
-                if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
-                    rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
-                    // otherwise load missing question mark texture
-                } else {
-                    rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
-                }
-
-                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
-                FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
-                if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
-                    MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
-                }
-
-                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
-                result.add(root);
-            }
-
-            // defining mutually exclusive Lists for pictures, primitives (overlays) and text
-            final List<GLComponent> picComps = new ArrayList<>();
-            final List<GLComponent> txtComps = new ArrayList<>();
-
-            FeatureKey[] picPosValues = section.root.getPicPosValues();
-            if (picPosValues != null) {
-                for (FeatureKey picPosKey : picPosValues) {
-                    if (picPosKey != section.root.getMainPicPos()) {
-                        FeatureValue picPosVal = resFeatMap.get(picPosKey);
-                        if (picPosVal instanceof MyRectangle) {
-                            MyRectangle picPosRect = (MyRectangle) picPosVal;
-                            MyRectangle temp = new MyRectangle();
-
-                            // scale rectangle to the drawing surface
-                            picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
-
-                            Pair<FeatureKey, FeatureKey> splitValues = FeatureKey.getSplitValues(picPosKey);
-                            float splitW = 0.0f, splitH = 0.0f;
-                            if (splitValues != null) {
-                                FeatureKey keyW = splitValues.getKey();
-                                if (keyW != null) {
-                                    FeatureValue valW = resFeatMap.get(keyW);
-                                    if (valW instanceof SingleValue) {
-                                        splitW = ((SingleValue) valW).getNumber();
-                                    }
-                                }
-                                FeatureKey keyH = splitValues.getValue();
-                                if (keyH != null) {
-                                    FeatureValue valH = resFeatMap.get(keyH);
-                                    if (valH instanceof SingleValue) {
-                                        splitH = ((SingleValue) valH).getNumber();
-                                    }
-                                }
-                            }
-
-                            List<FeatureKey> pics = FeatureKey.getPics(picPosKey);
-                            for (FeatureKey picKey : pics) {
-                                FeatureValue picVal = resFeatMap.get(picKey);
-                                if (picVal instanceof ImageWrapper) {
-                                    ImageWrapper iw = (ImageWrapper) picVal;
-                                    iw.loadImages();
-                                    BufferedImage[] images = iw.getImages();
-                                    if (images != null && images.length > 0) {
-                                        // dimension of picture/animation in pixels
-                                        int width, height;
-                                        // pixel (screen) coordinates
-                                        Vector2f pos = new Vector2f();
-                                        if (images.length == 1 && splitW == 0.0f && splitH == 0.0f) {
-                                            // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
-                                            // pixel position
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
-
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
-                                            }
-
-                                            // texture from loaded image
-                                            Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
-                                            picComps.add(imgComp);
-                                        } else if (splitW != 0.0f || splitH != 0.0f) {
-                                            // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
-                                            // pixel position (picPosRect is already scaled)
-
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
-
-                                            Vector2f posMax = new Vector2f(
-                                                    picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
-                                            );
-
-                                            // texture from loaded image
-                                            Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
-                                            picComps.add(aq);
-                                        } else {
-                                            // pixel dimension
-                                            width = picPosRect.lengthX();
-                                            height = picPosRect.lengthY();
-                                            // pixel position (picPosRect is already scaled)
-                                            pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
-                                            pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
-
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
-                                            }
-
-                                            int index = 0;
-                                            // array of textures for an animation
-                                            final Texture[] texas = new Texture[images.length];
-                                            for (BufferedImage image : images) {
-                                                texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
-                                                index++;
-                                            }
-                                            Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
-                                            picComps.add(anim);
-                                        }
-                                    }
-                                } else if (picVal != null) {
-                                    FO2IELogger.reportWarning("Unexisting cast for ("
-                                            + picKey.getStringValue() + ", " + picVal.getStringValue() + ")", null);
-                                }
-                            }
-
-                            // missing picture -> question mark for missing..
-                            if (pics.isEmpty()) {
-                                if (splitW != 0.0f || splitH != 0.0f) {
-                                    // pixel dimension
-                                    int width = (splitW != 0.0f) ? Math.round(splitW) : picPosRect.lengthX();
-                                    int height = (splitH != 0.0f) ? Math.round(splitH) : picPosRect.lengthY();
-                                    // pixel position (picPosRect is already scaled)
-
-                                    Vector2f pos = new Vector2f(
-                                            picPosRect.minX + width / 2.0f,
-                                            picPosRect.minY + height / 2.0f
-                                    );
-
-                                    Vector2f posMax = new Vector2f(
-                                            picPosRect.maxX - width / 2.0f,
-                                            picPosRect.maxY - height / 2.0f
-                                    );
-
-                                    // texture is missing texture
-                                    Texture aqtex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
-                                    AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
-                                    aq.setColor(qmarkColor);
-                                    picComps.add(aq);
-                                } else {
-                                    // position is always center (half sum of coords)
-                                    Vector2f pos = new Vector2f(
-                                            (picPosRect.minX + picPosRect.maxX) / 2.0f,
-                                            (picPosRect.minY + picPosRect.maxY) / 2.0f
-                                    );
-                                    // Global Map special case
-                                    if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                                        pos.x += mainPicPosVal.minX;
-                                        pos.y += mainPicPosVal.minY;
-                                    }
-                                    Quad qmark = new Quad(
-                                            picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
-                                            Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
-                                    );
-                                    qmark.setColor(qmarkColor);
-                                    picComps.add(qmark);
-                                }
-
-                            }
-
-                        } else if (picPosVal != null) {
-                            FO2IELogger.reportWarning("Unexisting cast for ("
-                                    + picPosKey.getStringValue() + ", " + picPosVal.getStringValue() + ")", null);
-                        }
-                    }
-
-                    progress += 50.0f / picPosValues.length;
-                }
-            }
-
-            FeatureKey[] textValues = section.root.getTextValues();
-            if (textValues != null) {
-                for (FeatureKey txtKey : textValues) {
-                    FeatureValue txtVal = resFeatMap.get(txtKey);
-                    if (txtVal instanceof MyRectangle) {
-                        MyRectangle textRect = (MyRectangle) txtVal;
-                        MyRectangle temp = new MyRectangle();
-
-                        // scale rectangle to the drawing surface
-                        textRect = textRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
-
-                        int width = textRect.lengthX();
-                        int height = textRect.lengthY();
-
-                        // determine position of this picture
-                        float posx = (textRect.minX + textRect.maxX) / 2.0f;
-                        float posy = (textRect.minY + textRect.maxY) / 2.0f;
-
-                        // Global Map special case
-                        if (mainPicPosVal != null && section.sectionName == SectionName.GlobalMap) {
-                            posx += mainPicPosVal.minX;
-                            posy += mainPicPosVal.minY;
-                        }
-
-                        // calc screen pixel coordinates
-                        Vector2f pos = new Vector2f(posx, posy);
-
-                        // this is text (primitive) overlay representing the area which text is populating
-                        PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
-                        txtOlay.setColor(textOverlayColor);
-
-                        // text display (content)
-                        String regex = txtKey.getPrefix() + "|" + "Text";
-                        String content = txtKey.getStringValue().replaceAll(regex, "");
-
-                        // font char dimensions
-                        int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
-                        int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
-
-                        // this is text component                    
-                        Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
-                        txt.setColor(textColor);
-                        txt.setAlignment(Text.ALIGNMENT_CENTER);
-                        txt.getOverlay().setColor(textOverlayColor);
-                        txt.getOverlay().setWidth(width);
-                        txt.getOverlay().setHeight(height);
-                        txtComps.add(txt);
-                    } else if (txtVal != null) {
-                        FO2IELogger.reportWarning("Unexisting cast for ("
-                                + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
-                    }
-
-                    progress += 50.0f / textValues.length;
-                }
-            }
-
-            result.addAll(picComps);
-            result.addAll(txtComps);
-        }
-
-        progress = 100.0f;
-        return result;
     }
 
     /**
@@ -1170,16 +547,8 @@ public class Intrface {
         return result;
     }
 
-    public void resetProgress() {
-        progress = 0.0f;
-    }
-
     public Section getFaction() {
         return faction;
-    }
-
-    public float getProgress() {
-        return progress;
     }
 
     public ReadMode getReadMode() {
@@ -1370,14 +739,6 @@ public class Intrface {
         return qmarkColor;
     }
 
-    public BuildMode getBuildMode() {
-        return buildMode;
-    }
-
-    public void setBuildMode(BuildMode buildMode) {
-        this.buildMode = buildMode;
-    }
-
     public int getModeWidth() {
         return modeWidth;
     }
@@ -1392,6 +753,22 @@ public class Intrface {
 
     public int getMainPicHeight() {
         return mainPicHeight;
+    }
+
+    public void setModeWidth(int modeWidth) {
+        this.modeWidth = modeWidth;
+    }
+
+    public void setModeHeight(int modeHeight) {
+        this.modeHeight = modeHeight;
+    }
+
+    public void setMainPicWidth(int mainPicWidth) {
+        this.mainPicWidth = mainPicWidth;
+    }
+
+    public void setMainPicHeight(int mainPicHeight) {
+        this.mainPicHeight = mainPicHeight;
     }
 
 }

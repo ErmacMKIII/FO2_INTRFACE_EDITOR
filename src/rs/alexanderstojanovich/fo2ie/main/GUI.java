@@ -21,9 +21,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -35,17 +33,13 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -60,7 +54,6 @@ import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
-import rs.alexanderstojanovich.fo2ie.main.ModuleAnimator.Mode;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
@@ -70,6 +63,12 @@ import rs.alexanderstojanovich.fo2ie.util.GLColor;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class GUI extends javax.swing.JFrame {
+
+    public static enum Mode {
+        ALL_RES, TARGET_RES
+    };
+
+    private Mode mode = Mode.TARGET_RES;
 
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
     public static final List<Image> ICONS = initFO2IELogos();
@@ -84,13 +83,20 @@ public class GUI extends javax.swing.JFrame {
     private static final DefaultComboBoxModel<Section.SectionName> DCBM = new DefaultComboBoxModel<>(Section.SectionName.values());
     private final Intrface intrface = new Intrface();
     private final FPSAnimator fpsAnim = new FPSAnimator(GL_CANVAS, FPSAnimator.DEFAULT_FRAMES_PER_INTERVAL, true);
-    private final ModuleAnimator mdlAnim = new ModuleAnimator(fpsAnim, intrface) {
+    private final ModuleRenderer renderer = new ModuleRenderer(fpsAnim, intrface) {
         @Override
         public void afterSelection() {
             featurePreview();
             componentsPreview();
         }
+
+        @Override
+        public void afterModuleBuild() {
+            btnBuild.setEnabled(true);
+            btnMdlePreview.setEnabled(true);
+        }
     };
+    public static final ExecutorService EXEC_BUILD = Executors.newSingleThreadExecutor();
 
     // cool it's our new logo :)
     private static final String LOGO_FILE_NAME = "fo2ie_logo.png";
@@ -122,8 +128,6 @@ public class GUI extends javax.swing.JFrame {
     public static final String SCREENSHOT_DIR = "screenshots";
 
     private File targetIniFile;
-
-    private File savedScreenshot;
 
     private static float progress = 0.0f;
 
@@ -184,10 +188,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void initGL() {
         // registering events
-        GL_CANVAS.addGLEventListener(mdlAnim);
+        GL_CANVAS.addGLEventListener(renderer);
         // for moving GLComponents
-        GL_CANVAS.addMouseListener(mdlAnim);
-        GL_CANVAS.addMouseMotionListener(mdlAnim);
+        GL_CANVAS.addMouseListener(renderer);
+        GL_CANVAS.addMouseMotionListener(renderer);
 
         GL_CANVAS.setSize(panelModule.getSize());
         GL_CANVAS.setPreferredSize(panelModule.getPreferredSize());
@@ -201,7 +205,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         GL_WINDOW.setTitle("Module preview");
-        GL_WINDOW.addGLEventListener(mdlAnim);
+        GL_WINDOW.addGLEventListener(renderer);
         GL_WINDOW.setSharedAutoDrawable(GL_CANVAS);
         GL_WINDOW.setSize(800, 600);
         fpsAnim.add(GL_WINDOW);
@@ -251,58 +255,8 @@ public class GUI extends javax.swing.JFrame {
         btnBuild.setEnabled(false);
         btnMdlePreview.setEnabled(false);
 
-        final JLabel jLabel = new JLabel("Building progress");
-        final URL urlBuild = getClass().getResource(RESOURCES_DIR + BUILD_ICON);
-        Font font = new Font(Font.SANS_SERIF, Font.BOLD, 26);
-        jLabel.setFont(font);
-        jLabel.setIcon(new ImageIcon(urlBuild));
-        final JProgressBar progBar = new JProgressBar(1, 100);
-        progBar.setStringPainted(true);
-        final JWindow window = new JWindow(this);
-        window.setLayout(new BorderLayout());
-        window.getContentPane().add(jLabel, BorderLayout.CENTER);
-        window.getContentPane().add(progBar, BorderLayout.SOUTH);
-        window.setAlwaysOnTop(true);
-        window.setVisible(true);
-        window.setLocation(DIM.width / 2 - window.getSize().width / 2, DIM.height / 2 - window.getSize().height / 2);
-        window.pack();
-
-        Timer timer = new Timer("Progress Timer");
-
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    intrface.resetProgress();
-                    while (intrface.getProgress() < 100.0f) {
-                        progBar.setValue(Math.round(intrface.getProgress()));
-                        progBar.validate();
-                    }
-                    featurePreview();
-                    componentsPreview();
-                    progBar.setValue(Math.round(intrface.getProgress()));
-                    progBar.validate();
-                    Thread.sleep(250L);
-                    window.dispose();
-                } catch (InterruptedException ex) {
-                    FO2IELogger.reportInfo(ex.getMessage(), ex);
-                }
-            }
-        };
-        timer.schedule(timerTask, 0L);
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                buildModule();
-                featurePreview();
-                componentsPreview();
-                timer.cancel();
-                btnBuild.setEnabled(true);
-                btnMdlePreview.setEnabled(true);
-            }
-        });
-
+        initBuildModule();
+        buildModuleComponents();
     }
 
     /**
@@ -671,7 +625,7 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnChoosePathOutActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
-        mdlAnim.getModule().components.clear();
+        renderer.getModule().components.clear();
         loadFromButton();
         featurePreview();
         componentsPreview();
@@ -802,7 +756,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-19 at 04:30).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-21 at 03:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -872,6 +826,17 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    // builds Animator Renderer GL components
+    private void buildModuleComponents() {
+        if (mode == Mode.ALL_RES) {
+            renderer.buildMode = ModuleRenderer.BuildMode.ALL_RES;
+            renderer.state = ModuleRenderer.State.BUILD;
+        } else if (mode == Mode.TARGET_RES) {
+            renderer.buildMode = ModuleRenderer.BuildMode.TARGET_RES;
+            renderer.state = ModuleRenderer.State.BUILD;
+        }
+    }
+
     // edit feature value in the subform
     private void editFeatureValue() {
         final int srow = tblFeats.getSelectedRow();
@@ -883,8 +848,8 @@ public class GUI extends javax.swing.JFrame {
         final FeatValueEditor fve = new FeatValueEditor(featKey, featVal, intrface, btnTogAllRes.isSelected()) {
             @Override
             public void execute() {
-                mdlAnim.state = ModuleAnimator.State.BUILD;
                 tblFeats.setValueAt(featVal.getStringValue(), srow, scol - 2);
+                buildModuleComponents();
             }
         };
 
@@ -901,9 +866,9 @@ public class GUI extends javax.swing.JFrame {
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
         if (val == JOptionPane.YES_OPTION) {
-            if (btnTogAllRes.isSelected()) {
+            if (mode == Mode.ALL_RES) {
                 intrface.getCommonFeatMap().remove(featKey);
-            } else {
+            } else if (mode == Mode.TARGET_RES) {
                 ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
                 if (resolutionPragma != null) {
                     resolutionPragma.getCustomFeatMap().remove(featKey);
@@ -914,7 +879,7 @@ public class GUI extends javax.swing.JFrame {
 //            model.removeRow(srow);
             featurePreview();
             componentsPreview();
-            mdlAnim.state = ModuleAnimator.State.BUILD;
+            buildModuleComponents();
         }
     }
 
@@ -928,7 +893,7 @@ public class GUI extends javax.swing.JFrame {
             public void execute() {
                 featurePreview();
                 componentsPreview();
-                mdlAnim.state = ModuleAnimator.State.BUILD;
+                buildModuleComponents();
             }
         };
         fva.setVisible(true);
@@ -938,7 +903,7 @@ public class GUI extends javax.swing.JFrame {
 
     // makes preview for the feature table
     private synchronized void featurePreview() {
-        if (btnTogAllRes.isSelected()) {
+        if (mode == Mode.ALL_RES) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -995,7 +960,7 @@ public class GUI extends javax.swing.JFrame {
             remCol.setCellEditor(btnRemoveEditor);
             remCol.setCellRenderer(btnRemoveRenderer);
 
-        } else {
+        } else if (mode == Mode.TARGET_RES) {
             String resStr = (String) cmbBoxResolution.getSelectedItem();
             ResolutionPragma resolutionPragma = null;
             if (resStr != null) {
@@ -1068,14 +1033,12 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // cuz its called from another thread (and may be called repeatedly)
-    private void buildModule() {
+    private void initBuildModule() {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
-        if (btnTogAllRes.isSelected()) {
+        if (mode == Mode.ALL_RES) {
             intrface.setSectionName(sectionName);
             intrface.setResolutionPragma(null);
-            mdlAnim.mode = Mode.ALL_RES;
-            mdlAnim.state = ModuleAnimator.State.BUILD;
-        } else {
+        } else if (mode == Mode.TARGET_RES) {
             String resStr = (String) cmbBoxResolution.getSelectedItem();
             if (resStr != null) {
                 String[] things = resStr.trim().split("x");
@@ -1093,8 +1056,6 @@ public class GUI extends javax.swing.JFrame {
                 if (resolutionPragma != null) {
                     intrface.setSectionName(sectionName);
                     intrface.setResolutionPragma(resolutionPragma);
-                    mdlAnim.mode = Mode.TARGET_RES;
-                    mdlAnim.state = ModuleAnimator.State.BUILD;
                 }
             }
         }
@@ -1137,7 +1098,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnTogAllResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTogAllResActionPerformed
         // TODO add your handling code here:
-        mdlAnim.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
+        this.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
         featurePreview();
         componentsPreview();
@@ -1154,7 +1115,7 @@ public class GUI extends javax.swing.JFrame {
             loadFromMenu();
             featurePreview();
             componentsPreview();
-            mdlAnim.getModule().components.clear();
+            renderer.getModule().components.clear();
         }
 
         if (!cfg.getInDir().getPath().isEmpty()) {
@@ -1211,8 +1172,7 @@ public class GUI extends javax.swing.JFrame {
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
         deselect();
-        mdlAnim.module.components.clear();
-        intrface.setBuildMode(Intrface.BuildMode.NONE);
+        renderer.module.components.clear();
         featurePreview();
         componentsPreview();
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
@@ -1230,7 +1190,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void toolsScreenshotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsScreenshotActionPerformed
         // TODO add your handling code here:
-        mdlAnim.state = ModuleAnimator.State.SCREENSHOT;
+        renderer.state = ModuleRenderer.State.SCREENSHOT;
     }//GEN-LAST:event_toolsScreenshotActionPerformed
 
     private void fileInOpen() {
@@ -1272,10 +1232,10 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void deselect() {
-        if (mdlAnim.selected != null) {
-            mdlAnim.selected.setColor(mdlAnim.savedColor);
+        if (renderer.selected != null) {
+            renderer.selected.setColor(renderer.savedColor);
         }
-        mdlAnim.selected = null;
+        renderer.selected = null;
     }
 
     private void selectComponent() {
@@ -1287,11 +1247,11 @@ public class GUI extends javax.swing.JFrame {
         // deselect
         deselect();
 
-        for (GLComponent glc : mdlAnim.module.components) {
+        for (GLComponent glc : renderer.module.components) {
             if (glc.getFeatureKey() == featKey) {
-                mdlAnim.selected = glc;
-                mdlAnim.savedColor = glc.getColor();
-                mdlAnim.selected.setColor(GLColor.awtColorToVec4(cfg.getSelectCol()));
+                renderer.selected = glc;
+                renderer.savedColor = glc.getColor();
+                renderer.selected.setColor(GLColor.awtColorToVec4(cfg.getSelectCol()));
                 break;
             }
         }
@@ -1320,12 +1280,12 @@ public class GUI extends javax.swing.JFrame {
         });
         ButtonRenderer selRend = new ButtonRenderer(selEdit.getButton());
 
-        for (GLComponent glc : mdlAnim.module.components) {
+        for (GLComponent glc : renderer.module.components) {
             FeatureKey fk = glc.getFeatureKey();
             FeatureValue fv = null;
-            if (btnTogAllRes.isSelected()) {
+            if (mode == Mode.ALL_RES) {
                 fv = intrface.getCommonFeatMap().get(fk);
-            } else {
+            } else if (mode == Mode.TARGET_RES) {
                 ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
                 if (resolutionPragma != null) {
                     fv = resolutionPragma.getCustomFeatMap().get(fk);

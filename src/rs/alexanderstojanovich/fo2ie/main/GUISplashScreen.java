@@ -72,6 +72,7 @@ public class GUISplashScreen extends JWindow implements Runnable {
         this.setUpPosition();
         this.getContentPane().add(splashImgLbl, BorderLayout.CENTER);
         this.getContentPane().add(progressBar, BorderLayout.SOUTH);
+        this.toFront();
         this.setVisible(true);
     }
 

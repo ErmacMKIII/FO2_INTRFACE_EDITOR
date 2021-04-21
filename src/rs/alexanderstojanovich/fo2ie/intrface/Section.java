@@ -29,16 +29,16 @@ public class Section {
 
     public static enum SectionName {
         Aim, Barter, Character, Chosen, Console, DialogBox, Faction, FixBoy, GlobalMap, GroundPickup,
-        InputBox, Intrface, Inventory, PopUp, MiniMap, Login, Options, PriceSetup, Perk, PipBoy,
-        PickUp, Radio, Registration, SaveLoad, SayBox, SkillBox, Split,
+        InputBox, Intrface, Inventory, MiniMap, Login, Options, PriceSetup, Perk, PickUp, PipBoy,
+        PopUp, Radio, Registration, SaveLoad, SayBox, SkillBox, Split,
         TownView, Timer, Use
     };
 
     protected final SectionName sectionName;
 
     /**
-     * Creates new section with given section name.One section should be created
-     * only once unless it's resolution section.
+     * Creates new section with given section name. One section should be
+     * created only once unless it's resolution section.
      *
      * @param sectionName section name
      * @param root main image of this section (can be null)
