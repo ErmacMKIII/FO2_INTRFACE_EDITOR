@@ -35,8 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -97,6 +95,8 @@ public class GUI extends javax.swing.JFrame {
         public void afterModuleBuild() {
             btnBuild.setEnabled(true);
             btnMdlePreview.setEnabled(true);
+            featurePreview();
+            componentsPreview();
         }
     };
     public static final ExecutorService EXEC_BUILD = Executors.newSingleThreadExecutor();
