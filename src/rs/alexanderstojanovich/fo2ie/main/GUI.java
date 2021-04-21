@@ -40,6 +40,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -756,7 +757,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-21 at 03:00).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-21 at 16:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -1335,10 +1336,8 @@ public class GUI extends javax.swing.JFrame {
             FO2IELogger.reportError(ex.getMessage(), ex);
         }
         //</editor-fold>
-
-        //</editor-fold>
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 GUI gui = new GUI();

@@ -90,7 +90,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
      * State of the machine
      */
     public static enum State {
-        INIT, RENDER, BUILD, SCREENSHOT
+        INIT, RENDER, BUILD, SCREENSHOT, SUSPEND
     }
 
     protected State state = State.INIT;
@@ -166,7 +166,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         }
 
         this.animator.start();
-        state = State.RENDER;
+        state = State.INIT;
     }
 
     /**
@@ -176,13 +176,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
      */
     @Override
     public void dispose(GLAutoDrawable glad) {
-        // cancel unbuffer timer
-//        module.unbufTask.cancel();
-
-        // animator should stop working
-//        this.animator.stop();
-        // finish utilizing the time (its not needed)
-//        GameTime.getInstance().setFinished(true);
+        glad.getGL().getContext().destroy();
     }
 
     /**
@@ -212,15 +206,18 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     public void display(GLAutoDrawable glad) {
         GL2 gl20 = glad.getGL().getGL2();
         switch (state) {
+            case INIT:
+                state = State.RENDER;
+                break;
             case RENDER:
                 gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
                 module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
                 break;
             case BUILD:
-                gl20.getContext().release();
+                // suspend the loop until all components are built
+                animator.pause();
                 buildComponents(gl20);
-                gl20.getContext().makeCurrent();
-                state = State.RENDER;
+                state = State.SUSPEND;
                 break;
             case SCREENSHOT:
                 BufferedImage screenshot = createScreenshot(gl20);
@@ -231,6 +228,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                     JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot failed!", "Module Screenshot", JOptionPane.ERROR_MESSAGE);
                 }
                 state = State.RENDER;
+                break;
+            case SUSPEND:
             default:
                 break;
         }
@@ -244,7 +243,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             protected void done() {
                 afterModuleBuild();
                 window.dispose();
-                state = State.RENDER;
+                state = State.INIT;
+                // resume the animating loop
+                animator.resume();
             }
         };
         task.addPropertyChangeListener(new PropertyChangeListener() {
