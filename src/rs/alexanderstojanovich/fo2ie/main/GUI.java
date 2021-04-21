@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -1315,6 +1317,7 @@ public class GUI extends javax.swing.JFrame {
         // start splash screen now!
         GUISplashScreen splashScreen = new GUISplashScreen();
         splashScreen.setUp();
+
         Thread splashUpdater = new Thread(splashScreen, "Splash Screen Updater");
         splashUpdater.start();
 

@@ -84,6 +84,7 @@ public class GUISplashScreen extends JWindow implements Runnable {
             this.progressBar.setValue(Math.round(GUI.getProgress()));
             this.progressBar.validate();
         }
+        this.toFront();
         this.progressBar.setValue(Math.round(GUI.getProgress()));
         this.progressBar.validate();
 

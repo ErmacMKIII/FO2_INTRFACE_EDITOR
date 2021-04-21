@@ -45,6 +45,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
+import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
@@ -359,21 +360,28 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             // try to find corrseponding feature value
             FeatureValue featureValue = null;
             // based on module build mode do something..
-//            if (mode == Mode.ALL_RES) {
-//                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-//            } else if (mode == Mode.TARGET_RES) {
-//                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-//                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
-//                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-//                } else {
-//                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-//                }
-//            }
+            if (buildMode == BuildMode.ALL_RES) {
+                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+            } else if (buildMode == BuildMode.TARGET_RES) {
+                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
+                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+                } else {
+                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+                }
+            }
 
             // try to set feature value with corresponding glMouseCoords
             if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
                 MyRectangle mr = (MyRectangle) featureValue;
-                Rectanglef xr = selected.getPixelArea();
+                Rectanglef xr;
+                if (selected instanceof Text) {
+                    Text selectedText = (Text) selected;
+                    // this is important
+                    xr = selectedText.getOverlay().getPixelArea();
+                } else {
+                    xr = selected.getPixelArea();
+                }
 
                 Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(intrface.getModeWidth(), intrface.getModeHeight(), intrface.getMainPicWidth(), intrface.getMainPicHeight());
 
