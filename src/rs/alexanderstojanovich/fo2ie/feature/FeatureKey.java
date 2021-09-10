@@ -4566,8 +4566,7 @@ public interface FeatureKey {
             return new FeatureKey[]{
                 SayCancel,
                 SayMain,
-                SayOk,
-                SaySay
+                SayOk
             };
         }
 
@@ -4576,7 +4575,8 @@ public interface FeatureKey {
             return new FeatureKey[]{
                 SayCancelText,
                 SayMainText,
-                SayOkText
+                SayOkText,
+                SaySay
             };
         }
 
