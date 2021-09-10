@@ -57,6 +57,7 @@ import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
  */
 public abstract class ModuleRenderer implements GLEventListener, MouseListener, MouseMotionListener {
 
+    public static final Object OBJ_MUTEX = new Object();
     public static final Object OBJ_SYNC = new Object();
 
     private final Configuration config = Configuration.getInstance();
@@ -431,6 +432,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         // move across the OpenGL render space
         if (selected != null) {
             selected.setPos(scrnMouseCoords);
+            afterSelection();
         }
 
         dragging = true;

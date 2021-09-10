@@ -40,6 +40,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -93,7 +95,7 @@ public class GUI extends javax.swing.JFrame {
 
         @Override
         public void afterModuleBuild() {
-            btnBuild.setEnabled(true);
+            //btnBuild.setEnabled(true);
             btnMdlePreview.setEnabled(true);
             featurePreview();
             componentsPreview();
@@ -204,6 +206,7 @@ public class GUI extends javax.swing.JFrame {
                 int width = e.getComponent().getWidth();
                 int height = e.getComponent().getHeight();
                 GL_CANVAS.setSize(width, height);
+                buildModuleComponents();
 //                FO2IELogger.reportInfo(GL_CANVAS.getSize().toString(), null);
             }
         });
@@ -254,8 +257,12 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // bulding the module priv method
-    private void workBuild() {
-        btnBuild.setEnabled(false);
+    private void workOnBuildComponents() {
+        // dont build if already build in progress
+        if (renderer.state == ModuleRenderer.State.BUILD) {
+            return;
+        }
+
         btnMdlePreview.setEnabled(false);
 
         initBuildModule();
@@ -292,7 +299,6 @@ public class GUI extends javax.swing.JFrame {
         lblResolution = new javax.swing.JLabel();
         cmbBoxResolution = new javax.swing.JComboBox<>();
         btnTogAllRes = new javax.swing.JToggleButton();
-        btnBuild = new javax.swing.JButton();
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
         tabPaneBrowser = new javax.swing.JTabbedPane();
@@ -324,7 +330,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - GOTHS");
+        setTitle("FOnline2 S3 Interface Editor - HUNS");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(640, 360));
@@ -407,7 +413,7 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().add(pnlFilePaths);
 
         pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
-        pnlIntrface.setLayout(new java.awt.GridLayout(4, 3, 2, 2));
+        pnlIntrface.setLayout(new java.awt.GridLayout(3, 3, 2, 2));
 
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
@@ -442,18 +448,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlIntrface.add(btnTogAllRes);
 
-        btnBuild.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/build_icon.png"))); // NOI18N
-        btnBuild.setText("Build Module");
-        btnBuild.setToolTipText("Build module");
-        btnBuild.setIconTextGap(5);
-        btnBuild.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuildActionPerformed(evt);
-            }
-        });
-        pnlIntrface.add(btnBuild);
-
-        btnMdlePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/eye_icon.png"))); // NOI18N
+        btnMdlePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/window_preview_icon.png"))); // NOI18N
         btnMdlePreview.setText("Preview Module");
         btnMdlePreview.setToolTipText("Preview module in window");
         btnMdlePreview.setIconTextGap(5);
@@ -632,20 +627,13 @@ public class GUI extends javax.swing.JFrame {
         loadFromButton();
         featurePreview();
         componentsPreview();
+        workOnBuildComponents();
     }//GEN-LAST:event_btnLoadActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         saveFromButton();
     }//GEN-LAST:event_btnSaveActionPerformed
-
-    private void btnBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuildActionPerformed
-        // TODO add your handling code here:
-        deselect();
-        featurePreview();
-        componentsPreview();
-        workBuild();
-    }//GEN-LAST:event_btnBuildActionPerformed
 
     private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
         // TODO add your handling code here:
@@ -759,9 +747,15 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 BETA1 - GOTHS (PUBLIC BUILD reviewed on 2021-04-21 at 16:00).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 - HUNS (PUBLIC BUILD reviewed on 2021-09-10 at 16:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.0 HUNS:\n");
+            sb.append("\t- Modules are being build faster.\n");
+            sb.append("\t- Changes made to the components tab.\n");
+            sb.append("\t- Component position updated whilst component moving.\n");
+            sb.append("\t- Removed build module button. Everything is done automatically.\n");
             sb.append("\n");
             sb.append("Changelog since v1.0 BETA1 GOTHS:\n");
             sb.append("\t- Fix for some modules (Barter, PipBoy etc.).\n");
@@ -818,7 +812,6 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- One section module (or just module) consists of features.\n");
             sb.append("\t- Interface in the game is made of many modules.\n");
             sb.append("\t- By using \"All resolutions\" you're ignoring target resolution when module being built.\n");
-            sb.append("\t- Build module in OpenGL renderer with \"Build Module\".\n");
             sb.append("\t- Preview module in the window with \"Preview Module\".\n");
             sb.append("\t- Table has two tabs, interface features and rendering components\n");
             sb.append("\t  which can be edited in either of these two mods,\n");
@@ -1070,7 +1063,7 @@ public class GUI extends javax.swing.JFrame {
         deselect();
         featurePreview();
         componentsPreview();
-        workBuild();
+        workOnBuildComponents();
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();
             int height = intrface.getResolutionPragma().getHeight();
@@ -1096,7 +1089,10 @@ public class GUI extends javax.swing.JFrame {
         } else {
             sb.append("Status: ERRONEOUS");
         }
-        JOptionPane.showMessageDialog(this, sb.toString(), "Interface status", JOptionPane.INFORMATION_MESSAGE);
+        JTextArea textArea = new JTextArea(sb.toString(), 7, 20);
+        JScrollPane jsp = new JScrollPane(textArea);
+        textArea.setEditable(false);
+        JOptionPane.showMessageDialog(this, jsp, "Interface status", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnCheckActionPerformed
 
     private void btnTogAllResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTogAllResActionPerformed
@@ -1105,6 +1101,7 @@ public class GUI extends javax.swing.JFrame {
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
         featurePreview();
         componentsPreview();
+        workOnBuildComponents(); // important!
     }//GEN-LAST:event_btnTogAllResActionPerformed
 
     private void fileMenuLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuLoadActionPerformed
@@ -1178,12 +1175,14 @@ public class GUI extends javax.swing.JFrame {
         renderer.module.components.clear();
         featurePreview();
         componentsPreview();
+        workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed
         // TODO add your handling code here:
         featurePreview();
         componentsPreview();
+        workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxResolutionActionPerformed
 
     private void btnAddFeatXDeselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddFeatXDeselectActionPerformed
@@ -1244,7 +1243,7 @@ public class GUI extends javax.swing.JFrame {
     private void selectComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 3);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
@@ -1265,14 +1264,15 @@ public class GUI extends javax.swing.JFrame {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 3;
+                return column == 4;
             }
         };
 
-        compTblMdl.addColumn("Feature Key");
-        compTblMdl.addColumn("Feature Value");
-        compTblMdl.addColumn("Component Type");
-        compTblMdl.addColumn("Select Component");
+        compTblMdl.addColumn("Name");
+        compTblMdl.addColumn("Position");
+        compTblMdl.addColumn("Dimension");
+        compTblMdl.addColumn("Type");
+        compTblMdl.addColumn("Select");
 
         ButtonEditor selEdit = new ButtonEditor(new JButton("Select"));
         selEdit.getButton().addActionListener(new ActionListener() {
@@ -1296,13 +1296,15 @@ public class GUI extends javax.swing.JFrame {
             }
 
             if (fk != null && fv != null) {
-                Object[] row = {fk.getStringValue(), fv.getStringValue(), glc.getType()};
+                String dim = glc.getWidth() + "x" + glc.getHeight();
+                String pos = Math.round(glc.getPos().x - glc.getWidth() / 2.0f) + ", " + Math.round(glc.getPos().y - glc.getHeight() / 2.0f);
+                Object[] row = {fk.getStringValue(), pos, dim, glc.getType()};
                 compTblMdl.addRow(row);
             }
         }
 
         tblComps.setModel(compTblMdl);
-        TableColumn selCol = tblComps.getColumn("Select Component");
+        TableColumn selCol = tblComps.getColumn("Select");
         selCol.setCellEditor(selEdit);
         selCol.setCellRenderer(selRend);
     }
@@ -1364,7 +1366,6 @@ public class GUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddFeat;
-    private javax.swing.JButton btnBuild;
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;

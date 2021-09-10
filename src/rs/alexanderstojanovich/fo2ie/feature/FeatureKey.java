@@ -141,6 +141,24 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+            switch (this) {
+                case AimCancel:
+                    result.add(AimCancelPicDn);
+                    break;
+                case AimMain:
+                    result.add(AimMainPic);
+                    break;
+            }
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -328,6 +346,94 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case BarterButton0:
+                    result.add(BarterButtonPic0);
+                    break;
+                case BarterButton1:
+                    result.add(BarterButtonPic1);
+                    break;
+                case BarterButton2:
+                    result.add(BarterButtonPic2);
+                    break;
+                case BarterButton3:
+                    result.add(BarterButtonPic3);
+                    break;
+                case BarterButton4:
+                    result.add(BarterButtonPic4);
+                    break;
+                case BarterButtonOpponent0:
+                    result.add(BarterButtonPic0);
+                    break;
+                case BarterButtonOpponent1:
+                    result.add(BarterButtonPic1);
+                    break;
+                case BarterButtonOpponent2:
+                    result.add(BarterButtonPic2);
+                    break;
+                case BarterButtonOpponent3:
+                    result.add(BarterButtonPic3);
+                    break;
+                case BarterButtonOpponent4:
+                    result.add(BarterButtonPic4);
+                    break;
+                case BarterChosen:
+                case BarterCritter:
+                case BarterCont1:
+                case BarterCont2:
+                    break;
+                case BarterCont1oScrDn:
+                    result.add(BarterCont1oScrDnPicDn);
+                    break;
+                case BarterCont1oScrUp:
+                    result.add(BarterCont1oScrUpPicDn);
+                    break;
+                case BarterCont2ScrDn:
+                    result.add(BarterCont2ScrDnPicDn);
+                    break;
+                case BarterCont2ScrUp:
+                    result.add(BarterCont2ScrUpPicDn);
+                    break;
+                case BarterCont2oScrDn:
+                    result.add(BarterCont2oScrDnPicDn);
+                    break;
+                case BarterCont2oScrUp:
+                    result.add(BarterCont2oScrUpPicDn);
+                    break;
+                case BarterCont1ScrDn:
+                    result.add(BarterCont1ScrDnPicDn);
+                    break;
+                case BarterCont1ScrUp:
+                    result.add(BarterCont1ScrUpPicDn);
+                    break;
+                case BarterCont1Pic:
+                case BarterCont2Pic:
+                    break;
+                case BarterMain:
+                    result.add(BarterMainPic);
+                    break;
+                case BarterTalk:
+                    result.add(BarterTalkPic);
+                    break;
+                case BarterOffer:
+                    result.add(BarterOfferPic);
+                    break;
+                case BarterCont1o:
+                case BarterCont2o:
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -555,7 +661,6 @@ public interface FeatureKey {
                     return Type.PIC;
                 case ChaAge:
                 case ChaSex:
-                case ChaName:
                 case ChaMain:
                 case ChaPrint:
                 case ChaOk:
@@ -571,6 +676,7 @@ public interface FeatureKey {
                 case ChaSexMain:
                 case ChaSwitch:
                     return Type.PIC_POS;
+                case ChaName:
                 case ChaParamPic:
                 case ChaCancelText:
                 case ChaOkText:
@@ -617,6 +723,70 @@ public interface FeatureKey {
                     return Type.UNKNOWN;
 
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case ChaAge:
+                    result.add(ChaAgeMainPic);
+                    break;
+                case ChaSex:
+                    result.add(ChaSexPicDn);
+                    break;
+                case ChaMain:
+                    result.add(ChaMainPic);
+                    break;
+                case ChaPrint:
+                    result.add(ChaPrintPicDn);
+                    break;
+                case ChaOk:
+                    result.add(ChaOkPicDn);
+                    break;
+                case ChaCancel:
+                    result.add(ChaCancelPicDn);
+                    break;
+                case ChaSliderPlus:
+                    result.add(ChaSliderPlusPicDn);
+                    break;
+                case ChaSliderMinus:
+                    result.add(ChaSliderMinusPicDn);
+                    break;
+                case ChaAgeUp:
+                    result.add(ChaAgeUpPicDn);
+                    break;
+                case ChaAgeDown:
+                    result.add(ChaAgeDownPicDn);
+                    break;
+                case ChaAgeMain:
+                    result.add(ChaAgeMainPic);
+                    break;
+                case ChaNameMain:
+                    result.add(ChaNameMainPic);
+                    break;
+                case ChaSexFemale:
+                    result.add(ChaSexFemalePicDn);
+                    break;
+                case ChaSexMale:
+                    result.add(ChaSexMalePicDn);
+                    break;
+                case ChaSexMain:
+                    result.add(ChaSexMainPic);
+                    break;
+                case ChaSwitch:
+                    result.add(ChaSwitchKarmaPic);
+                    result.add(ChaSwitchKillsPic);
+                    result.add(ChaSwitchPerksPic);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -675,7 +845,6 @@ public interface FeatureKey {
             return new FeatureKey[]{
                 ChaAge,
                 ChaSex,
-                ChaName,
                 ChaMain,
                 ChaPrint,
                 ChaOk,
@@ -696,6 +865,7 @@ public interface FeatureKey {
         @Override
         public FeatureKey[] getTextValues() {
             return new FeatureKey[]{
+                ChaName,
                 ChaParamPic,
                 ChaCancelText,
                 ChaOkText,
@@ -780,6 +950,21 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            if (this == ChosenTab) {
+                result.add(ChosenTabPic);
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -833,6 +1018,17 @@ public interface FeatureKey {
         ConsoleMainPicY,
         ConsoleTextX,
         ConsoleTextY;
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            return result;
+        }
 
         @Override
         public String getPrefix() {
@@ -985,6 +1181,50 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case DlgAnsw:
+                    result.add(DlgAnswPic);
+                    break;
+                case DlgBarter:
+                    result.add(DlgBarterPicDn);
+                    break;
+                case DlgSay:
+                    result.add(DlgSayPicDn);
+                    break;
+                case DlgScrDn:
+                    result.add(DlgScrDnPicDn);
+                    break;
+                case DlgScrUp:
+                    result.add(DlgScrUpPicDn);
+                    break;
+                case DlgMain:
+                    result.add(DlgMainPic);
+                    break;
+                case DlgboxButton:
+                    result.add(DlgboxButtonPicDn);
+                    break;
+                case DlgboxBottom:
+                    result.add(DlgboxButtonPicDn);
+                    break;
+                case DlgboxMiddle:
+                    result.add(DlgboxMiddlePic);
+                    break;
+                case DlgboxTop:
+                    result.add(DlgboxTopPic);
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -1124,6 +1364,25 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+            switch (this) {
+                case FactionButton0:
+                case FactionButton1:
+                case FactionButton2:
+                case FactionButton3:
+                case FactionButton4:
+                case FactionButton5:
+                    break;
+            }
+            return result;
+        }
+
+        @Override
         public FeatureKey[] getPicValues() {
             return new FeatureKey[]{FactionMainPic};
         }
@@ -1229,6 +1488,56 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case FixButton1:
+                    result.add(FixButtonPic1);
+                    break;
+                case FixButton2:
+                    result.add(FixButtonPic2);
+                    break;
+                case FixButton3:
+                    result.add(FixButtonPic3);
+                    break;
+                case FixButton4:
+                    result.add(FixButtonPic4);
+                    break;
+                case FixButton5:
+                    result.add(FixButtonPic5);
+                    break;
+                case FixDone:
+                    result.add(FixDonePicDn);
+                    break;
+                case FixDow:
+                    result.add(FixDowPic);
+                    break;
+                case FixFix:
+                    result.add(FixFixPicDn);
+                    break;
+                case FixMain:
+                    result.add(FixMainPic);
+                    break;
+                case FixScrDn:
+                    result.add(FixScrDnPicDn);
+                    break;
+                case FixScrUp:
+                    result.add(FixScrUpPicDn);
+                    break;
+                case FixUp:
+                    result.add(FixUpPic);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -1422,6 +1731,56 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+            switch (this) {
+                case GmapCha:
+                    result.add(GmapChaPicDn);
+                    break;
+                case GmapFix:
+                    result.add(GmapFixPicDn);
+                    break;
+                case GmapMain:
+                    result.add(GmapMainPic);
+                    break;
+                case GmapPip:
+                    result.add(GmapPipPicDn);
+                    break;
+                case GmapTown:
+                    result.add(GmapTownPicDn);
+                    break;
+                case GmapCar:
+                    break;
+                case GmapTabs:
+                    break;
+                case GmapDayTime:
+                    result.add(GmapDayTimeAnim);
+                    break;
+                case GmapInv:
+                    result.add(GmapInvPicDn);
+                    break;
+                case GmapMap:
+                    break;
+                case GmapMenu:
+                    result.add(GmapMenuPicDn);
+                    break;
+                case GmapPanel:
+                    break;
+                case GmapTabsScrDn:
+                    result.add(GmapTabsScrDnPicDn);
+                    break;
+                case GmapTabsScrUp:
+                    result.add(GmapTabsScrUpPicDn);
+                    break;
+            }
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -1600,6 +1959,33 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case GPickupCancel:
+                    result.add(GPickupCancelPicDn);
+                    break;
+                case GPickupInvScrDn:
+                    result.add(GPickupInvScrDnPic);
+                    result.add(GPickupInvScrDnPicDn);
+                    result.add(GPickupInvScrDnPicNa);
+                    break;
+                case GPickupInvScrUp:
+                    result.add(GPickupInvScrUpPic);
+                    result.add(GPickupInvScrUpPicDn);
+                    result.add(GPickupInvScrUpPicNa);
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public FeatureKey[] getPicPosValues() {
             return new FeatureKey[]{
                 GPickupCancel,
@@ -1666,6 +2052,27 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+            switch (this) {
+                case IboxCancel:
+                    result.add(IboxCancelPicDn);
+                    break;
+                case IboxDone:
+                    result.add(IboxDonePicDn);
+                    break;
+                case IboxMain:
+                    result.add(IboxMainPic);
+                    break;
+            }
+            return result;
         }
 
         @Override
@@ -1872,6 +2279,84 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+            switch (this) {
+                case IntAddMess:
+                    result.add(IntAddMessPicDn);
+                    break;
+                case IntAddMessWindow:
+                    result.add(IntAddMessWindowPic);
+                    break;
+                case IntAim:
+                    result.add(IntAimPic);
+                    break;
+                case IntBreakTime:
+                    result.add(IntBreakTimePic);
+                    break;
+                case IntChangeSlot:
+                    result.add(IntChangeSlotPicDn);
+                    break;
+                case IntCombatEnd:
+                    result.add(IntCombatEndPicDn);
+                    break;
+                case IntMessFilter1:
+                    result.add(IntMessFilter1PicDn);
+                    break;
+                case IntMessFilter2:
+                    result.add(IntMessFilter2PicDn);
+                    break;
+                case IntSkill:
+                    result.add(IntSkillPicDn);
+                    break;
+                case IntPip:
+                    result.add(IntPipPicDn);
+                    break;
+                case IntFix:
+                    result.add(IntFixPicDn);
+                    break;
+                case IntMap:
+                    result.add(IntMapPicDn);
+                    break;
+                case IntInv:
+                    result.add(IntInvPicDn);
+                    break;
+                case IntCha:
+                    result.add(IntChaPicDn);
+                    break;
+                case IntMenu:
+                    result.add(IntMenuPicDn);
+                    break;
+                case IntAmmoCount:
+                    break;
+                case IntWearProcent:
+                    break;
+                case IntAp:
+                    result.add(IntApGreenPic);
+                    result.add(IntApRedPic);
+                    result.add(IntApYellowPic);
+                    break;
+                case IntCombat:
+                    result.add(IntCombatAnim);
+                    break;
+                case IntCombatTurn:
+                    result.add(IntCombatTurnPicDn);
+                    break;
+                case IntMain:
+                    result.add(IntMainPic);
+                    break;
+                case IntItem:
+                    result.add(IntItemPicDn);
+                    break;
+            }
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -2044,6 +2529,44 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case InvArmor:
+                case InvChosen:
+                case InvSlot1:
+                case InvSlot2:
+                    break;
+                case InvMain:
+                    result.add(InvMainPic);
+                    break;
+                case InvOk:
+                    result.add(InvOkPic);
+                    result.add(InvOkPicDn);
+                    break;
+                case InvInv:
+                    break;
+                case InvScrDn:
+                    result.add(InvScrDnPic);
+                    result.add(InvScrDnPicDn);
+                    result.add(InvScrDnPicNa);
+                    break;
+                case InvScrUp:
+                    result.add(InvScrUpPic);
+                    result.add(InvScrUpPicDn);
+                    result.add(InvScrUpPicNa);
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -2211,6 +2734,17 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -2335,6 +2869,34 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case LmapLoHi:
+                    result.add(LmapLoHiPicDn);
+                    break;
+                case LmapMain:
+                    result.add(LmapMainPic);
+                    break;
+                case LmapOk:
+                    result.add(LmapOkPicDn);
+                    break;
+                case LmapScan:
+                    result.add(LmapScanPicDn);
+                    break;
+                case LmapMap:
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -2456,6 +3018,38 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case LogCredits:
+                    result.add(LogCreditsPicDn);
+                    break;
+                case LogExit:
+                    result.add(LogExitPicDn);
+                    break;
+                case LogMain:
+                    result.add(LogMainPic);
+                    break;
+                case LogOptions:
+                    result.add(LogOptionsPicDn);
+                    break;
+                case LogPlay:
+                    result.add(LogPlayPicDn);
+                    break;
+                case LogReg:
+                    result.add(LogRegPicDn);
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -2569,6 +3163,38 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case MoptExit:
+                    result.add(MoptExitPicDn);
+                    break;
+                case MoptLoadGame:
+                    result.add(MoptLoadGamePicDn);
+                    break;
+                case MoptMain:
+                    result.add(MoptMainPic);
+                    break;
+                case MoptOptions:
+                    result.add(MoptOptionsPicDn);
+                    break;
+                case MoptResume:
+                    result.add(MoptResumePicDn);
+                    break;
+                case MoptSaveGame:
+                    result.add(MoptSaveGamePicDn);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -2687,6 +3313,39 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case PSInvScrDn:
+                    result.add(PSInvScrDnPic);
+                    result.add(PSInvScrDnPicDn);
+                    result.add(PSInvScrDnPicNa);
+                    break;
+                case PSInvScrUp:
+                    result.add(PSInvScrUpPic);
+                    result.add(PSInvScrUpPicDn);
+                    result.add(PSInvScrUpPicNa);
+                    break;
+                case PSdone:
+                    result.add(PSdonePicDn);
+                    break;
+                case PScancel:
+                    result.add(PScancelPicDn);
+                    break;
+                case PSInv:
+                case PSItem:
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -2813,6 +3472,37 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case PerkCancel:
+                    result.add(PerkCancelPic);
+                    break;
+                case PerkMain:
+                    result.add(PerkMainPic);
+                    break;
+                case PerkOk:
+                    result.add(PerkOkPic);
+                    break;
+                case PerkScrDn:
+                    result.add(PerkScrDnPic);
+                    break;
+                case PerkScrUp:
+                    result.add(PerkScrUpPic);
+                    break;
+                case PerkPic:
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -2921,6 +3611,38 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case PipArchives:
+                    result.add(PipArchivesPicDn);
+                    break;
+                case PipAutomaps:
+                    result.add(PipAutomapsPicDn);
+                    break;
+                case PipClose:
+                    result.add(PipClosePicDn);
+                    break;
+                case PipMonitor:
+                    result.add(PipMonitorPic);
+                    break;
+                case PipMain:
+                    result.add(PipMainPic);
+                    break;
+                case PipStatus:
+                    result.add(PipStatusPicDn);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -3059,6 +3781,59 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case PupMain:
+                    result.add(PupMainPic);
+                    break;
+                case PupNextCritLeft:
+                    result.add(PupNextCritLeftPic);
+                    result.add(PupNextCritLeftPicDn);
+                    break;
+                case PupNextCritRight:
+                    result.add(PupNextCritRightPic);
+                    result.add(PupNextCritRightPicDn);
+                    break;
+                case PupScrUp1:
+                    result.add(PupScrUp1PicDn);
+                    result.add(PupScrUp1PicOff);
+                    break;
+                case PupScrUp2:
+                    result.add(PupScrUp2PicDn);
+                    result.add(PupScrUp2PicOff);
+                    break;
+                case PupScrDw1:
+                    result.add(PupScrDw1PicDn);
+                    result.add(PupScrDw1PicOff);
+                    break;
+                case PupScrDw2:
+                    result.add(PupScrDw2PicDn);
+                    result.add(PupScrDw2PicOff);
+                    break;
+                case PupCont1:
+                    break;
+                case PupCont2:
+                    break;
+                case PupOk:
+                    result.add(PupOkPicDn);
+                    break;
+                case PupTakeAll:
+                    result.add(PupTAPicDn);
+                    break;
+                case PupInfo:
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -3217,7 +3992,6 @@ public interface FeatureKey {
                 case RadioBroadcastSend3:
                 case RadioBroadcastSend4:
                 case RadioBroadcastSend5:
-                case RadioChannel:
                 case RadioMain:
                 case RadioRefresh:
                     return Type.PIC_POS;
@@ -3231,10 +4005,67 @@ public interface FeatureKey {
                 case RadioChannelText:
                 case RadioMainText:
                 case RadioRefreshText:
+                case RadioChannel:
                     return Type.TXT;
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case RadioBroadcastRecv:
+                    result.add(RadioBroadcastRecvPicDn);
+                    break;
+                case RadioBroadcastRecv1:
+                    result.add(RadioBroadcastRecv1PicDn);
+                    break;
+                case RadioBroadcastRecv2:
+                    result.add(RadioBroadcastRecv2PicDn);
+                    break;
+                case RadioBroadcastRecv3:
+                    result.add(RadioBroadcastRecv3PicDn);
+                    break;
+                case RadioBroadcastRecv4:
+                    result.add(RadioBroadcastRecv4PicDn);
+                    break;
+                case RadioBroadcastRecv5:
+                    result.add(RadioBroadcastRecv5PicDn);
+                    break;
+                case RadioBroadcastSend:
+                    result.add(RadioBroadcastSendPicDn);
+                    break;
+                case RadioBroadcastSend1:
+                    result.add(RadioBroadcastSend1PicDn);
+                    break;
+                case RadioBroadcastSend2:
+                    result.add(RadioBroadcastSend2PicDn);
+                    break;
+                case RadioBroadcastSend3:
+                    result.add(RadioBroadcastSend3PicDn);
+                    break;
+                case RadioBroadcastSend4:
+                    result.add(RadioBroadcastSend4PicDn);
+                    break;
+                case RadioBroadcastSend5:
+                    result.add(RadioBroadcastSend5PicDn);
+                    break;
+                case RadioMain:
+                    result.add(RadioMainPic);
+                    break;
+                case RadioRefresh:
+                    result.add(RadioRefreshPicDn);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -3292,7 +4123,6 @@ public interface FeatureKey {
                 RadioBroadcastSend3,
                 RadioBroadcastSend4,
                 RadioBroadcastSend5,
-                RadioChannel,
                 RadioMain,
                 RadioRefresh
             };
@@ -3310,7 +4140,8 @@ public interface FeatureKey {
                 RadioBroadcastSendText,
                 RadioChannelText,
                 RadioMainText,
-                RadioRefreshText
+                RadioRefreshText,
+                RadioChannel
             };
         }
 
@@ -3370,10 +4201,10 @@ public interface FeatureKey {
                 case RegTagSkill:
                 case RegTraitL:
                 case RegTraitR:
-                case RegUnspentSpecial:
                     return Type.PIC_POS;
                 case RegTraitLText:
                 case RegTraitRText:
+                case RegUnspentSpecial:
                 case RegUnspentSpecialText:
                     return Type.TXT;
                 case RegSpecialNextX:
@@ -3386,6 +4217,37 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case RegMain:
+                    result.add(RegMainPic);
+                    break;
+                case RegSpecialMinus:
+                    result.add(RegSpecialMinusPicDn);
+                    break;
+                case RegSpecialPlus:
+                    result.add(RegSpecialPlusPicDn);
+                    break;
+                case RegTagSkill:
+                    result.add(RegTagSkillPicDn);
+                case RegTraitL:
+                    result.add(RegTraitPicDn);
+                    break;
+                case RegTraitR:
+                    result.add(RegTraitPicDn);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -3427,8 +4289,7 @@ public interface FeatureKey {
                 RegSpecialPlus,
                 RegTagSkill,
                 RegTraitL,
-                RegTraitR,
-                RegUnspentSpecial
+                RegTraitR
             };
         }
 
@@ -3437,7 +4298,8 @@ public interface FeatureKey {
             return new FeatureKey[]{
                 RegTraitLText,
                 RegTraitRText,
-                RegUnspentSpecialText
+                RegUnspentSpecialText,
+                RegUnspentSpecial
             };
         }
 
@@ -3509,6 +4371,37 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case SaveLoadBack:
+                    result.add(SaveLoadPic);
+                    break;
+                case SaveLoadDone:
+                    result.add(SaveLoadDonePicDn);
+                    break;
+                case SaveLoadMain:
+                    result.add(SaveLoadMainPic);
+                    break;
+                case SaveLoadScrDown:
+                    result.add(SaveLoadScrDownPicDn);
+                    break;
+                case SaveLoadScrUp:
+                    result.add(SaveLoadScrUpPicDn);
+                    break;
+                case SaveLoadSlots:
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -3605,8 +4498,8 @@ public interface FeatureKey {
                 case SayCancel:
                 case SayMain:
                 case SayOk:
-                case SaySay:
                     return Type.PIC_POS;
+                case SaySay:
                 case SayCancelText:
                 case SayMainText:
                 case SayOkText:
@@ -3614,6 +4507,29 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case SayCancel:
+                    result.add(SayCancelPicDn);
+                    break;
+                case SayMain:
+                    result.add(SayMainPic);
+                    break;
+                case SayOk:
+                    result.add(SayOkPicDn);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -3756,6 +4672,50 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case SboxCancel:
+                    result.add(SboxCancelPicDn);
+                    break;
+                case SboxDoctor:
+                    result.add(SboxDoctorPicDn);
+                    break;
+                case SboxFirstAid:
+                    result.add(SboxFirstAidPicDn);
+                    break;
+                case SboxLockpick:
+                    result.add(SboxLockpickPicDn);
+                    break;
+                case SboxMain:
+                    result.add(SboxMainPic);
+                    break;
+                case SboxRepair:
+                    result.add(SboxRepairPicDn);
+                    break;
+                case SboxScience:
+                    result.add(SboxSciencePicDn);
+                    break;
+                case SboxSneak:
+                    result.add(SboxSneakPicDn);
+                    break;
+                case SboxSteal:
+                    result.add(SboxStealPicDn);
+                    break;
+                case SboxTrap:
+                    result.add(SboxTrapPicDn);
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -3885,6 +4845,40 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case SplitAll:
+                    result.add(SplitAllPicDn);
+                    break;
+                case SplitCancel:
+                    result.add(SplitCancelPic);
+                    break;
+                case SplitDone:
+                    result.add(SplitDonePic);
+                    break;
+                case SplitDown:
+                    result.add(SplitDownPicDn);
+                    break;
+                case SplitMain:
+                    result.add(SplitMainPic);
+                    break;
+                case SplitUp:
+                    result.add(SplitUpPicDn);
+                    break;
+                case SplitItem:
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -3981,6 +4975,32 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case TViewBack:
+                    result.add(TViewBackPicDn);
+                    break;
+                case TViewContours:
+                    result.add(TViewContoursPicDn);
+                    break;
+                case TViewEnter:
+                    result.add(TViewEnterPicDn);
+                    break;
+                case TViewMain:
+                    result.add(TViewMainPic);
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -4083,6 +5103,36 @@ public interface FeatureKey {
                 default:
                     return Type.UNKNOWN;
             }
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case TimerCancel:
+                    result.add(TimerCancelPicDn);
+                    break;
+                case TimerDone:
+                    result.add(TimerDonePicDn);
+                    break;
+                case TimerDown:
+                    result.add(TimerDownPicDn);
+                    break;
+                case TimerUp:
+                    result.add(TimerUpPicDn);
+                    break;
+                case TimerMain:
+                    result.add(TimerMainPic);
+                case TimerItem:
+                    break;
+            }
+
+            return result;
         }
 
         @Override
@@ -4200,6 +5250,40 @@ public interface FeatureKey {
         }
 
         @Override
+        public List<FeatureKey> getPics() {
+            if (this.getType() != Type.PIC_POS) {
+                return null;
+            }
+
+            List<FeatureKey> result = new ArrayList<>();
+
+            switch (this) {
+                case UseMain:
+                    result.add(UseMainPic);
+                    break;
+                case UseCancel:
+                    result.add(UseCancelPic);
+                    result.add(UseCancelPicDn);
+                    break;
+                case UseScrDown:
+                    result.add(UseScrDownPic);
+                    result.add(UseScrDownPicDn);
+                    result.add(UseScrDownPicOff);
+                    break;
+                case UseScrUp:
+                    result.add(UseScrUpPic);
+                    result.add(UseScrUpPicDn);
+                    result.add(UseScrUpPicOff);
+                    break;
+                case UseInv:
+                case UseChosen:
+                    break;
+            }
+
+            return result;
+        }
+
+        @Override
         public String getStringValue() {
             return this.name();
         }
@@ -4314,6 +5398,13 @@ public interface FeatureKey {
      * @return all pic values
      */
     public FeatureKey[] getPicValues();
+
+    /**
+     * Get pictures using possible picture position
+     *
+     * @return list of pictures (null if picPos isn't picture position)
+     */
+    public List<FeatureKey> getPics();
 
     /**
      * Gets all feats keys which are picture positions

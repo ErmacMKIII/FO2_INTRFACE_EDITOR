@@ -32,13 +32,17 @@ import rs.alexanderstojanovich.fo2ie.ogl.Text;
  */
 public class Module {
 
+    protected static final Object OBJ_MUTEX = new Object();
+
     protected final List<GLComponent> components = new ArrayList<>();
 
     protected final TimerTask unbufTask = new TimerTask() {
         @Override
         public void run() {
-            for (GLComponent component : components) {
-                component.unbuffer(); // hint that component should be refreshed again
+            synchronized (OBJ_MUTEX) {
+                for (GLComponent component : components) {
+                    component.unbuffer(); // hint that component should be refreshed again
+                }
             }
         }
     };
@@ -59,23 +63,25 @@ public class Module {
      * @param fntSP font shader program
      */
     public void render(GL2 gl20, Matrix4f projMat4, ShaderProgram prmSP, ShaderProgram imgSP, ShaderProgram fntSP) {
-        for (GLComponent component : components) {
-            if (!component.isBuffered()) {
-                component.buffer(gl20);
-            }
+        synchronized (OBJ_MUTEX) {
+            for (GLComponent component : components) {
+                if (!component.isBuffered()) {
+                    component.buffer(gl20);
+                }
 
-            switch (component.getType()) {
-                case PIC:
-                case ANIM:
-                case ADDR:
-                    component.render(gl20, projMat4, imgSP);
-                    break;
-                case TXT:
-                    Text text = (Text) component;
-                    text.render(gl20, projMat4, fntSP, prmSP);
-                    break;
-            }
+                switch (component.getType()) {
+                    case PIC:
+                    case ANIM:
+                    case ADDR:
+                        component.render(gl20, projMat4, imgSP);
+                        break;
+                    case TXT:
+                        Text text = (Text) component;
+                        text.render(gl20, projMat4, fntSP, prmSP);
+                        break;
+                }
 
+            }
         }
 
     }
