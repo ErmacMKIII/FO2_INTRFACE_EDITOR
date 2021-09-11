@@ -43,28 +43,28 @@ import rs.alexanderstojanovich.fo2ie.intrface.Section;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public abstract class FeatValueAdder extends JFrame {
-    
+
     private final Intrface intrface;
     private final boolean allRes;
     private final Section section;
-    
+
     private final JLabel lblFeatName = new JLabel("Feature key:");
     private final JComboBox<FeatureKey> cmbFtKeys;
-    
+
     private final JLabel lblFtValType = new JLabel("Feature value type:");
     private final JTextField txtFldFtValType = new JTextField();
-    
+
     private final JButton btnOK = new JButton("OK");
     private final JButton btnCancel = new JButton("Cancel");
-    
+
     public FeatValueAdder(Section section, Intrface intrface, boolean allRes) {
         this.setTitle("Add feature");
         this.section = section;
         this.intrface = intrface;
-        
+
         FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, allRes);
         cmbFtKeys = new JComboBox<>(unmappedKeys);
-        
+
         this.allRes = allRes;
         this.setType(Window.Type.POPUP);
         this.setAlwaysOnTop(true);
@@ -89,7 +89,7 @@ public abstract class FeatValueAdder extends JFrame {
     private boolean addFeature() {
         boolean ok = false;
         FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
-        
+
         if (featKey == null) {
             JOptionPane.showMessageDialog(this, "Feature name is erroneous!", "Feature Key Error", JOptionPane.ERROR_MESSAGE);
         } else {
@@ -102,14 +102,14 @@ public abstract class FeatValueAdder extends JFrame {
                 case SINGLE_VALUE:
                     featVal = new SingleValue();
                     break;
-                case ARRAY:                    
+                case ARRAY:
                     featVal = new MyArray();
                     break;
-                case RECT4:                    
+                case RECT4:
                     featVal = new MyRectangle();
                     break;
             }
-            
+
             if (featVal == null) {
                 JOptionPane.showMessageDialog(this, "Feature value type does not match its key!", "Feature Value Error", JOptionPane.ERROR_MESSAGE);
             } else if (allRes) {
@@ -123,10 +123,10 @@ public abstract class FeatValueAdder extends JFrame {
                 }
             }
         }
-        
+
         return ok;
     }
-    
+
     private void setInitTxtFld() {
         FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
         FeatureValue.Type featValType = FeatureValue.Type.UNKNOWN;
@@ -138,7 +138,7 @@ public abstract class FeatValueAdder extends JFrame {
             case VALUE:
                 featValType = FeatureValue.Type.SINGLE_VALUE;
                 break;
-            case ARRAY:                
+            case ARRAY:
                 featValType = FeatureValue.Type.ARRAY;
                 break;
             case PIC_POS:
@@ -148,17 +148,17 @@ public abstract class FeatValueAdder extends JFrame {
         }
         txtFldFtValType.setText(featValType.name());
     }
-    
+
     private void init() {
         this.setLayout(new GridLayout(3, 2));
         this.getContentPane().add(lblFeatName);
         this.getContentPane().add(cmbFtKeys);
-        
+
         this.getContentPane().add(lblFtValType);
         this.getContentPane().add(txtFldFtValType);
-        
+
         this.txtFldFtValType.setEditable(false);
-        
+
         this.cmbFtKeys.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -166,7 +166,7 @@ public abstract class FeatValueAdder extends JFrame {
             }
         });
         setInitTxtFld();
-        
+
         this.btnOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -177,52 +177,52 @@ public abstract class FeatValueAdder extends JFrame {
                 }
             }
         });
-        
+
         this.btnCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
             }
         });
-        
+
         this.getContentPane().add(btnOK);
         this.getContentPane().add(btnCancel);
     }
-    
+
     public JLabel getLblFeatName() {
         return lblFeatName;
     }
-    
+
     public Section getSection() {
         return section;
     }
-    
+
     public JComboBox<FeatureKey> getCmbFtKeys() {
         return cmbFtKeys;
     }
-    
+
     public JLabel getLblFtValType() {
         return lblFtValType;
     }
-    
+
     public JTextField getTxtFldFtValType() {
         return txtFldFtValType;
     }
-    
+
     public JButton getBtnOK() {
         return btnOK;
     }
-    
+
     public JButton getBtnCancel() {
         return btnCancel;
     }
-    
+
     public Intrface getIntrface() {
         return intrface;
     }
-    
+
     public boolean isAllRes() {
         return allRes;
     }
-    
+
 }
