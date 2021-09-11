@@ -1111,6 +1111,7 @@ public class GUI extends javax.swing.JFrame {
             featurePreview();
             componentsPreview();
             renderer.getModule().components.clear();
+            workOnBuildComponents(); // important!
         }
 
         if (!cfg.getInDir().getPath().isEmpty()) {
