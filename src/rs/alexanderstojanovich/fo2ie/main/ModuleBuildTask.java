@@ -339,7 +339,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                         // text display (content)
                         String regex = txtKey.getPrefix() + "|" + "Text";
-                        String content = txtKey.getStringValue().replaceAll(regex, "");
+                        String content = txtKey.getStringValue().replaceFirst(regex, "");
 
                         // font char dimensions
                         int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
@@ -650,7 +650,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                         // text display (content)
                         String regex = txtKey.getPrefix() + "|" + "Text";
-                        String content = txtKey.getStringValue().replaceAll(regex, "");
+                        String content = txtKey.getStringValue().replaceFirst(regex, "");
 
                         // font char dimensions
                         int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());

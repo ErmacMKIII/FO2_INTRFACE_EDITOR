@@ -675,6 +675,8 @@ public interface FeatureKey {
                 case ChaSexMale:
                 case ChaSexMain:
                 case ChaSwitch:
+                case ChaSwitchScrDn:
+                case ChaSwitchScrUp:
                     return Type.PIC_POS;
                 case ChaName:
                 case ChaParamPic:
@@ -692,8 +694,6 @@ public interface FeatureKey {
                 case ChaNextLevel:
                 case ChaStatsName:
                 case ChaStatsValue:
-                case ChaSwitchScrDn:
-                case ChaSwitchScrUp:
                 case ChaAgeAge:
                 case ChaNameName:
                 case ChaNameNameText:
@@ -785,6 +785,14 @@ public interface FeatureKey {
                     result.add(ChaSwitchKillsPic);
                     result.add(ChaSwitchPerksPic);
                     break;
+                case ChaSwitchScrDn:
+                    result.add(ChaSwitchScrDnPic);
+                    result.add(ChaSwitchScrDnPicDn);
+                    break;
+                case ChaSwitchScrUp:
+                    result.add(ChaSwitchScrUpPic);
+                    result.add(ChaSwitchScrUpPicDn);
+                    break;
             }
 
             return result;
@@ -859,7 +867,9 @@ public interface FeatureKey {
                 ChaSexFemale,
                 ChaSexMale,
                 ChaSexMain,
-                ChaSwitch
+                ChaSwitch,
+                ChaSwitchScrDn,
+                ChaSwitchScrUp
             };
         }
 
@@ -882,8 +892,6 @@ public interface FeatureKey {
                 ChaNextLevel,
                 ChaStatsName,
                 ChaStatsValue,
-                ChaSwitchScrDn,
-                ChaSwitchScrUp,
                 ChaAgeAge,
                 ChaNameName,
                 ChaNameNameText,
