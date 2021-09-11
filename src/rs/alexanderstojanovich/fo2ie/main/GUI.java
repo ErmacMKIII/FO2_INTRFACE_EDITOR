@@ -748,9 +748,9 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 - HUNS (PUBLIC BUILD reviewed on 2021-09-11 at 08:00).</b></html>\n");
-            sb.append("<html><b>This software is free software, </b></html>\n");
-            sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
+            sb.append("VERSION v1.0 - HUNS (PUBLIC BUILD reviewed on 2021-09-11 at 08:00).\n");
+            sb.append("This software is free software, \n");
+            sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v1.0 HUNS:\n");
             sb.append("\t- Modules are being build faster.\n");
@@ -758,6 +758,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Component position updated whilst component moving.\n");
             sb.append("\t- Removed build module button. Everything is done automatically.\n");
             sb.append("\t- Add feature detects feature value type automatically.\n");
+            sb.append("\t- Screenshots can be taken from the preview window (hotkey F12).\n");
             sb.append("\n");
             sb.append("Changelog since v1.0 BETA1 GOTHS:\n");
             sb.append("\t- Fix for some modules (Barter, PipBoy etc.).\n");
@@ -771,23 +772,14 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Switch view between feature mode and component.\n");
             sb.append("\t- Feature to select & move components around.\n");
             sb.append("\n");
-            sb.append("Changelog since v0.4 ESTONIA:\n");
-            sb.append("\t- Add/Remove for features.\n");
-            sb.append("\t- Fonts are properly scaled.\n");
-            sb.append("\t- Fix for some modules to display correctly (like Global Map).\n");
-            sb.append("\t- Fix for the Ini Writer.\n");
-            sb.append("\n");
-            sb.append("Changelog since v0.3 DEUTERIUM:\n");
-            sb.append("\t- Initial pre-release.\n");
-            sb.append("\n");
             sb.append("\n");
             sb.append("Purpose:\n");
             sb.append("FOnline2 S3 Interface Editor is a way to edit interface\n");
             sb.append("through linking features/components and modifies only .ini\n");
             sb.append("and is not an image editor itself.\n");
             sb.append("\n");
-            sb.append("<html><b>Copyright © 2021</b></html>\n");
-            sb.append("<html><b>Alexander \"Ermac\" Stojanovich</b></html>\n");
+            sb.append("Copyright © 2021\n");
+            sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JOptionPane.showMessageDialog(this, sb.toString(), "About", JOptionPane.INFORMATION_MESSAGE, icon);
@@ -798,8 +790,8 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>- FOR THE PURPOSE ABOUT THIS PROGRAM, </b></html>\n");
-            sb.append("<html><b>check About. Make sure that you checked it first.</b></html>\n");
+            sb.append("- FOR THE PURPOSE ABOUT THIS PROGRAM, \n");
+            sb.append("check About. Make sure that you checked it first.\n");
             sb.append("\n");
             sb.append("- Editing interface consists of several steps:\n");
             sb.append("\t1. Put (extract from archive if needed) interface to a single location,\n");
