@@ -212,6 +212,7 @@ public class GUI extends javax.swing.JFrame {
         });
         GL_WINDOW.setTitle("Module preview");
         GL_WINDOW.addGLEventListener(renderer);
+        GL_WINDOW.addKeyListener(renderer);
         GL_WINDOW.setSharedAutoDrawable(GL_CANVAS);
         GL_WINDOW.setSize(800, 600);
         fpsAnim.add(GL_WINDOW);
@@ -747,7 +748,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html><b>VERSION v1.0 - HUNS (PUBLIC BUILD reviewed on 2021-09-10 at 18:30).</b></html>\n");
+            sb.append("<html><b>VERSION v1.0 - HUNS (PUBLIC BUILD reviewed on 2021-09-11 at 08:00).</b></html>\n");
             sb.append("<html><b>This software is free software, </b></html>\n");
             sb.append("<html><b>licensed under GNU General Public License (GPL).</b></html>\n");
             sb.append("\n");
@@ -756,6 +757,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Changes made to the components tab.\n");
             sb.append("\t- Component position updated whilst component moving.\n");
             sb.append("\t- Removed build module button. Everything is done automatically.\n");
+            sb.append("\t- Add feature detects feature value type automatically.\n");
             sb.append("\n");
             sb.append("Changelog since v1.0 BETA1 GOTHS:\n");
             sb.append("\t- Fix for some modules (Barter, PipBoy etc.).\n");
@@ -1068,6 +1070,7 @@ public class GUI extends javax.swing.JFrame {
             int width = intrface.getResolutionPragma().getWidth();
             int height = intrface.getResolutionPragma().getHeight();
             GL_WINDOW.setSize(width, height);
+            GL_WINDOW.setTitle(cmbBoxSection.getSelectedItem() + " (Press F12 to take screenshot)");
         }
         GL_WINDOW.setVisible(true);
     }//GEN-LAST:event_btnMdlePreviewActionPerformed

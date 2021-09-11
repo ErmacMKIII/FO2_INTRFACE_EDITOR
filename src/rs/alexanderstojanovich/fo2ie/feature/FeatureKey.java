@@ -704,7 +704,6 @@ public interface FeatureKey {
                 case ChaSkillName:
                 case ChaParamDesc:
                 case ChaParamName:
-                case ChaSpecialParams:
                 case ChaUnspentSP:
                 case ChaUnspentSPText:
                     return Type.TXT;
@@ -718,7 +717,9 @@ public interface FeatureKey {
                 case ChaSpecialNextY:
                 case ChaStatsNextX:
                 case ChaStatsNextY:
-                    return Type.VALUE;
+                    return Type.OFFSET;
+                case ChaSpecialParams:
+                    return Type.ARRAY;
                 default:
                     return Type.UNKNOWN;
 
@@ -893,7 +894,6 @@ public interface FeatureKey {
                 ChaSkillName,
                 ChaParamDesc,
                 ChaParamName,
-                ChaSpecialParams,
                 ChaUnspentSP,
                 ChaUnspentSPText
             };
@@ -5351,7 +5351,7 @@ public interface FeatureKey {
      * Type used to determine this Feature Key
      */
     public static enum Type {
-        UNKNOWN, PIC, PIC_POS, TXT, VALUE, OFFSET
+        UNKNOWN, PIC, PIC_POS, TXT, VALUE, OFFSET, ARRAY
     }
 
     public static final String SPLIT_REGEX = ".*(Width|Height)$";

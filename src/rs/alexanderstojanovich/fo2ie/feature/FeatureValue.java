@@ -32,7 +32,7 @@ public interface FeatureValue {
     public static final String NUMBER_ARRAY_REGEX = "^(\\s*-?\\d+(\\.\\d+)?)(\\s*\\s\\s*-?\\d+(\\.\\d+)?)*$";
 
     public enum Type {
-        IMAGE, RECT4, SINGLE_VALUE, ARRAY
+        IMAGE, RECT4, SINGLE_VALUE, ARRAY, UNKNOWN
     };
 
     public void setStringValue(String value);

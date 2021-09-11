@@ -16,6 +16,8 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.KeyListener;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -55,7 +57,7 @@ import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public abstract class ModuleRenderer implements GLEventListener, MouseListener, MouseMotionListener {
+public abstract class ModuleRenderer implements GLEventListener, MouseListener, MouseMotionListener, KeyListener {
 
     public static final Object OBJ_MUTEX = new Object();
     public static final Object OBJ_SYNC = new Object();
@@ -272,8 +274,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     public static BufferedImage createScreenshot(GL2 gl20) {
         final int rgba = 4;
 
-        final int width = GUI.GL_CANVAS.getWidth();
-        final int height = GUI.GL_CANVAS.getHeight();
+        final int width = (GUI.GL_WINDOW.isVisible()) ? GUI.GL_WINDOW.getWidth() : GUI.GL_CANVAS.getWidth();
+        final int height = (GUI.GL_WINDOW.isVisible()) ? GUI.GL_WINDOW.getHeight() : GUI.GL_CANVAS.getHeight();
+
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
         ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * rgba);
@@ -441,6 +444,18 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     @Override
     public void mouseMoved(MouseEvent e) {
         scrnMouseCoords = new Vector2f(e.getX(), e.getY());
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        if (ke.getKeyCode() == KeyEvent.VK_F12) {
+            state = ModuleRenderer.State.SCREENSHOT;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+
     }
 
     //--------------------------------------------------------------------------
