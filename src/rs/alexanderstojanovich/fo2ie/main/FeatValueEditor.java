@@ -40,24 +40,27 @@ import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
  */
 public abstract class FeatValueEditor extends JFrame {
 
-    private final FeatureKey featureKey;
-    private final FeatureValue featureValue;
-    private final JButton btnSet = new JButton("Set");
-    private final JButton btnReset = new JButton("Reset");
-    private final JButton btnCancel = new JButton("Cancel");
-    private final Intrface intrface;
-    private final boolean allRes;
+    private static FeatValueEditor instance;
 
-    public FeatValueEditor(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
-        this.setTitle(featureKey.getStringValue());
-        this.featureKey = featureKey;
-        this.featureValue = featureValue;
-        this.intrface = intrface;
-        this.allRes = allRes;
+    public static FeatValueEditor getInstance(GUI gui) {
+        if (instance == null) {
+            instance = new FeatValueEditor() {
+                @Override
+                public void execute() {
+                    gui.buildModuleComponents();
+                    gui.featurePreview();
+                    gui.componentsPreview();
+                }
+            };
+        }
+
+        return instance;
+    }
+
+    private FeatValueEditor() {
         this.setType(Type.POPUP);
         this.setAlwaysOnTop(true);
         this.setIconImages(GUI.ICONS);
-        init();
         initPosition();
     }
 
@@ -67,7 +70,7 @@ public abstract class FeatValueEditor extends JFrame {
         this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
     }
 
-    private void apply() {
+    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
         if (allRes) {
             intrface.getCommonFeatMap().replace(featureKey, featureValue);
         } else {
@@ -78,9 +81,16 @@ public abstract class FeatValueEditor extends JFrame {
         }
     }
 
-    private void init() {
+    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
+        // remove all components
+        this.getContentPane().removeAll();
+        this.setTitle(featureKey.getStringValue());
         // this value is kept for reset
         final String strFVal = featureValue.getStringValue();
+
+        final JButton btnSet = new JButton("Set");
+        final JButton btnReset = new JButton("Reset");
+        final JButton btnCancel = new JButton("Cancel");
 
         switch (featureValue.getType()) {
             case IMAGE:
@@ -94,7 +104,7 @@ public abstract class FeatValueEditor extends JFrame {
                     public void actionPerformed(ActionEvent e) {
                         featureValue.setStringValue(txtFld.getText());
                         execute();
-                        apply();
+                        apply(featureKey, featureValue, intrface, allRes);
 
                         FeatValueEditor.this.dispose();
                     }
@@ -130,7 +140,7 @@ public abstract class FeatValueEditor extends JFrame {
                     public void actionPerformed(ActionEvent e) {
                         featureValue.setStringValue(String.valueOf((int) spinval.getValue()));
                         execute();
-                        apply();
+                        apply(featureKey, featureValue, intrface, allRes);
 
                         FeatValueEditor.this.dispose();
                     }
@@ -175,7 +185,7 @@ public abstract class FeatValueEditor extends JFrame {
                         myRect4.maxX = (int) spinZ.getValue();
                         myRect4.maxY = (int) spinW.getValue();
                         execute();
-                        apply();
+                        apply(featureKey, featureValue, intrface, allRes);
 
                         FeatValueEditor.this.dispose();
                     }
@@ -211,25 +221,5 @@ public abstract class FeatValueEditor extends JFrame {
      * Execute (command) on set
      */
     public abstract void execute();
-
-    public FeatureKey getFeatureKey() {
-        return featureKey;
-    }
-
-    public FeatureValue getFeatureValue() {
-        return featureValue;
-    }
-
-    public JButton getBtnSet() {
-        return btnSet;
-    }
-
-    public JButton getBtnReset() {
-        return btnReset;
-    }
-
-    public JButton getBtnCancel() {
-        return btnCancel;
-    }
 
 }

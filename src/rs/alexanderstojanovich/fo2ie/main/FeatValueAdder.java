@@ -44,12 +44,8 @@ import rs.alexanderstojanovich.fo2ie.intrface.Section;
  */
 public abstract class FeatValueAdder extends JFrame {
 
-    private final Intrface intrface;
-    private final boolean allRes;
-    private final Section section;
-
     private final JLabel lblFeatName = new JLabel("Feature key:");
-    private final JComboBox<FeatureKey> cmbFtKeys;
+    private JComboBox<FeatureKey> cmbFtKeys;
 
     private final JLabel lblFtValType = new JLabel("Feature value type:");
     private final JTextField txtFldFtValType = new JTextField();
@@ -57,19 +53,28 @@ public abstract class FeatValueAdder extends JFrame {
     private final JButton btnOK = new JButton("OK");
     private final JButton btnCancel = new JButton("Cancel");
 
-    public FeatValueAdder(Section section, Intrface intrface, boolean allRes) {
+    private static FeatValueAdder instance;
+
+    public static FeatValueAdder getInstance(GUI gui) {
+        if (instance == null) {
+            instance = new FeatValueAdder() {
+                @Override
+                public void execute() {
+                    gui.buildModuleComponents();
+                    gui.featurePreview();
+                    gui.componentsPreview();
+                }
+            };
+        }
+
+        return instance;
+    }
+
+    public FeatValueAdder() {
         this.setTitle("Add feature");
-        this.section = section;
-        this.intrface = intrface;
-
-        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, allRes);
-        cmbFtKeys = new JComboBox<>(unmappedKeys);
-
-        this.allRes = allRes;
         this.setType(Window.Type.POPUP);
         this.setAlwaysOnTop(true);
         this.setIconImages(GUI.ICONS);
-        init();
         initPosition();
     }
 
@@ -86,7 +91,9 @@ public abstract class FeatValueAdder extends JFrame {
 
     // add feature (internal)
     // depending on the selected type of val corresponding feature (featKey, featValue) will be added
-    private boolean addFeature() {
+    private boolean addFeature(Intrface intrface, boolean allRes) {
+        this.setTitle("Add feature");
+
         boolean ok = false;
         FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
 
@@ -149,7 +156,13 @@ public abstract class FeatValueAdder extends JFrame {
         txtFldFtValType.setText(featValType.name());
     }
 
-    private void init() {
+    public void popUp(Section section, Intrface intrface, boolean allRes) {
+        this.setTitle("Add feature");
+        this.getContentPane().removeAll(); // removes all the components
+
+        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, allRes);
+        cmbFtKeys = new JComboBox<>(unmappedKeys);
+
         this.setLayout(new GridLayout(3, 2));
         this.getContentPane().add(lblFeatName);
         this.getContentPane().add(cmbFtKeys);
@@ -170,7 +183,7 @@ public abstract class FeatValueAdder extends JFrame {
         this.btnOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean ok = addFeature();
+                boolean ok = addFeature(intrface, allRes);
                 if (ok) {
                     execute();
                     dispose();
@@ -193,10 +206,6 @@ public abstract class FeatValueAdder extends JFrame {
         return lblFeatName;
     }
 
-    public Section getSection() {
-        return section;
-    }
-
     public JComboBox<FeatureKey> getCmbFtKeys() {
         return cmbFtKeys;
     }
@@ -215,14 +224,6 @@ public abstract class FeatValueAdder extends JFrame {
 
     public JButton getBtnCancel() {
         return btnCancel;
-    }
-
-    public Intrface getIntrface() {
-        return intrface;
-    }
-
-    public boolean isAllRes() {
-        return allRes;
     }
 
 }

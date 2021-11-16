@@ -195,7 +195,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     @Override
     public void reshape(GLAutoDrawable glad, int i, int i1, int i2, int i3) {
         GL2 gl20 = glad.getGL().getGL2();
-        gl20.glViewport(0, 0, i2, i3);
+        //gl20.glViewport(0, 0, i2, i3);
         if (config.isKeepAspectRatio()) {
             setPerspective();
         }

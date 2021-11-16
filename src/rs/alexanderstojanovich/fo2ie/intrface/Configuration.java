@@ -40,7 +40,7 @@ public class Configuration {
     private File outDir = new File(OUTPUT_DIR_PATH);
     private Color txtCol = Color.GREEN;
     private Color txtOverlayCol = new Color(128, 128, 128, 128); // gray half translucent
-    private Color selectCol = new Color(255, 0, 0, 128); // half red translucent
+    private Color selectCol = new Color(0, 0, 255, 128); // half blue translucent
     private Color qmarkCol = Color.MAGENTA;
     private int textureSize = 1024;
 

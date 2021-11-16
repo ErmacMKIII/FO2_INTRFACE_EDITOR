@@ -203,11 +203,7 @@ public class GUI extends javax.swing.JFrame {
         this.panelModule.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                int width = e.getComponent().getWidth();
-                int height = e.getComponent().getHeight();
-                GL_CANVAS.setSize(width, height);
                 buildModuleComponents();
-//                FO2IELogger.reportInfo(GL_CANVAS.getSize().toString(), null);
             }
         });
         GL_WINDOW.setTitle("Module preview");
@@ -278,7 +274,6 @@ public class GUI extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         fileChooserDirInput = new javax.swing.JFileChooser();
         fileChooserDirOutput = new javax.swing.JFileChooser();
@@ -331,10 +326,10 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - HUNS");
+        setTitle("FOnline2 S3 Interface Editor - IODINE");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
-        setSize(new java.awt.Dimension(640, 360));
+        setSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
@@ -419,6 +414,7 @@ public class GUI extends javax.swing.JFrame {
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
 
+        cmbBoxSection.setMaximumRowCount(5);
         cmbBoxSection.setModel(DCBM);
         cmbBoxSection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -430,7 +426,7 @@ public class GUI extends javax.swing.JFrame {
         lblResolution.setText("Resolution:");
         pnlIntrface.add(lblResolution);
 
-        cmbBoxResolution.setMaximumRowCount(6);
+        cmbBoxResolution.setMaximumRowCount(5);
         cmbBoxResolution.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbBoxResolutionActionPerformed(evt);
@@ -463,7 +459,7 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().add(pnlIntrface);
 
         pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Features & Components"));
-        pnlTable.setLayout(new java.awt.GridBagLayout());
+        pnlTable.setLayout(new java.awt.BorderLayout());
 
         tabPaneBrowser.setEnabled(false);
 
@@ -497,13 +493,7 @@ public class GUI extends javax.swing.JFrame {
 
         tabPaneBrowser.addTab("Components", sbComps);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        pnlTable.add(tabPaneBrowser, gridBagConstraints);
+        pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
 
         btnAddFeat.setText("Add Feature");
         btnAddFeat.setEnabled(false);
@@ -512,30 +502,12 @@ public class GUI extends javax.swing.JFrame {
                 btnAddFeatXDeselectActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        pnlTable.add(btnAddFeat, gridBagConstraints);
+        pnlTable.add(btnAddFeat, java.awt.BorderLayout.PAGE_START);
 
         getContentPane().add(pnlTable);
 
         panelModule.setBorder(javax.swing.BorderFactory.createTitledBorder("Module"));
-
-        javax.swing.GroupLayout panelModuleLayout = new javax.swing.GroupLayout(panelModule);
-        panelModule.setLayout(panelModuleLayout);
-        panelModuleLayout.setHorizontalGroup(
-            panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 390, Short.MAX_VALUE)
-        );
-        panelModuleLayout.setVerticalGroup(
-            panelModuleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 265, Short.MAX_VALUE)
-        );
-
+        panelModule.setLayout(new java.awt.BorderLayout());
         getContentPane().add(panelModule);
 
         mainMenuFile.setText("File");
@@ -748,9 +720,15 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.0 - HUNS (PUBLIC BUILD reviewed on 2021-09-11 at 08:00).\n");
+            sb.append("VERSION v1.1 - IODINE (PUBLIC BUILD reviewed on 2021-11-16 at 02:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.1 IODINE:\n");
+            sb.append("\t- Fixed that only one popup window\n");
+            sb.append("\t  for add feature / edit feature / edit component can be.\n");
+            sb.append("\t- Feature to edit position of the components (which also affects feature values).\n");
+            sb.append("\t- Module preview has correct border.\n");
             sb.append("\n");
             sb.append("Changelog since v1.0 HUNS:\n");
             sb.append("\t- Modules are being build faster.\n");
@@ -775,14 +753,17 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\n");
             sb.append("Purpose:\n");
             sb.append("FOnline2 S3 Interface Editor is a way to edit interface\n");
-            sb.append("through linking features/components and modifies only .ini\n");
+            sb.append("through linking features/components and modifies only the .ini\n");
             sb.append("and is not an image editor itself.\n");
             sb.append("\n");
             sb.append("Copyright © 2021\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
-            JOptionPane.showMessageDialog(this, sb.toString(), "About", JOptionPane.INFORMATION_MESSAGE, icon);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JScrollPane jsp = new JScrollPane(textArea);
+            textArea.setEditable(false);
+            JOptionPane.showMessageDialog(this, jsp, "About", JOptionPane.INFORMATION_MESSAGE, icon);
         }
     }
 
@@ -802,22 +783,28 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t6. Edit interface by editing it's features and (or) components,\n");
             sb.append("\t7. Click \"Save\" to save the interface on the output path.\n");
             sb.append("\n");
-            sb.append("\t- Each line of the .ini file represents one feature.\n");
-            sb.append("\t- One section module (or just module) consists of features.\n");
-            sb.append("\t- Interface in the game is made of many modules.\n");
-            sb.append("\t- By using \"All resolutions\" you're ignoring target resolution when module being built.\n");
-            sb.append("\t- Preview module in the window with \"Preview Module\".\n");
-            sb.append("\t- Table has two tabs, interface features and rendering components\n");
-            sb.append("\t  which can be edited in either of these two mods,\n");
-            sb.append("\t- In order to view Components build the module.\n");
+            sb.append("[*] Trivia:\n");
+            sb.append("- Each line of the .ini file represents one feature.\n");
+            sb.append("- One section module (or just module) consists of features.\n");
+            sb.append("- Interface in the game is made of many modules.\n");
+            sb.append("- By using \"All resolutions\" you're ignoring target resolution when module being built.\n");
+            sb.append("- Preview module in the window with \"Preview Module\".\n");
+            sb.append("- Table has two tabs, interface features and rendering components\n");
+            sb.append("  which can be edited in either of these two mods,\n");
+            sb.append("- In order to view Components build the module.\n");
+            sb.append("- To include resolution e.g. 1366x768 put \"resolution 1366 768\" as a new line in the .ini\n");
+            sb.append("  and reload your interface.\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
-            JOptionPane.showMessageDialog(this, sb.toString(), "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JScrollPane jsp = new JScrollPane(textArea);
+            textArea.setEditable(false);
+            JOptionPane.showMessageDialog(this, jsp, "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
         }
     }
 
     // builds Animator Renderer GL components
-    private void buildModuleComponents() {
+    public void buildModuleComponents() {
         if (mode == Mode.ALL_RES) {
             renderer.buildMode = ModuleRenderer.BuildMode.ALL_RES;
             renderer.state = ModuleRenderer.State.BUILD;
@@ -835,13 +822,10 @@ public class GUI extends javax.swing.JFrame {
         Object valueAtVal = tblFeats.getValueAt(srow, scol - 2);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         final FeatureValue featVal = FeatureValue.valueOf((String) valueAtVal);
-        final FeatValueEditor fve = new FeatValueEditor(featKey, featVal, intrface, btnTogAllRes.isSelected()) {
-            @Override
-            public void execute() {
-                tblFeats.setValueAt(featVal.getStringValue(), srow, scol - 2);
-                buildModuleComponents();
-            }
-        };
+
+        // featKey, featVal, intrface, btnTogAllRes.isSelected()
+        final FeatValueEditor fve = FeatValueEditor.getInstance(this);
+        fve.popUp(featKey, featVal, intrface, btnTogAllRes.isSelected());
 
         fve.setVisible(true);
         fve.setResizable(false);
@@ -878,21 +862,16 @@ public class GUI extends javax.swing.JFrame {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
         Section section = intrface.getNameToSectionMap().get(sectionName);
 
-        FeatValueAdder fva = new FeatValueAdder(section, intrface, btnTogAllRes.isSelected()) {
-            @Override
-            public void execute() {
-                featurePreview();
-                componentsPreview();
-                buildModuleComponents();
-            }
-        };
+        FeatValueAdder fva = FeatValueAdder.getInstance(this);
+        fva.popUp(section, intrface, btnTogAllRes.isSelected());
+
         fva.setVisible(true);
         fva.setResizable(false);
         fva.pack();
     }
 
     // makes preview for the feature table
-    private synchronized void featurePreview() {
+    public synchronized void featurePreview() {
         if (mode == Mode.ALL_RES) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
@@ -906,23 +885,23 @@ public class GUI extends javax.swing.JFrame {
             ftTblMdl.addColumn("Edit Feature");
             ftTblMdl.addColumn("Remove Feature");
 
-            ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+            final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
             btnModifyEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     editFeatureValue();
                 }
             });
-            ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
+            final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
 
-            ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+            final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
             btnRemoveEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     removeFeature();
                 }
             });
-            ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
+            final ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
 
             SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
             Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -978,23 +957,23 @@ public class GUI extends javax.swing.JFrame {
                 ftTblMdl.addColumn("Edit Feature");
                 ftTblMdl.addColumn("Remove Feature");
 
-                ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+                final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
                 btnModifyEditor.getButton().addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         editFeatureValue();
                     }
                 });
-                ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
+                final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
 
-                ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+                final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
                 btnRemoveEditor.getButton().addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         removeFeature();
                     }
                 });
-                ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
+                final ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
 
                 SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
                 Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -1239,7 +1218,7 @@ public class GUI extends javax.swing.JFrame {
     private void selectComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
@@ -1256,11 +1235,47 @@ public class GUI extends javax.swing.JFrame {
 
     }
 
-    private synchronized void componentsPreview() {
+    private void editComponent() {
+        final int srow = tblComps.getSelectedRow();
+        final int scol = tblComps.getSelectedColumn();
+
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
+
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        FeatureValue featVal = null;
+
+        if (mode == Mode.ALL_RES) {
+            featVal = intrface.getCommonFeatMap().get(featKey);
+        } else if (mode == Mode.TARGET_RES) {
+            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+            if (resolutionPragma != null) {
+                featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+            }
+        }
+
+        GLComponent glcKey = null;
+        for (GLComponent glc : renderer.module.components) {
+            if (glc.getFeatureKey() == featKey) {
+                glcKey = glc;
+                break;
+            }
+        }
+
+        if (glcKey != null && featVal != null) {
+            //(featKey, featVal, intrface, btnTogAllRes.isSelected(), glcKey)
+            final ComponentEditor compEditor = ComponentEditor.getInstance(this);
+            compEditor.popUp(featKey, featVal, intrface, rootPaneCheckingEnabled, glcKey);
+            compEditor.setVisible(true);
+            compEditor.setResizable(false);
+            compEditor.pack();
+        }
+    }
+
+    public synchronized void componentsPreview() {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 4;
+                return (column == 4) || (column == 5);
             }
         };
 
@@ -1268,16 +1283,26 @@ public class GUI extends javax.swing.JFrame {
         compTblMdl.addColumn("Position");
         compTblMdl.addColumn("Dimension");
         compTblMdl.addColumn("Type");
-        compTblMdl.addColumn("Select");
+        compTblMdl.addColumn("Edit Position");
+        compTblMdl.addColumn("Select & Drag");
 
-        ButtonEditor selEdit = new ButtonEditor(new JButton("Select"));
+        final ButtonEditor propEdit = new ButtonEditor(new JButton("Edit"));
+        propEdit.getButton().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editComponent();
+            }
+        });
+        final ButtonRenderer propRend = new ButtonRenderer(propEdit.getButton());
+
+        final ButtonEditor selEdit = new ButtonEditor(new JButton("Select"));
         selEdit.getButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selectComponent();
             }
         });
-        ButtonRenderer selRend = new ButtonRenderer(selEdit.getButton());
+        final ButtonRenderer selRend = new ButtonRenderer(selEdit.getButton());
 
         for (GLComponent glc : renderer.module.components) {
             FeatureKey fk = glc.getFeatureKey();
@@ -1300,9 +1325,13 @@ public class GUI extends javax.swing.JFrame {
         }
 
         tblComps.setModel(compTblMdl);
-        TableColumn selCol = tblComps.getColumn("Select");
+        TableColumn selCol = tblComps.getColumn("Select & Drag");
         selCol.setCellEditor(selEdit);
         selCol.setCellRenderer(selRend);
+
+        TableColumn propCol = tblComps.getColumn("Edit Position");
+        propCol.setCellEditor(propEdit);
+        propCol.setCellRenderer(propRend);
     }
 
     /**
