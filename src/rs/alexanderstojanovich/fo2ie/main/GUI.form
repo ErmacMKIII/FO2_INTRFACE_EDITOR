@@ -112,6 +112,9 @@
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[800, 600]"/>
     </Property>
+    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[800, 600]"/>
+    </Property>
     <Property name="size" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[800, 600]"/>
     </Property>
@@ -411,6 +414,7 @@
         <Component class="javax.swing.JButton" name="btnAddFeat">
           <Properties>
             <Property name="text" type="java.lang.String" value="Add Feature"/>
+            <Property name="toolTipText" type="java.lang.String" value="Add new feature for this section"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>

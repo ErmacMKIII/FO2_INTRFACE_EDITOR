@@ -496,6 +496,7 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
 
         btnAddFeat.setText("Add Feature");
+        btnAddFeat.setToolTipText("Add new feature for this section");
         btnAddFeat.setEnabled(false);
         btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
