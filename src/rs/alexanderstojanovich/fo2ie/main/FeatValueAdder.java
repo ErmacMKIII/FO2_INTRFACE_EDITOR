@@ -61,8 +61,8 @@ public abstract class FeatValueAdder extends JFrame {
                 @Override
                 public void execute() {
                     gui.buildModuleComponents();
-                    gui.featurePreview();
-                    gui.componentsPreview();
+                    gui.initFeaturePreview();
+                    gui.initComponentsPreview();
                 }
             };
         }

@@ -44,6 +44,20 @@ public interface GLComponent {
     public FeatureKey getFeatureKey();
 
     /**
+     * Is component enabled
+     *
+     * @return enabled flag
+     */
+    public boolean isEnabled();
+
+    /**
+     * Set enable/disable depending on passed boolean
+     *
+     * @param enabled GLComponent enabled flag
+     */
+    public void setEnabled(boolean enabled);
+
+    /**
      * Gets color of this component
      *
      * @return

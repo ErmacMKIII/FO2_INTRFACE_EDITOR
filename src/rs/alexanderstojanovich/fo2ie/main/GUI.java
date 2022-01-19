@@ -42,6 +42,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -52,12 +53,15 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
 import rs.alexanderstojanovich.fo2ie.helper.ButtonEditor;
 import rs.alexanderstojanovich.fo2ie.helper.ButtonRenderer;
+import rs.alexanderstojanovich.fo2ie.helper.ToggleButtonEditor;
+import rs.alexanderstojanovich.fo2ie.helper.ToggleButtonRenderer;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 
@@ -89,16 +93,16 @@ public class GUI extends javax.swing.JFrame {
     private final ModuleRenderer renderer = new ModuleRenderer(fpsAnim, intrface) {
         @Override
         public void afterSelection() {
-            featurePreview();
-            componentsPreview();
+            updateFeaturePreview();
+            updateComponentsPreview();
         }
 
         @Override
         public void afterModuleBuild() {
             //btnBuild.setEnabled(true);
             btnMdlePreview.setEnabled(true);
-            featurePreview();
-            componentsPreview();
+            initFeaturePreview();
+            initComponentsPreview();
         }
     };
     public static final ExecutorService EXEC_BUILD = Executors.newSingleThreadExecutor();
@@ -132,7 +136,13 @@ public class GUI extends javax.swing.JFrame {
     public static final String SPLASH_FILE_NAME = "fo2ie_splash.png";
     public static final String SCREENSHOT_DIR = "screenshots";
 
+    public static final String ICON_BTN_ENABLED = "eye_enabled_icon.png";
+    public static final String ICON_BTN_DISABLED = "eye_disabled_icon.png";
+
     private File targetIniFile;
+
+    private ImageIcon bteEnabledIcon;
+    private ImageIcon bteDisabledIcon;
 
     private static float progress = 0.0f;
 
@@ -152,6 +162,7 @@ public class GUI extends javax.swing.JFrame {
         initPosition(); // centers the GUI
         initMenuDialogs(); // init menu dialogs
         initTabPaneIcons(); // init tab icons
+        initIconsForFeatTables();
         progress += 25.0f;
     }
 
@@ -266,6 +277,14 @@ public class GUI extends javax.swing.JFrame {
         buildModuleComponents();
     }
 
+    private void initIconsForFeatTables() {
+        URL url_bteicon1 = GUI.class.getResource(RESOURCES_DIR + ICON_BTN_ENABLED);
+        bteEnabledIcon = new ImageIcon(url_bteicon1);
+
+        URL url_bteicon2 = GUI.class.getResource(RESOURCES_DIR + ICON_BTN_DISABLED);
+        bteDisabledIcon = new ImageIcon(url_bteicon2);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -297,6 +316,9 @@ public class GUI extends javax.swing.JFrame {
         btnTogAllRes = new javax.swing.JToggleButton();
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        lblSearch = new javax.swing.JLabel();
+        txtFldSearch = new javax.swing.JTextField();
         tabPaneBrowser = new javax.swing.JTabbedPane();
         sbFeatures = new javax.swing.JScrollPane();
         tblFeats = new javax.swing.JTable();
@@ -326,7 +348,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - IODINE");
+        setTitle("FOnline2 S3 Interface Editor - JAPANESE");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -461,7 +483,20 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Features & Components"));
         pnlTable.setLayout(new java.awt.BorderLayout());
 
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
+
+        lblSearch.setText("Filter:");
+        jPanel1.add(lblSearch);
+        jPanel1.add(txtFldSearch);
+
+        pnlTable.add(jPanel1, java.awt.BorderLayout.PAGE_END);
+
         tabPaneBrowser.setEnabled(false);
+        tabPaneBrowser.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                tabPaneBrowserStateChanged(evt);
+            }
+        });
 
         sbFeatures.setPreferredSize(new java.awt.Dimension(240, 135));
 
@@ -495,6 +530,7 @@ public class GUI extends javax.swing.JFrame {
 
         pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
 
+        btnAddFeat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/feat_plus.png"))); // NOI18N
         btnAddFeat.setText("Add Feature");
         btnAddFeat.setToolTipText("Add new feature for this section");
         btnAddFeat.setEnabled(false);
@@ -599,8 +635,8 @@ public class GUI extends javax.swing.JFrame {
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         renderer.getModule().components.clear();
         loadFromButton();
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_btnLoadActionPerformed
 
@@ -850,10 +886,12 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
 
-//            DefaultTableModel model = (DefaultTableModel) tblFeatsComps.getModel();
-//            model.removeRow(srow);
-            featurePreview();
-            componentsPreview();
+            DefaultTableModel model = (DefaultTableModel) tblFeats.getModel();
+            model.removeRow(srow);
+
+            updateFeaturePreview();
+            updateComponentsPreview();
+
             buildModuleComponents();
         }
     }
@@ -872,12 +910,12 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // makes preview for the feature table
-    public synchronized void featurePreview() {
+    public synchronized void initFeaturePreview() {
         if (mode == Mode.ALL_RES) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
                 public boolean isCellEditable(int row, int column) {
-                    return column == 3 || column == 4;
+                    return (column == 3 || column == 4);
                 }
             };
             ftTblMdl.addColumn("Feature Key");
@@ -1002,6 +1040,69 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    // makes preview for the feature table
+    public synchronized void updateFeaturePreview() {
+        if (mode == Mode.ALL_RES) {
+            DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblFeats.getModel();
+
+            for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+                FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+                FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
+                int overrides = 0;
+                for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
+                    if (resPragma.getCustomFeatMap().containsKey(featKey)) {
+                        overrides++;
+                    }
+                }
+
+                if (featVal != null) {
+                    Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                    int col = 0;
+                    for (Object obj : objs) {
+                        ftTblMdl.setValueAt(obj, row, col);
+                        col++;
+                    }
+                }
+            }
+
+        } else if (mode == Mode.TARGET_RES) {
+            String resStr = (String) cmbBoxResolution.getSelectedItem();
+            ResolutionPragma resolutionPragma = null;
+            if (resStr != null) {
+                String[] things = resStr.trim().split("x");
+                int width = Integer.parseInt(things[0]);
+                int height = Integer.parseInt(things[1]);
+                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                        resolutionPragma = resolution;
+                        break;
+                    }
+                }
+            }
+
+            if (resolutionPragma != null) {
+                DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblFeats.getModel();
+
+                for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+                    FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+                    FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+
+                    boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
+
+                    if (featVal != null) {
+                        Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                        int col = 0;
+                        for (Object obj : objs) {
+                            ftTblMdl.setValueAt(obj, row, col);
+                            col++;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
     // cuz its called from another thread (and may be called repeatedly)
     private void initBuildModule() {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
@@ -1035,8 +1136,8 @@ public class GUI extends javax.swing.JFrame {
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:        
         deselect();
-        featurePreview();
-        componentsPreview();
+        updateFeaturePreview();
+        updateComponentsPreview();
         workOnBuildComponents();
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();
@@ -1074,8 +1175,8 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents(); // important!
     }//GEN-LAST:event_btnTogAllResActionPerformed
 
@@ -1088,8 +1189,8 @@ public class GUI extends javax.swing.JFrame {
             txtFldInPath.setText(cfg.getInDir().getPath());
             txtFldInPath.setToolTipText(cfg.getInDir().getPath());
             loadFromMenu();
-            featurePreview();
-            componentsPreview();
+            initFeaturePreview();
+            initComponentsPreview();
             renderer.getModule().components.clear();
             workOnBuildComponents(); // important!
         }
@@ -1149,15 +1250,15 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         deselect();
         renderer.module.components.clear();
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed
         // TODO add your handling code here:
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxResolutionActionPerformed
 
@@ -1170,6 +1271,15 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         renderer.state = ModuleRenderer.State.SCREENSHOT;
     }//GEN-LAST:event_toolsScreenshotActionPerformed
+
+    private void tabPaneBrowserStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPaneBrowserStateChanged
+        // TODO add your handling code here:
+        if (tabPaneBrowser.getSelectedIndex() == 0) {
+            updateFeaturePreview();
+        } else if (tabPaneBrowser.getSelectedIndex() == 1) {
+            updateComponentsPreview();
+        }
+    }//GEN-LAST:event_tabPaneBrowserStateChanged
 
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
@@ -1216,10 +1326,10 @@ public class GUI extends javax.swing.JFrame {
         renderer.selected = null;
     }
 
-    private void selectComponent() {
+    public void toggleEnableComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
@@ -1227,6 +1337,29 @@ public class GUI extends javax.swing.JFrame {
 
         for (GLComponent glc : renderer.module.components) {
             if (glc.getFeatureKey() == featKey) {
+                boolean en = glc.isEnabled();
+                glc.setEnabled(!en);
+                if (glc instanceof Text) {
+                    Text txt = (Text) glc;
+                    txt.getOverlay().setEnabled(!en);
+                }
+                tblComps.setValueAt(glc.isEnabled(), srow, scol);
+                break;
+            }
+        }
+    }
+
+    private void selectComponent() {
+        final int srow = tblComps.getSelectedRow();
+        final int scol = tblComps.getSelectedColumn();
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 6);
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+
+        // deselect
+        deselect();
+
+        for (GLComponent glc : renderer.module.components) {
+            if (glc.getFeatureKey() == featKey && glc.isEnabled()) {
                 renderer.selected = glc;
                 renderer.savedColor = glc.getColor();
                 renderer.selected.setColor(GLColor.awtColorToVec4(cfg.getSelectCol()));
@@ -1240,7 +1373,7 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
 
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
 
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         FeatureValue featVal = null;
@@ -1256,7 +1389,7 @@ public class GUI extends javax.swing.JFrame {
 
         GLComponent glcKey = null;
         for (GLComponent glc : renderer.module.components) {
-            if (glc.getFeatureKey() == featKey) {
+            if (glc.getFeatureKey() == featKey && glc.isEnabled()) {
                 glcKey = glc;
                 break;
             }
@@ -1272,11 +1405,11 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    public synchronized void componentsPreview() {
+    public synchronized void initComponentsPreview() {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return (column == 4) || (column == 5);
+                return ((column == 4) || (column == 5) || (column == 6));
             }
         };
 
@@ -1284,8 +1417,18 @@ public class GUI extends javax.swing.JFrame {
         compTblMdl.addColumn("Position");
         compTblMdl.addColumn("Dimension");
         compTblMdl.addColumn("Type");
+        compTblMdl.addColumn("Enabled");
         compTblMdl.addColumn("Edit Position");
         compTblMdl.addColumn("Select & Drag");
+
+        final ToggleButtonEditor bteEdit = new ToggleButtonEditor(new JToggleButton("Disable", bteEnabledIcon));
+        bteEdit.getToggleButton().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleEnableComponent();
+            }
+        });
+        final ToggleButtonRenderer bteRend = new ToggleButtonRenderer(bteEdit.getToggleButton(), bteEnabledIcon, bteDisabledIcon);
 
         final ButtonEditor propEdit = new ButtonEditor(new JButton("Edit"));
         propEdit.getButton().addActionListener(new ActionListener() {
@@ -1320,12 +1463,17 @@ public class GUI extends javax.swing.JFrame {
             if (fk != null && fv != null) {
                 String dim = glc.getWidth() + "x" + glc.getHeight();
                 String pos = Math.round(glc.getPos().x - glc.getWidth() / 2.0f) + ", " + Math.round(glc.getPos().y - glc.getHeight() / 2.0f);
-                Object[] row = {fk.getStringValue(), pos, dim, glc.getType()};
+                Object[] row = {fk.getStringValue(), pos, dim, glc.getType(), glc.isEnabled()};
                 compTblMdl.addRow(row);
             }
         }
 
         tblComps.setModel(compTblMdl);
+
+        TableColumn enCol = tblComps.getColumn("Enabled");
+        enCol.setCellEditor(bteEdit);
+        enCol.setCellRenderer(bteRend);
+
         TableColumn selCol = tblComps.getColumn("Select & Drag");
         selCol.setCellEditor(selEdit);
         selCol.setCellRenderer(selRend);
@@ -1333,6 +1481,46 @@ public class GUI extends javax.swing.JFrame {
         TableColumn propCol = tblComps.getColumn("Edit Position");
         propCol.setCellEditor(propEdit);
         propCol.setCellRenderer(propRend);
+    }
+
+    public synchronized void updateComponentsPreview() {
+        DefaultTableModel compTblMdl = (DefaultTableModel) tblComps.getModel();
+
+        for (int row = 0; row < tblComps.getRowCount(); row++) {
+            FeatureKey fk = FeatureKey.valueOf((String) compTblMdl.getValueAt(row, 0));
+            FeatureValue fv = null;
+            if (mode == Mode.ALL_RES) {
+                fv = intrface.getCommonFeatMap().get(fk);
+            } else if (mode == Mode.TARGET_RES) {
+                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+                if (resolutionPragma != null) {
+                    fv = resolutionPragma.getCustomFeatMap().get(fk);
+                }
+            }
+
+            if (fk != null && fv != null) {
+                GLComponent glcTarg = null;
+                for (GLComponent glc : renderer.module.components) {
+                    if (glc.getFeatureKey() == fk) {
+                        glcTarg = glc;
+                        break;
+                    }
+                }
+
+                if (glcTarg != null) {
+                    String dim = glcTarg.getWidth() + "x" + glcTarg.getHeight();
+                    String pos = Math.round(glcTarg.getPos().x - glcTarg.getWidth() / 2.0f) + ", " + Math.round(glcTarg.getPos().y - glcTarg.getHeight() / 2.0f);
+                    Object[] objs = {fk.getStringValue(), pos, dim, glcTarg.getType(), glcTarg.isEnabled()};
+
+                    int col = 0;
+                    for (Object obj : objs) {
+                        compTblMdl.setValueAt(obj, row, col);
+                        col++;
+                    }
+                }
+            }
+
+        }
     }
 
     /**
@@ -1413,9 +1601,11 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator fileMenuSep1;
     private javax.swing.JMenuItem infoMenuAbout;
     private javax.swing.JMenuItem infoMenuHelp;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblInput;
     private javax.swing.JLabel lblOutput;
     private javax.swing.JLabel lblResolution;
+    private javax.swing.JLabel lblSearch;
     private javax.swing.JLabel lblSection;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mainMenuFile;
@@ -1433,5 +1623,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;
+    private javax.swing.JTextField txtFldSearch;
     // End of variables declaration//GEN-END:variables
 }
