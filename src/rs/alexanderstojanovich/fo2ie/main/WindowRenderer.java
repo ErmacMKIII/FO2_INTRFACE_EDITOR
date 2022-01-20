@@ -16,19 +16,16 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.KeyListener;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.MouseListener;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.GLBuffers;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,29 +33,21 @@ import java.time.LocalDateTime;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.joml.Matrix4f;
-import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
-import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
-import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
-import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
-import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.GLColor;
-import rs.alexanderstojanovich.fo2ie.util.Pair;
-import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public abstract class ModuleRenderer implements GLEventListener, MouseListener, MouseMotionListener, KeyListener {
+public abstract class WindowRenderer implements GLEventListener, MouseListener, KeyListener {
 
     public static final Object OBJ_MUTEX = new Object();
     public static final Object OBJ_SYNC = new Object();
@@ -86,12 +75,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     // animator used for rendering in the loop
     private final FPSAnimator animator;
 
-    protected GLComponent selected;
-    protected boolean dragging = false;
     protected Vector4f savedColor = new Vector4f();
     private Vector2f scrnMouseCoords;
-
-    private int selectedIndex = -1;
 
     /**
      * State of the machine
@@ -115,12 +100,12 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
      * Create JOGL Animator of the built module
      *
      * @param animator parsed FPS animator
-     * @param module GL module with components
+     * @param module module with GL Components
      * @param intrface FOnline interface
      */
-    public ModuleRenderer(FPSAnimator animator, Module module, Intrface intrface) {
-        this.animator = animator;
+    public WindowRenderer(FPSAnimator animator, Module module, Intrface intrface) {
         this.module = module;
+        this.animator = animator;
         this.intrface = intrface;
     }
 
@@ -222,12 +207,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
                 module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
                 break;
-            case BUILD:
-                // suspend the loop until all components are built
-                animator.pause();
-                buildComponents(gl20);
-                state = State.SUSPEND;
-                break;
             case SCREENSHOT:
                 BufferedImage screenshot = createScreenshot(gl20);
                 boolean ok = saveScreenshot(screenshot);
@@ -244,33 +223,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         }
     }
 
-    //--------------------------------------------------------------------------
-    private void buildComponents(GL2 gl20) {
-        final ProgressWindow window = new ProgressWindow();
-        ModuleBuildTask task = new ModuleBuildTask(intrface.getSectionName(), intrface, module, buildMode, gl20, fntTexture, qmarkTexture) {
-            @Override
-            protected void done() {
-                afterModuleBuild();
-                window.dispose();
-                state = State.INIT;
-                // resume the animating loop
-                animator.resume();
-                selectedIndex = -1;
-            }
-        };
-        task.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if ("progress".equals(evt.getPropertyName())) {
-                    window.progressBar.setValue(Math.round((float) evt.getNewValue()));
-                    window.progressBar.validate();
-                }
-            }
-        });
-        task.execute();
-    }
-
-    //--------------------------------------------------------------------------
     /**
      * Read pixels and create screenshot as an image.
      *
@@ -342,101 +294,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         return ok;
     }
 
-    //--------------------------------------------------------------------------
-    // selects one component (CTRL + A)
-    private void select() {
-        deselect();
-
-        for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)) {
-                selected = glc;
-                savedColor = glc.getColor();
-                selected.setColor(GLColor.awtColorToVec4(config.getSelectCol()));
-                break;
-            }
-        }
-    }
-
-    // select previous index of (selected components)
-    private void selectPrev() {
-        deselect();
-
-        if (selectedIndex > 0) {
-            GLComponent glc = module.components.get(Math.max(--selectedIndex, 0));
-            selected = glc;
-            savedColor = glc.getColor();
-            selected.setColor(GLColor.awtColorToVec4(config.getSelectCol()));
-        }
-
-    }
-
-    // select next index of (selected components)
-    private void selectNext() {
-        deselect();
-
-        final int size = module.components.size();
-
-        if (selectedIndex < size - 1) {
-            GLComponent glc = module.components.get(Math.min(++selectedIndex, size - 1));
-            selected = glc;
-            savedColor = glc.getColor();
-            selected.setColor(GLColor.awtColorToVec4(config.getSelectCol()));
-        }
-
-    }
-
-    // deselects all (CTRL + D)
-    private void deselect() {
-        // same as deselect from the GUI
-        if (selected != null) {
-            selected.setColor(savedColor);
-        }
-        selected = null;
-    }
-
-    private void endMovingSelected() {
-        // process mouse release
-        if (selected != null) {
-            // try to find corrseponding feature value
-            FeatureValue featureValue = null;
-            // based on module build mode do something..
-            if (buildMode == BuildMode.ALL_RES) {
-                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-            } else if (buildMode == BuildMode.TARGET_RES) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
-                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-                } else {
-                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-                }
-            }
-
-            // try to set feature value with corresponding glMouseCoords
-            if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
-                MyRectangle mr = (MyRectangle) featureValue;
-                Rectanglef xr;
-                if (selected instanceof Text) {
-                    Text selectedText = (Text) selected;
-                    // this is important
-                    xr = selectedText.getOverlay().getPixelArea();
-                } else {
-                    xr = selected.getPixelArea();
-                }
-
-                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(intrface.getModeWidth(), intrface.getModeHeight(), intrface.getMainPicWidth(), intrface.getMainPicHeight());
-
-                mr.minX = Math.round(xr.minX / skvp.getKey());
-                mr.maxX = Math.round(xr.maxX / skvp.getKey());
-                mr.minY = Math.round(xr.minY / skvp.getValue());
-                mr.maxY = Math.round(xr.maxY / skvp.getValue());
-
-                afterSelection();
-            }
-
-        }
-    }
-
-    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------    
+    //--------------------------------------------------------------------------    
     @Override
     public void mouseClicked(MouseEvent e) {
         // ..IGNORE
@@ -444,30 +303,13 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (dragging) {
-            return;
-        }
-
-        dragging = true;
-
-        scrnMouseCoords = new Vector2f(e.getX(), e.getY());
+        // ..IGNORE
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (!dragging) {
-            return;
-        }
-
-        dragging = false;
-
-        endMovingSelected();
+        // ..IGNORE
     }
-
-    /**
-     * Action which takes place after module build
-     */
-    public abstract void afterModuleBuild();
 
     /**
      * Action which takes place after selection
@@ -481,24 +323,13 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     @Override
     public void mouseExited(MouseEvent e) {
-        //deselect();
+        // same as deselect from the GUI
+        // ..IGNORE
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (!dragging) {
-            return;
-        }
-
-        scrnMouseCoords = new Vector2f(e.getX(), e.getY());
-
-        // move across the OpenGL render space
-        if (selected != null) {
-            selected.setPos(scrnMouseCoords);
-            afterSelection();
-        }
-
-        dragging = true;
+        // ..IGNORE
     }
 
     @Override
@@ -507,36 +338,20 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     @Override
+    public void mouseWheelMoved(MouseEvent me) {
+        // .. IGNORED
+    }
+
+    @Override
     public void keyPressed(KeyEvent ke) {
         if (ke.getKeyCode() == KeyEvent.VK_F12) {
-            state = ModuleRenderer.State.SCREENSHOT;
-        }
-
-        if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_D) {
-            deselect();
-        }
-
-        if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
-            select();
-        }
-
-        if (ke.getKeyCode() == KeyEvent.VK_OPEN_BRACKET) {
-            selectPrev();
-        }
-
-        if (ke.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET) {
-            selectNext();
+            state = WindowRenderer.State.SCREENSHOT;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent ke) {
-        //..IGNORED
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        //..IGNORED
+        // .. IGNORED
     }
 
     //--------------------------------------------------------------------------
@@ -601,16 +416,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         return animator;
     }
 
-    public GLComponent getSelected() {
-        return selected;
-    }
-
     public Vector2f getScrnMouseCoords() {
         return scrnMouseCoords;
-    }
-
-    public boolean isDragging() {
-        return dragging;
     }
 
     public BuildMode getBuildMode() {
