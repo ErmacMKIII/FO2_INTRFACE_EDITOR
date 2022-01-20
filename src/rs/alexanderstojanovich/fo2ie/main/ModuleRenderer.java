@@ -344,7 +344,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     //--------------------------------------------------------------------------
     // selects one component (CTRL + A)
-    private void select() {
+    public void select() {
         deselect();
 
         for (GLComponent glc : module.components) {
@@ -358,7 +358,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     // select previous index of (selected components)
-    private void selectPrev() {
+    public void selectPrev() {
         deselect();
 
         if (selectedIndex > 0) {
@@ -371,7 +371,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     // select next index of (selected components)
-    private void selectNext() {
+    public void selectNext() {
         deselect();
 
         final int size = module.components.size();
@@ -386,7 +386,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     // deselects all (CTRL + D)
-    private void deselect() {
+    public void deselect() {
         // same as deselect from the GUI
         if (selected != null) {
             selected.setColor(savedColor);

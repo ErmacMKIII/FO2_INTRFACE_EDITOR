@@ -149,10 +149,21 @@ public class GUI extends javax.swing.JFrame {
     public static final String ICON_BTN_ENABLED = "eye_enabled_icon.png";
     public static final String ICON_BTN_DISABLED = "eye_disabled_icon.png";
 
+    public static final String ICON_FEAT_EDIT = "pencil_feat_edit_icon.png";
+    public static final String ICON_COMP_EDIT = "pencil_comp_edit_icon.png";
+
+    public static final String ICON_COMP_SELECT = "select_arrow_tiny.png";
+    public static final String ICON_FEAT_REMOVE = "remove_icon.png";
+
     private File targetIniFile;
 
     private ImageIcon bteEnabledIcon;
     private ImageIcon bteDisabledIcon;
+
+    private ImageIcon featEditIcon;
+    private ImageIcon compEditIcon;
+    private ImageIcon compSelIcon;
+    private ImageIcon featRemIcon;
 
     private static float progress = 0.0f;
 
@@ -252,6 +263,7 @@ public class GUI extends javax.swing.JFrame {
         }
 
         btnAddFeat.setEnabled(ok);
+        btnDeselect.setEnabled(ok);
         tabPaneBrowser.setEnabled(ok);
     }
 
@@ -300,6 +312,18 @@ public class GUI extends javax.swing.JFrame {
 
         URL url_bteicon2 = GUI.class.getResource(RESOURCES_DIR + ICON_BTN_DISABLED);
         bteDisabledIcon = new ImageIcon(url_bteicon2);
+
+        URL url_feat_edit = GUI.class.getResource(RESOURCES_DIR + ICON_FEAT_EDIT);
+        this.featEditIcon = new ImageIcon(url_feat_edit);
+
+        URL comp_feat_edit = GUI.class.getResource(RESOURCES_DIR + ICON_COMP_EDIT);
+        this.compEditIcon = new ImageIcon(comp_feat_edit);
+
+        URL feat_rem = GUI.class.getResource(RESOURCES_DIR + ICON_FEAT_REMOVE);
+        this.featRemIcon = new ImageIcon(feat_rem);
+
+        URL cmp_select = GUI.class.getResource(RESOURCES_DIR + ICON_COMP_SELECT);
+        this.compSelIcon = new ImageIcon(cmp_select);
     }
 
     /**
@@ -334,6 +358,9 @@ public class GUI extends javax.swing.JFrame {
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
+        btnAddFeat = new javax.swing.JButton();
+        btnDeselect = new javax.swing.JButton();
+        pnlSearch = new javax.swing.JPanel();
         lblSearch = new javax.swing.JLabel();
         txtFldSearch = new javax.swing.JTextField();
         tabPaneBrowser = new javax.swing.JTabbedPane();
@@ -341,7 +368,6 @@ public class GUI extends javax.swing.JFrame {
         tblFeats = new javax.swing.JTable();
         sbComps = new javax.swing.JScrollPane();
         tblComps = new javax.swing.JTable();
-        btnAddFeat = new javax.swing.JButton();
         panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
@@ -367,7 +393,6 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor - JAPANESE");
         setMinimumSize(new java.awt.Dimension(800, 600));
-        setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
@@ -500,13 +525,38 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Features & Components"));
         pnlTable.setLayout(new java.awt.BorderLayout());
 
-        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
+        jPanel1.setLayout(new java.awt.GridLayout(1, 2));
+
+        btnAddFeat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/feat_plus.png"))); // NOI18N
+        btnAddFeat.setText("Add Feature");
+        btnAddFeat.setToolTipText("Add new feature for this section");
+        btnAddFeat.setEnabled(false);
+        btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddFeatXDeselectActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnAddFeat);
+
+        btnDeselect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/deselect_arrow.png"))); // NOI18N
+        btnDeselect.setText("Deselect");
+        btnDeselect.setEnabled(false);
+        btnDeselect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeselectActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnDeselect);
+
+        pnlTable.add(jPanel1, java.awt.BorderLayout.NORTH);
+
+        pnlSearch.setLayout(new javax.swing.BoxLayout(pnlSearch, javax.swing.BoxLayout.LINE_AXIS));
 
         lblSearch.setText("Filter:");
-        jPanel1.add(lblSearch);
-        jPanel1.add(txtFldSearch);
+        pnlSearch.add(lblSearch);
+        pnlSearch.add(txtFldSearch);
 
-        pnlTable.add(jPanel1, java.awt.BorderLayout.PAGE_END);
+        pnlTable.add(pnlSearch, java.awt.BorderLayout.PAGE_END);
 
         tabPaneBrowser.setEnabled(false);
         tabPaneBrowser.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -546,17 +596,6 @@ public class GUI extends javax.swing.JFrame {
         tabPaneBrowser.addTab("Components", sbComps);
 
         pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
-
-        btnAddFeat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/feat_plus.png"))); // NOI18N
-        btnAddFeat.setText("Add Feature");
-        btnAddFeat.setToolTipText("Add new feature for this section");
-        btnAddFeat.setEnabled(false);
-        btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddFeatXDeselectActionPerformed(evt);
-            }
-        });
-        pnlTable.add(btnAddFeat, java.awt.BorderLayout.PAGE_START);
 
         getContentPane().add(pnlTable);
 
@@ -774,7 +813,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-20 at 02:00).\n");
+            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-20 at 04:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -976,7 +1015,7 @@ public class GUI extends javax.swing.JFrame {
             ftTblMdl.addColumn("Edit Feature");
             ftTblMdl.addColumn("Remove Feature");
 
-            final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+            final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit", featEditIcon));
             btnModifyEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -985,7 +1024,7 @@ public class GUI extends javax.swing.JFrame {
             });
             final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
 
-            final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+            final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove", featRemIcon));
             btnRemoveEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -1217,7 +1256,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:        
-        deselect();
+        mdlRenderer.deselect();
         updateFeaturePreview();
         updateComponentsPreview();
         workOnBuildComponents();
@@ -1330,7 +1369,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
-        deselect();
+        mdlRenderer.deselect();
         mdlRenderer.module.components.clear();
         initFeaturePreview();
         initComponentsPreview();
@@ -1362,6 +1401,11 @@ public class GUI extends javax.swing.JFrame {
             updateComponentsPreview();
         }
     }//GEN-LAST:event_tabPaneBrowserStateChanged
+
+    private void btnDeselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeselectActionPerformed
+        // TODO add your handling code here
+        mdlRenderer.deselect();
+    }//GEN-LAST:event_btnDeselectActionPerformed
 
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
@@ -1401,13 +1445,12 @@ public class GUI extends javax.swing.JFrame {
 
     }
 
-    private void deselect() {
-        if (mdlRenderer.selected != null) {
-            mdlRenderer.selected.setColor(mdlRenderer.savedColor);
-        }
-        mdlRenderer.selected = null;
-    }
-
+//    private void deselect() {
+//        if (mdlRenderer.selected != null) {
+//            mdlRenderer.selected.setColor(mdlRenderer.savedColor);
+//        }
+//        mdlRenderer.selected = null;
+//    }
     public void toggleEnableComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
@@ -1415,7 +1458,7 @@ public class GUI extends javax.swing.JFrame {
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
-        deselect();
+        mdlRenderer.deselect();
 
         for (GLComponent glc : mdlRenderer.module.components) {
             if (glc.getFeatureKey() == featKey) {
@@ -1438,7 +1481,7 @@ public class GUI extends javax.swing.JFrame {
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
-        deselect();
+        mdlRenderer.deselect();
 
         for (GLComponent glc : mdlRenderer.module.components) {
             if (glc.getFeatureKey() == featKey && glc.isEnabled()) {
@@ -1541,7 +1584,7 @@ public class GUI extends javax.swing.JFrame {
         });
         final ToggleButtonRenderer bteRend = new ToggleButtonRenderer(bteEdit.getToggleButton(), bteEnabledIcon, bteDisabledIcon);
 
-        final ButtonEditor propEdit = new ButtonEditor(new JButton("Edit"));
+        final ButtonEditor propEdit = new ButtonEditor(new JButton("Edit", compEditIcon));
         propEdit.getButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1550,7 +1593,7 @@ public class GUI extends javax.swing.JFrame {
         });
         final ButtonRenderer propRend = new ButtonRenderer(propEdit.getButton());
 
-        final ButtonEditor selEdit = new ButtonEditor(new JButton("Select"));
+        final ButtonEditor selEdit = new ButtonEditor(new JButton("Select", compSelIcon));
         selEdit.getButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1694,6 +1737,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;
+    private javax.swing.JButton btnDeselect;
     private javax.swing.JButton btnLoad;
     private javax.swing.JButton btnMdlePreview;
     private javax.swing.JButton btnSave;
@@ -1725,6 +1769,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel panelModule;
     private javax.swing.JPanel pnlFilePaths;
     private javax.swing.JPanel pnlIntrface;
+    private javax.swing.JPanel pnlSearch;
     private javax.swing.JPanel pnlTable;
     private javax.swing.JScrollPane sbComps;
     private javax.swing.JScrollPane sbFeatures;
