@@ -357,7 +357,7 @@ public class GUI extends javax.swing.JFrame {
         btnTogAllRes = new javax.swing.JToggleButton();
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
+        pnlButtons = new javax.swing.JPanel();
         btnAddFeat = new javax.swing.JButton();
         btnDeselect = new javax.swing.JButton();
         pnlSearch = new javax.swing.JPanel();
@@ -393,6 +393,7 @@ public class GUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor - JAPANESE");
         setMinimumSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
@@ -525,7 +526,7 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Features & Components"));
         pnlTable.setLayout(new java.awt.BorderLayout());
 
-        jPanel1.setLayout(new java.awt.GridLayout(1, 2));
+        pnlButtons.setLayout(new java.awt.GridLayout(1, 2));
 
         btnAddFeat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/feat_plus.png"))); // NOI18N
         btnAddFeat.setText("Add Feature");
@@ -536,7 +537,7 @@ public class GUI extends javax.swing.JFrame {
                 btnAddFeatXDeselectActionPerformed(evt);
             }
         });
-        jPanel1.add(btnAddFeat);
+        pnlButtons.add(btnAddFeat);
 
         btnDeselect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/deselect_arrow.png"))); // NOI18N
         btnDeselect.setText("Deselect");
@@ -546,9 +547,9 @@ public class GUI extends javax.swing.JFrame {
                 btnDeselectActionPerformed(evt);
             }
         });
-        jPanel1.add(btnDeselect);
+        pnlButtons.add(btnDeselect);
 
-        pnlTable.add(jPanel1, java.awt.BorderLayout.NORTH);
+        pnlTable.add(pnlButtons, java.awt.BorderLayout.NORTH);
 
         pnlSearch.setLayout(new javax.swing.BoxLayout(pnlSearch, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -813,7 +814,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-20 at 04:00).\n");
+            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-20 at 18:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -821,6 +822,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Feature \"eye\" button - to hide/reveal components. [VVish] \n");
             sb.append("\t- Search bar for the both tables (Feature & Component tabs).\n");
             sb.append("\t- Reworked selection: CTRL + A -> select by mouse cursor, CTRL + D -> deselect, '[' - ']' -> select range.\n");
+            sb.append("\t  Feature to move selected with arrows.\n");
             sb.append("\n");
             sb.append("Changelog since v1.1 IODINE:\n");
             sb.append("\t- Fixed that only one popup window\n");
@@ -1756,7 +1758,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator fileMenuSep1;
     private javax.swing.JMenuItem infoMenuAbout;
     private javax.swing.JMenuItem infoMenuHelp;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblInput;
     private javax.swing.JLabel lblOutput;
     private javax.swing.JLabel lblResolution;
@@ -1767,6 +1768,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenu mainMenuInfo;
     private javax.swing.JMenu mainMenuTools;
     private javax.swing.JPanel panelModule;
+    private javax.swing.JPanel pnlButtons;
     private javax.swing.JPanel pnlFilePaths;
     private javax.swing.JPanel pnlIntrface;
     private javax.swing.JPanel pnlSearch;

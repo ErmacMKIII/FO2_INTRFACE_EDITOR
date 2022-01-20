@@ -394,6 +394,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         selected = null;
     }
 
+    // finalize moving selected
     private void endMovingSelected() {
         // process mouse release
         if (selected != null) {
@@ -434,6 +435,44 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             }
 
         }
+    }
+
+    private void moveSelected(float x, float y) {
+        scrnMouseCoords = new Vector2f(x, y);
+
+        // move across the OpenGL render space
+        if (selected != null) {
+            selected.setPos(scrnMouseCoords);
+            afterSelection();
+        }
+    }
+
+    private void moveSelectedLeft() {
+        float x = scrnMouseCoords.x;
+        float y = scrnMouseCoords.y;
+
+        moveSelected(x - 1.0f, y);
+    }
+
+    private void moveSelectedRight() {
+        float x = scrnMouseCoords.x;
+        float y = scrnMouseCoords.y;
+
+        moveSelected(x + 1.0f, y);
+    }
+
+    private void moveSelectedDown() {
+        float x = scrnMouseCoords.x;
+        float y = scrnMouseCoords.y;
+
+        moveSelected(x, y + 1.0f);
+    }
+
+    private void moveSelectedUp() {
+        float x = scrnMouseCoords.x;
+        float y = scrnMouseCoords.y;
+
+        moveSelected(x, y - 1.0f);
     }
 
     //--------------------------------------------------------------------------
@@ -490,13 +529,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             return;
         }
 
-        scrnMouseCoords = new Vector2f(e.getX(), e.getY());
-
-        // move across the OpenGL render space
-        if (selected != null) {
-            selected.setPos(scrnMouseCoords);
-            afterSelection();
-        }
+        moveSelected(e.getX(), e.getY());
 
         dragging = true;
     }
@@ -526,6 +559,22 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
         if (ke.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET) {
             selectNext();
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
+            moveSelectedLeft();
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
+            moveSelectedRight();
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
+            moveSelectedDown();
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_UP) {
+            moveSelectedUp();
         }
     }
 
