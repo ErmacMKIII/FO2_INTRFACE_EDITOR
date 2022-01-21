@@ -38,7 +38,7 @@ import javax.swing.JOptionPane;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
@@ -76,6 +76,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     private ShaderProgram primSProgram;
     private ShaderProgram imgSProgram;
     private ShaderProgram fntSProgram;
+    private ShaderProgram cntSProgram;
 
     // textures
     protected Texture fntTexture;
@@ -87,8 +88,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     private final FPSAnimator animator;
 
     protected GLComponent selected;
+    protected GLComponent outline;
+
     protected boolean dragging = false;
-    protected Vector4f savedColor = new Vector4f();
+//    protected Vector4f savedColor = new Vector4f();
     private Vector2f scrnMouseCoords;
 
     private int selectedIndex = -1;
@@ -167,6 +170,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         Shader fntFS = new Shader(gl20, GUI.FNT_FRAGMENT_SHADER, Shader.FRAGMENT_SHADER);
         fntSProgram = new ShaderProgram(gl20, fntVS, fntFS);
 
+        Shader cntVS = new Shader(gl20, GUI.OUTLINE_VERTEX_SHADER, Shader.VERTEX_SHADER);
+        Shader cntFS = new Shader(gl20, GUI.OUTLINE_FRAGMENT_SHADER, Shader.FRAGMENT_SHADER);
+        cntSProgram = new ShaderProgram(gl20, cntVS, cntFS);
+
         fntTexture = Texture.loadLocalTexture(gl20, GUI.FNT_PIC);
         qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
 
@@ -221,6 +228,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             case RENDER:
                 gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
                 module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
+                if (selected != null) {
+                    selected.render(gl20, projMat4, cntSProgram);
+                }
                 break;
             case BUILD:
                 // suspend the loop until all components are built
@@ -350,37 +360,47 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         for (GLComponent glc : module.components) {
             if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)) {
                 selected = glc;
-                savedColor = glc.getColor();
-                selected.setColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
                 break;
             }
         }
     }
 
-    // select previous index of (selected components)
-    public void selectPrev() {
+    // selects one component by feature key
+    public void select(FeatureKey featureKey) {
         deselect();
 
+        for (GLComponent glc : module.components) {
+            if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
+                selected = glc;
+                selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                break;
+            }
+        }
+    }
+    
+    // select previous index of (selected components)
+    public void selectPrev() {
+
         if (selectedIndex > 0) {
+            deselect();
             GLComponent glc = module.components.get(Math.max(--selectedIndex, 0));
             selected = glc;
-            savedColor = glc.getColor();
-            selected.setColor(GLColor.awtColorToVec4(config.getSelectCol()));
+            selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
         }
 
     }
 
     // select next index of (selected components)
     public void selectNext() {
-        deselect();
-
         final int size = module.components.size();
 
         if (selectedIndex < size - 1) {
+            deselect();
             GLComponent glc = module.components.get(Math.min(++selectedIndex, size - 1));
             selected = glc;
-            savedColor = glc.getColor();
-            selected.setColor(GLColor.awtColorToVec4(config.getSelectCol()));
+//            savedColor = glc.getColor();
+            selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
         }
 
     }
@@ -388,10 +408,11 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     // deselects all (CTRL + D)
     public void deselect() {
         // same as deselect from the GUI
-        if (selected != null) {
-            selected.setColor(savedColor);
-        }
+//        if (selected != null) {
+//            selected.setOutlineColor(savedColor);
+//        }
         selected = null;
+        outline = null;
     }
 
     // finalize moving selected
@@ -589,14 +610,13 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     //--------------------------------------------------------------------------
-    public Vector4f getSavedColor() {
-        return savedColor;
-    }
-
-    public void setSavedColor(Vector4f savedColor) {
-        this.savedColor = savedColor;
-    }
-
+//    public Vector4f getSavedColor() {
+//        return savedColor;
+//    }
+//
+//    public void setSavedColor(Vector4f savedColor) {
+//        this.savedColor = savedColor;
+//    }
     //--------------------------------------------------------------------------
     public Module getModule() {
         return module;
@@ -616,6 +636,22 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     public void setFntSProgram(ShaderProgram fntSProgram) {
         this.fntSProgram = fntSProgram;
+    }
+
+    public ShaderProgram getCntSProgram() {
+        return cntSProgram;
+    }
+
+    public void setCntSProgram(ShaderProgram cntSProgram) {
+        this.cntSProgram = cntSProgram;
+    }
+
+    public int getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public void setSelectedIndex(int selectedIndex) {
+        this.selectedIndex = selectedIndex;
     }
 
     public Intrface getIntrface() {
@@ -664,6 +700,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     public BuildMode getBuildMode() {
         return buildMode;
+    }
+
+    public GLComponent getOutline() {
+        return outline;
     }
 
 }

@@ -26,8 +26,10 @@ import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.main.GameTime;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
@@ -50,6 +52,10 @@ public class Animation implements GLComponent {
     private Texture[] texture;
 
     private Vector4f color = new Vector4f(Vector3fColors.WHITE, 1.0f);
+
+    private final Configuration config = Configuration.getInstance();
+    private Vector4f outlineColor = new Vector4f(GLColor.awtColorToVec4(config.getSelectCol()));
+
     private float scale = 1.0f;
 
     private Vector2f pos = new Vector2f();
@@ -421,10 +427,12 @@ public class Animation implements GLComponent {
         return pos;
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -483,6 +491,16 @@ public class Animation implements GLComponent {
 
     public GameTime getGameTime() {
         return gameTime;
+    }
+
+    @Override
+    public Vector4f getOutlineColor() {
+        return outlineColor;
+    }
+
+    @Override
+    public void setOutlineColor(Vector4f outlineColor) {
+        this.outlineColor = outlineColor;
     }
 
 }

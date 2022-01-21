@@ -26,7 +26,9 @@ import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
@@ -44,6 +46,9 @@ public class Quad implements GLComponent {
 
     private Vector4f color = new Vector4f(Vector3fColors.WHITE, 1.0f);
     private float scale = 1.0f;
+
+    private final Configuration config = Configuration.getInstance();
+    private Vector4f outlineColor = new Vector4f(GLColor.awtColorToVec4(config.getSelectCol()));
 
     private Vector2f pos = new Vector2f();
     private boolean enabled = true;
@@ -205,6 +210,9 @@ public class Quad implements GLComponent {
             program.updateUniform(gl20, projMat4, "projectionMatrix");
             program.updateUniform(gl20, modelMat4, "modelMatrix");
             program.updateUniform(gl20, color, "color");
+            program.updateUniform(gl20, outlineColor, "outlineColor");
+            program.updateUniform(gl20, 1.0f / (float) texture.getImage().getWidth(), "unit");
+
             texture.bind(gl20, 0, program, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
 
@@ -260,6 +268,9 @@ public class Quad implements GLComponent {
             fntProgram.updateUniform(gl20, modelMat4, "modelMatrix");
             fntProgram.updateUniform(gl20, color, "color");
             texture.bind(gl20, 0, fntProgram, "colorMap");
+            fntProgram.updateUniform(gl20, outlineColor, "outlineColor");
+            fntProgram.updateUniform(gl20, 1.0f / (float) texture.getImage().getWidth(), "unit");
+
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
 
             Texture.unbind(gl20, 0);
@@ -404,10 +415,12 @@ public class Quad implements GLComponent {
         return pos;
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -450,6 +463,16 @@ public class Quad implements GLComponent {
 
     public static void setIbo(int ibo) {
         Quad.ibo = ibo;
+    }
+
+    @Override
+    public Vector4f getOutlineColor() {
+        return outlineColor;
+    }
+
+    @Override
+    public void setOutlineColor(Vector4f outlineColor) {
+        this.outlineColor = outlineColor;
     }
 
 }

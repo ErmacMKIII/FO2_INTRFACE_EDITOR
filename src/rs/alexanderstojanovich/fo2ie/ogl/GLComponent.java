@@ -72,6 +72,20 @@ public interface GLComponent {
     public void setColor(Vector4f color);
 
     /**
+     * Gets color of this component
+     *
+     * @return
+     */
+    public Vector4f getOutlineColor();
+
+    /**
+     * Sets color for this component
+     *
+     * @param outlineColor chosen outline color
+     */
+    public void setOutlineColor(Vector4f outlineColor);
+
+    /**
      * Gets OpenGL position of this component
      *
      * @return
@@ -162,4 +176,5 @@ public interface GLComponent {
      * @return pixel rectangular GL surface
      */
     public Rectanglef getGLArea();
+
 }

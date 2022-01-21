@@ -135,6 +135,9 @@ public class GUI extends javax.swing.JFrame {
     public static final String FNT_VERTEX_SHADER = "fontVS.glsl";
     public static final String FNT_FRAGMENT_SHADER = "fontFS.glsl";
 
+    public static final String OUTLINE_VERTEX_SHADER = "contourVS.glsl";
+    public static final String OUTLINE_FRAGMENT_SHADER = "contourFS.glsl";
+
     public static final String FNT_PIC = "font.png";
     public static final String QMARK_PIC = "qmark.png";
 
@@ -1485,14 +1488,8 @@ public class GUI extends javax.swing.JFrame {
         // deselect
         mdlRenderer.deselect();
 
-        for (GLComponent glc : mdlRenderer.module.components) {
-            if (glc.getFeatureKey() == featKey && glc.isEnabled()) {
-                mdlRenderer.selected = glc;
-                mdlRenderer.savedColor = glc.getColor();
-                mdlRenderer.selected.setColor(GLColor.awtColorToVec4(cfg.getSelectCol()));
-                break;
-            }
-        }
+        // select from module renderer
+        mdlRenderer.select(featKey);
 
     }
 
