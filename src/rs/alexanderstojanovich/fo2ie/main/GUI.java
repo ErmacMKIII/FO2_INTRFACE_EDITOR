@@ -65,7 +65,6 @@ import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.GLColor;
 
 /**
  *
@@ -252,7 +251,9 @@ public class GUI extends javax.swing.JFrame {
         GL_WINDOW.addKeyListener(winRenderer);
 
         GL_WINDOW.setSharedAutoDrawable(GL_CANVAS);
-        GL_WINDOW.setSize(800, 600);
+        GL_WINDOW.setFullscreen(true);
+        GL_WINDOW.setVisible(false);
+
         fpsAnim.add(GL_WINDOW);
         this.panelModule.add(GL_CANVAS);
     }
@@ -817,7 +818,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-20 at 18:00).\n");
+            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-21 at 09:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -826,6 +827,8 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Search bar for the both tables (Feature & Component tabs).\n");
             sb.append("\t- Reworked selection: CTRL + A -> select by mouse cursor, CTRL + D -> deselect, '[' - ']' -> select range.\n");
             sb.append("\t  Feature to move selected with arrows.\n");
+            sb.append("\t- Text scales to fit.\n");
+            sb.append("\t- Preview Module always goes fullscreen (ESC -> close window).\n");
             sb.append("\n");
             sb.append("Changelog since v1.1 IODINE:\n");
             sb.append("\t- Fixed that only one popup window\n");
@@ -1271,6 +1274,7 @@ public class GUI extends javax.swing.JFrame {
             GL_WINDOW.setSize(width, height);
             GL_WINDOW.setTitle(cmbBoxSection.getSelectedItem() + " (Press F12 to take screenshot)");
         }
+        GL_WINDOW.setFullscreen(true);
         GL_WINDOW.setVisible(true);
     }//GEN-LAST:event_btnMdlePreviewActionPerformed
 

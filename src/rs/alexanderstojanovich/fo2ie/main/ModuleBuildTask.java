@@ -42,6 +42,7 @@ import rs.alexanderstojanovich.fo2ie.ogl.Quad;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.MathUtils;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
 import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
@@ -187,20 +188,23 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             // pixel dimension
                                             width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
                                             height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
-                                            // pixel position
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
 
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
+                                            if (width > 0 && height > 0) {
+                                                // pixel position
+                                                pos.x = picPosRect.minX + width / 2.0f;
+                                                pos.y = picPosRect.minY + height / 2.0f;
+
+                                                // Global Map special case
+                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
+                                                    pos.x += mainPicPosVal.minX;
+                                                    pos.y += mainPicPosVal.minY;
+                                                }
+
+                                                // texture from loaded image
+                                                Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                                Quad imgComp = new Quad(picKey, width, height, tex, pos);
+                                                picComps.add(imgComp);
                                             }
-
-                                            // texture from loaded image
-                                            Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            Quad imgComp = new Quad(picKey, width, height, tex, pos);
-                                            picComps.add(imgComp);
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
                                             // pixel dimension
                                             width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
@@ -219,28 +223,30 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             AddressableQuad aq = new AddressableQuad(picKey, width, height, aqtex, pos, splitW, splitH, posMax);
                                             picComps.add(aq);
                                         } else {
-                                            // pixel dimension
+                                            // pixel dimension                                            
                                             width = picPosRect.lengthX();
                                             height = picPosRect.lengthY();
-                                            // pixel position (picPosRect is already scaled)
-                                            pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
-                                            pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
+                                            if (width > 0 && height > 0) {
+                                                // pixel position (picPosRect is already scaled)
+                                                pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
+                                                pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
 
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
-                                            }
+                                                // Global Map special case
+                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
+                                                    pos.x += mainPicPosVal.minX;
+                                                    pos.y += mainPicPosVal.minY;
+                                                }
 
-                                            int index = 0;
-                                            // array of textures for an animation
-                                            final Texture[] texas = new Texture[images.length];
-                                            for (BufferedImage image : images) {
-                                                texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
-                                                index++;
+                                                int index = 0;
+                                                // array of textures for an animation
+                                                final Texture[] texas = new Texture[images.length];
+                                                for (BufferedImage image : images) {
+                                                    texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
+                                                    index++;
+                                                }
+                                                Animation anim = new Animation(picKey, iw.getFps(), width, height, texas, pos);
+                                                picComps.add(anim);
                                             }
-                                            Animation anim = new Animation(picKey, iw.getFps(), width, height, texas, pos);
-                                            picComps.add(anim);
                                         }
                                     }
                                 } else if (picVal != null) {
@@ -320,39 +326,42 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                         int width = textRect.lengthX();
                         int height = textRect.lengthY();
 
-                        // determine position of this picture
-                        float posx = (textRect.minX + textRect.maxX) / 2.0f;
-                        float posy = (textRect.minY + textRect.maxY) / 2.0f;
+                        if (width > 0 && height > 0) {
+                            // determine position of this picture
+                            float posx = (textRect.minX + textRect.maxX) / 2.0f;
+                            float posy = (textRect.minY + textRect.maxY) / 2.0f;
 
-                        // Global Map special case
-                        if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                            posx += mainPicPosVal.minX;
-                            posy += mainPicPosVal.minY;
+                            // Global Map special case
+                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
+                                posx += mainPicPosVal.minX;
+                                posy += mainPicPosVal.minY;
+                            }
+
+                            // calc screen pixel coordinates
+                            Vector2f pos = new Vector2f(posx, posy);
+
+                            // this is text (primitive) overlay representing the area which text is populating
+                            PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
+                            txtOlay.setColor(intrface.getTextOverlayColor());
+
+                            // text display (content)
+                            String regex = txtKey.getPrefix() + "|" + "Text";
+                            String content = txtKey.getStringValue().replaceFirst(regex, "");
+
+                            // font char dimensions
+                            int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
+                            int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
+
+                            // this is text component                    
+                            Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
+                            txt.setColor(intrface.getTextColor());
+                            txt.setAlignment(Text.ALIGNMENT_CENTER);
+                            txt.getOverlay().setColor(intrface.getTextOverlayColor());
+                            txt.getOverlay().setWidth(width);
+                            txt.getOverlay().setHeight(height);
+                            txt.setScale(0.67f * MathUtils.lerp(fntWidth, width, 0.75f) / (float) (fntWidth + width) + 0.33f * MathUtils.lerp(fntHeight, height, 0.75f) / (float) (fntHeight + height));
+                            txtComps.add(txt);
                         }
-
-                        // calc screen pixel coordinates
-                        Vector2f pos = new Vector2f(posx, posy);
-
-                        // this is text (primitive) overlay representing the area which text is populating
-                        PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
-                        txtOlay.setColor(intrface.getTextOverlayColor());
-
-                        // text display (content)
-                        String regex = txtKey.getPrefix() + "|" + "Text";
-                        String content = txtKey.getStringValue().replaceFirst(regex, "");
-
-                        // font char dimensions
-                        int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
-                        int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
-
-                        // this is text component                    
-                        Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
-                        txt.setColor(intrface.getTextColor());
-                        txt.setAlignment(Text.ALIGNMENT_CENTER);
-                        txt.getOverlay().setColor(intrface.getTextOverlayColor());
-                        txt.getOverlay().setWidth(width);
-                        txt.getOverlay().setHeight(height);
-                        txtComps.add(txt);
                     } else if (txtVal != null) {
                         FO2IELogger.reportWarning("Unexisting cast for ("
                                 + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);
@@ -498,60 +507,67 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             // pixel dimension
                                             width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
                                             height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
-                                            // pixel position
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
 
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
+                                            if (width > 0 && height > 0) {
+                                                // pixel position
+                                                pos.x = picPosRect.minX + width / 2.0f;
+                                                pos.y = picPosRect.minY + height / 2.0f;
+
+                                                // Global Map special case
+                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
+                                                    pos.x += mainPicPosVal.minX;
+                                                    pos.y += mainPicPosVal.minY;
+                                                }
+
+                                                // texture from loaded image
+                                                Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                                Quad imgComp = new Quad(picKey, width, height, tex, pos);
+                                                picComps.add(imgComp);
                                             }
-
-                                            // texture from loaded image
-                                            Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            Quad imgComp = new Quad(picKey, width, height, tex, pos);
-                                            picComps.add(imgComp);
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
                                             // pixel dimension
                                             width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
                                             height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
                                             // pixel position (picPosRect is already scaled)
+                                            if (width > 0 && height > 0) {
+                                                pos.x = picPosRect.minX + width / 2.0f;
+                                                pos.y = picPosRect.minY + height / 2.0f;
 
-                                            pos.x = picPosRect.minX + width / 2.0f;
-                                            pos.y = picPosRect.minY + height / 2.0f;
+                                                Vector2f posMax = new Vector2f(
+                                                        picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
+                                                );
 
-                                            Vector2f posMax = new Vector2f(
-                                                    picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
-                                            );
-
-                                            // texture from loaded image
-                                            Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            AddressableQuad aq = new AddressableQuad(picKey, width, height, aqtex, pos, splitW, splitH, posMax);
-                                            picComps.add(aq);
+                                                // texture from loaded image
+                                                Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
+                                                AddressableQuad aq = new AddressableQuad(picKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                                picComps.add(aq);
+                                            }
                                         } else {
                                             // pixel dimension
                                             width = picPosRect.lengthX();
                                             height = picPosRect.lengthY();
-                                            // pixel position (picPosRect is already scaled)
-                                            pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
-                                            pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
 
-                                            // Global Map special case
-                                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                pos.x += mainPicPosVal.minX;
-                                                pos.y += mainPicPosVal.minY;
-                                            }
+                                            if (width > 0 && height > 0) {
+                                                // pixel position (picPosRect is already scaled)
+                                                pos.x = (picPosRect.minX + picPosRect.maxX) / 2.0f;
+                                                pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
 
-                                            int index = 0;
-                                            // array of textures for an animation
-                                            final Texture[] texas = new Texture[images.length];
-                                            for (BufferedImage image : images) {
-                                                texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
-                                                index++;
+                                                // Global Map special case
+                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
+                                                    pos.x += mainPicPosVal.minX;
+                                                    pos.y += mainPicPosVal.minY;
+                                                }
+
+                                                int index = 0;
+                                                // array of textures for an animation
+                                                final Texture[] texas = new Texture[images.length];
+                                                for (BufferedImage image : images) {
+                                                    texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
+                                                    index++;
+                                                }
+                                                Animation anim = new Animation(picKey, iw.getFps(), width, height, texas, pos);
+                                                picComps.add(anim);
                                             }
-                                            Animation anim = new Animation(picKey, iw.getFps(), width, height, texas, pos);
-                                            picComps.add(anim);
                                         }
                                     }
                                 } else if (picVal != null) {
@@ -631,39 +647,42 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                         int width = textRect.lengthX();
                         int height = textRect.lengthY();
 
-                        // determine position of this picture
-                        float posx = (textRect.minX + textRect.maxX) / 2.0f;
-                        float posy = (textRect.minY + textRect.maxY) / 2.0f;
+                        if (width > 0 && height > 0) {
+                            // determine position of this picture
+                            float posx = (textRect.minX + textRect.maxX) / 2.0f;
+                            float posy = (textRect.minY + textRect.maxY) / 2.0f;
 
-                        // Global Map special case
-                        if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                            posx += mainPicPosVal.minX;
-                            posy += mainPicPosVal.minY;
+                            // Global Map special case
+                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
+                                posx += mainPicPosVal.minX;
+                                posy += mainPicPosVal.minY;
+                            }
+
+                            // calc screen pixel coordinates
+                            Vector2f pos = new Vector2f(posx, posy);
+
+                            // this is text (primitive) overlay representing the area which text is populating
+                            PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
+                            txtOlay.setColor(intrface.getTextOverlayColor());
+
+                            // text display (content)
+                            String regex = txtKey.getPrefix() + "|" + "Text";
+                            String content = txtKey.getStringValue().replaceFirst(regex, "");
+
+                            // font char dimensions
+                            int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
+                            int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
+
+                            // this is text component                    
+                            Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
+                            txt.setColor(intrface.getTextColor());
+                            txt.setAlignment(Text.ALIGNMENT_CENTER);
+                            txt.getOverlay().setColor(intrface.getTextOverlayColor());
+                            txt.getOverlay().setWidth(width);
+                            txt.getOverlay().setHeight(height);
+                            txt.setScale(0.67f * MathUtils.lerp(fntWidth, width, 0.75f) / (float) (fntWidth + width) + 0.33f * MathUtils.lerp(fntHeight, height, 0.75f) / (float) (fntHeight + height));
+                            txtComps.add(txt);
                         }
-
-                        // calc screen pixel coordinates
-                        Vector2f pos = new Vector2f(posx, posy);
-
-                        // this is text (primitive) overlay representing the area which text is populating
-                        PrimitiveQuad txtOlay = new PrimitiveQuad(width, height, pos);
-                        txtOlay.setColor(intrface.getTextOverlayColor());
-
-                        // text display (content)
-                        String regex = txtKey.getPrefix() + "|" + "Text";
-                        String content = txtKey.getStringValue().replaceFirst(regex, "");
-
-                        // font char dimensions
-                        int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
-                        int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
-
-                        // this is text component                    
-                        Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
-                        txt.setColor(intrface.getTextColor());
-                        txt.setAlignment(Text.ALIGNMENT_CENTER);
-                        txt.getOverlay().setColor(intrface.getTextOverlayColor());
-                        txt.getOverlay().setWidth(width);
-                        txt.getOverlay().setHeight(height);
-                        txtComps.add(txt);
                     } else if (txtVal != null) {
                         FO2IELogger.reportWarning("Unexisting cast for ("
                                 + txtKey.getStringValue() + ", " + txtVal.getStringValue() + ")", null);

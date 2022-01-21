@@ -31,13 +31,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import javax.imageio.ImageIO;
-import javax.swing.JOptionPane;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
+import static rs.alexanderstojanovich.fo2ie.main.GUI.GL_WINDOW;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 import rs.alexanderstojanovich.fo2ie.ogl.Texture;
@@ -209,15 +209,11 @@ public abstract class WindowRenderer implements GLEventListener, MouseListener, 
                 break;
             case SCREENSHOT:
                 BufferedImage screenshot = createScreenshot(gl20);
-                boolean ok = saveScreenshot(screenshot);
-                if (ok) {
-                    JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot saved.", "Module Screenshot", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(GUI.GL_CANVAS.getParent().getParent(), "Screenshot failed!", "Module Screenshot", JOptionPane.ERROR_MESSAGE);
-                }
+                saveScreenshot(screenshot);
                 state = State.RENDER;
                 break;
             case SUSPEND:
+                break;
             default:
                 break;
         }
@@ -346,7 +342,13 @@ public abstract class WindowRenderer implements GLEventListener, MouseListener, 
     public void keyPressed(KeyEvent ke) {
         if (ke.getKeyCode() == KeyEvent.VK_F12) {
             state = WindowRenderer.State.SCREENSHOT;
+
         }
+
+        if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            GL_WINDOW.destroy();
+        }
+
     }
 
     @Override

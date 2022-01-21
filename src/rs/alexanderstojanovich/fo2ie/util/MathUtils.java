@@ -77,4 +77,8 @@ public class MathUtils {
         return ((maxNew - minNew) * (x - min) / (max - min)) + minNew;
     }
 
+    // Precise method, which guarantees v = v1 when t = 1. This method is monotonic only when v0 * v1 < 0. Lerping between same values might not produce the same value
+    public static float lerp(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
+    }
 }
