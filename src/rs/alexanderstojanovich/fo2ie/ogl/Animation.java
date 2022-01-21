@@ -184,7 +184,8 @@ public class Animation implements GLComponent {
     }
 
     private int getFrame() {
-        frameIndex = (int) Math.floorMod(Math.round(gameTime.getGameTicks()), texture.length);
+        double q = (GameTime.TPS - gameTime.getGameTicks()) / GameTime.TPS;
+        frameIndex = (int) Math.floorMod(Math.round((1.0 - q) * texture.length), texture.length);
         return frameIndex;
     }
 

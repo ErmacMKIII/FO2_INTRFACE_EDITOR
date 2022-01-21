@@ -378,7 +378,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             }
         }
     }
-    
+
     // select previous index of (selected components)
     public void selectPrev() {
 

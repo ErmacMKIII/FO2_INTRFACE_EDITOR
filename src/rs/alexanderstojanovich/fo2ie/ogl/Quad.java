@@ -28,6 +28,7 @@ import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.main.GameTime;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
@@ -38,6 +39,8 @@ import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 public class Quad implements GLComponent {
 
     private final FeatureKey featureKey;
+
+    private final GameTime gameTime = GameTime.getInstance();
     private final Type type = Type.PIC;
 
     private int width;
@@ -212,6 +215,7 @@ public class Quad implements GLComponent {
             program.updateUniform(gl20, color, "color");
             program.updateUniform(gl20, outlineColor, "outlineColor");
             program.updateUniform(gl20, 1.0f / (float) texture.getImage().getWidth(), "unit");
+            program.updateUniform(gl20, (float) gameTime.getGameTicks(), "GameTime");
 
             texture.bind(gl20, 0, program, "colorMap");
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
@@ -270,6 +274,7 @@ public class Quad implements GLComponent {
             texture.bind(gl20, 0, fntProgram, "colorMap");
             fntProgram.updateUniform(gl20, outlineColor, "outlineColor");
             fntProgram.updateUniform(gl20, 1.0f / (float) texture.getImage().getWidth(), "unit");
+            fntProgram.updateUniform(gl20, (float) gameTime.getGameTicks(), "GameTime");
 
             gl20.glDrawElements(GL2.GL_TRIANGLES, INDICES.length, GL2.GL_UNSIGNED_INT, 0);
 
