@@ -364,6 +364,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 break;
             }
         }
+
+        afterSelection();
     }
 
     // selects one component by feature key
@@ -377,6 +379,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 break;
             }
         }
+
+        afterSelection();
     }
 
     // select previous index of (selected components)
@@ -389,6 +393,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
         }
 
+        afterSelection();
     }
 
     // select next index of (selected components)
@@ -403,6 +408,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
         }
 
+        afterSelection();
     }
 
     // deselects all (CTRL + D)
@@ -413,6 +419,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 //        }
         selected = null;
         outline = null;
+
+        afterSelection();
     }
 
     // finalize moving selected
@@ -468,32 +476,32 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         }
     }
 
-    private void moveSelectedLeft() {
+    private void moveSelectedLeft(float amount) {
         float x = scrnMouseCoords.x;
         float y = scrnMouseCoords.y;
 
-        moveSelected(x - 1.0f, y);
+        moveSelected(x - amount, y);
     }
 
-    private void moveSelectedRight() {
+    private void moveSelectedRight(float amount) {
         float x = scrnMouseCoords.x;
         float y = scrnMouseCoords.y;
 
-        moveSelected(x + 1.0f, y);
+        moveSelected(x + amount, y);
     }
 
-    private void moveSelectedDown() {
+    private void moveSelectedDown(float amount) {
         float x = scrnMouseCoords.x;
         float y = scrnMouseCoords.y;
 
-        moveSelected(x, y + 1.0f);
+        moveSelected(x, y + amount);
     }
 
-    private void moveSelectedUp() {
+    private void moveSelectedUp(float amount) {
         float x = scrnMouseCoords.x;
         float y = scrnMouseCoords.y;
 
-        moveSelected(x, y - 1.0f);
+        moveSelected(x, y - amount);
     }
 
     //--------------------------------------------------------------------------
@@ -582,20 +590,36 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             selectNext();
         }
 
-        if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
-            moveSelectedLeft();
+        if (ke.getKeyCode() == KeyEvent.VK_LEFT && ke.isShiftDown()) {
+            moveSelectedLeft(5.0f);
         }
 
-        if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
-            moveSelectedRight();
+        if (ke.getKeyCode() == KeyEvent.VK_LEFT && !ke.isShiftDown()) {
+            moveSelectedLeft(1.0f);
         }
 
-        if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-            moveSelectedDown();
+        if (ke.getKeyCode() == KeyEvent.VK_RIGHT && ke.isShiftDown()) {
+            moveSelectedRight(5.0f);
         }
 
-        if (ke.getKeyCode() == KeyEvent.VK_UP) {
-            moveSelectedUp();
+        if (ke.getKeyCode() == KeyEvent.VK_RIGHT && !ke.isShiftDown()) {
+            moveSelectedRight(1.0f);
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_DOWN && ke.isShiftDown()) {
+            moveSelectedDown(5.0f);
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_DOWN && !ke.isShiftDown()) {
+            moveSelectedDown(1.0f);
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_UP && ke.isShiftDown()) {
+            moveSelectedUp(5.0f);
+        }
+
+        if (ke.getKeyCode() == KeyEvent.VK_UP && !ke.isShiftDown()) {
+            moveSelectedUp(1.0f);
         }
     }
 

@@ -95,6 +95,7 @@ public class GUI extends javax.swing.JFrame {
     private final ModuleRenderer mdlRenderer = new ModuleRenderer(fpsAnim, module, intrface) {
         @Override
         public void afterSelection() {
+            putSelectedOnLabel();
             updateFeaturePreview();
             updateComponentsPreview();
         }
@@ -111,6 +112,7 @@ public class GUI extends javax.swing.JFrame {
     private final WindowRenderer winRenderer = new WindowRenderer(fpsAnim, module, intrface) {
         @Override
         public void afterSelection() {
+            putSelectedOnLabel();
             updateFeaturePreview();
             updateComponentsPreview();
         }
@@ -238,6 +240,7 @@ public class GUI extends javax.swing.JFrame {
         this.panelModule.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                mdlRenderer.deselect();
                 buildModuleComponents();
             }
         });
@@ -367,6 +370,7 @@ public class GUI extends javax.swing.JFrame {
         pnlSearch = new javax.swing.JPanel();
         lblSearch = new javax.swing.JLabel();
         txtFldSearch = new javax.swing.JTextField();
+        lblSelected = new javax.swing.JLabel();
         tabPaneBrowser = new javax.swing.JTabbedPane();
         sbFeatures = new javax.swing.JScrollPane();
         tblFeats = new javax.swing.JTable();
@@ -413,7 +417,7 @@ public class GUI extends javax.swing.JFrame {
 
         btnChooseInPath.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChooseInPath.setText("Input dir...");
-        btnChooseInPath.setToolTipText("Choose input directory");
+        btnChooseInPath.setToolTipText("Choose input directory (intrface)");
         btnChooseInPath.setIconTextGap(5);
         btnChooseInPath.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -431,7 +435,7 @@ public class GUI extends javax.swing.JFrame {
 
         btnChoosePathOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChoosePathOut.setText("Output dir...");
-        btnChoosePathOut.setToolTipText("Choose output directory");
+        btnChoosePathOut.setToolTipText("Choose output directory (for .ini store)");
         btnChoosePathOut.setIconTextGap(5);
         btnChoosePathOut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -545,6 +549,7 @@ public class GUI extends javax.swing.JFrame {
 
         btnDeselect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/deselect_arrow.png"))); // NOI18N
         btnDeselect.setText("Deselect");
+        btnDeselect.setToolTipText("Deselect all components");
         btnDeselect.setEnabled(false);
         btnDeselect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -555,11 +560,16 @@ public class GUI extends javax.swing.JFrame {
 
         pnlTable.add(pnlButtons, java.awt.BorderLayout.NORTH);
 
-        pnlSearch.setLayout(new javax.swing.BoxLayout(pnlSearch, javax.swing.BoxLayout.LINE_AXIS));
+        pnlSearch.setLayout(new java.awt.BorderLayout());
 
+        lblSearch.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblSearch.setText("Filter:");
-        pnlSearch.add(lblSearch);
-        pnlSearch.add(txtFldSearch);
+        pnlSearch.add(lblSearch, java.awt.BorderLayout.LINE_START);
+        pnlSearch.add(txtFldSearch, java.awt.BorderLayout.CENTER);
+
+        lblSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/select_arrow.png"))); // NOI18N
+        lblSelected.setText("None selected");
+        pnlSearch.add(lblSelected, java.awt.BorderLayout.PAGE_END);
 
         pnlTable.add(pnlSearch, java.awt.BorderLayout.PAGE_END);
 
@@ -818,7 +828,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-21 at 09:15).\n");
+            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-22 at 06:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -830,6 +840,8 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Text scales to fit.\n");
             sb.append("\t- Animations run smoother.\n");
             sb.append("\t- Preview Module always goes fullscreen (ESC -> close window).\n");
+            sb.append("\t- Added more missing Feature Keys.\n");
+            sb.append("\t- Small fix to Global Map module (chat panel..).\n");
             sb.append("\n");
             sb.append("Changelog since v1.1 IODINE:\n");
             sb.append("\t- Fixed that only one popup window\n");
@@ -1681,6 +1693,14 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    private void putSelectedOnLabel() {
+        if (mdlRenderer.selected != null) {
+            lblSelected.setText(mdlRenderer.selected.getFeatureKey().toString());
+        } else {
+            lblSelected.setText("None selected");
+        }
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -1765,6 +1785,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblResolution;
     private javax.swing.JLabel lblSearch;
     private javax.swing.JLabel lblSection;
+    private javax.swing.JLabel lblSelected;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mainMenuFile;
     private javax.swing.JMenu mainMenuInfo;
