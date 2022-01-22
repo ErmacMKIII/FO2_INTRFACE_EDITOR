@@ -1175,7 +1175,7 @@ public class GUI extends javax.swing.JFrame {
                 ftTblMdl.addColumn("Edit Feature");
                 ftTblMdl.addColumn("Remove Feature");
 
-                final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+                final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit", featEditIcon));
                 btnModifyEditor.getButton().addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -1184,7 +1184,7 @@ public class GUI extends javax.swing.JFrame {
                 });
                 final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
 
-                final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+                final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove", featRemIcon));
                 btnRemoveEditor.getButton().addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
