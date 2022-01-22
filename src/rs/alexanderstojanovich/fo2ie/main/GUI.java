@@ -33,6 +33,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -43,6 +44,7 @@ import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -170,6 +172,8 @@ public class GUI extends javax.swing.JFrame {
     private ImageIcon featRemIcon;
 
     private static float progress = 0.0f;
+
+    private static final int STACK_LIMIT = 1000;
 
     /**
      * Creates new form GUI
@@ -331,6 +335,38 @@ public class GUI extends javax.swing.JFrame {
 
         URL cmp_select = GUI.class.getResource(RESOURCES_DIR + ICON_COMP_SELECT);
         this.compSelIcon = new ImageIcon(cmp_select);
+    }
+
+    private static File[] buildTree(File inDir) {
+        List<File> result = new ArrayList<>();
+
+        Stack<File> stack = new Stack<>();
+        stack.push(inDir);
+
+        while (!stack.isEmpty()) {
+            File file = stack.pop();
+            if (file != null && file.isDirectory()) {
+                String[] list = file.list();
+                if (list != null) {
+                    for (int i = list.length - 1; i >= 0; i--) {
+                        File chldFile = new File(
+                                file.getAbsolutePath() + File.separator + list[i]
+                        );
+
+                        if (stack.size() >= STACK_LIMIT) {
+                            return null;
+                        }
+
+                        stack.push(chldFile);
+                    }
+                }
+            } else {
+                result.add(file);
+            }
+        }
+
+        File[] array = new File[result.size()];
+        return result.toArray(array);
     }
 
     /**
@@ -828,7 +864,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-22 at 06:00).\n");
+            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-22 at 08:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -842,6 +878,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Preview Module always goes fullscreen (ESC -> close window).\n");
             sb.append("\t- Added more missing Feature Keys.\n");
             sb.append("\t- Small fix to Global Map module (chat panel..).\n");
+            sb.append("\t- File query to select file with the default ini when choosing input directory.\n");
             sb.append("\n");
             sb.append("Changelog since v1.1 IODINE:\n");
             sb.append("\t- Fixed that only one popup window\n");
@@ -1432,9 +1469,44 @@ public class GUI extends javax.swing.JFrame {
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            cfg.setInDir(fileChooserDirInput.getSelectedFile());
-            txtFldInPath.setText(cfg.getInDir().getPath());
-            txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+            File selectedFile = fileChooserDirInput.getSelectedFile();
+            if (selectedFile != null && selectedFile.isDirectory()) {
+                btnChooseInPath.setEnabled(false);
+                SwingWorker<Object, Object> swingWorker = new SwingWorker<Object, Object>() {
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        File[] files = buildTree(selectedFile);
+                        if (files != null) {
+                            boolean iniFound = false;
+                            for (File file : files) {
+                                if (file.getAbsolutePath().contains(cfg.getDefaultIni())) {
+                                    cfg.setInDir(file.getParentFile());
+                                    iniFound = true;
+                                    break;
+                                }
+                            }
+
+                            if (!iniFound) {
+                                JOptionPane.showMessageDialog(GUI.this, "App cannot locate the ini!", "Warning", JOptionPane.WARNING_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(GUI.this, "File(s) query too big - aborting!", "Query Error", JOptionPane.ERROR_MESSAGE);
+                        }
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        txtFldInPath.setText(cfg.getInDir().getPath());
+                        txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+                        btnChooseInPath.setEnabled(true);
+                    }
+
+                };
+
+                swingWorker.execute();
+            }
         }
 
         if (!cfg.getInDir().getPath().isEmpty()) {
