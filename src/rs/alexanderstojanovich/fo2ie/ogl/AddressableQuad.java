@@ -26,8 +26,10 @@ import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.main.GameTime;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 
 /**
@@ -45,6 +47,9 @@ public class AddressableQuad implements GLComponent {
 
     private Vector4f color = new Vector4f(Vector3fColors.WHITE, 1.0f);
     private float scale = 1.0f;
+
+    private final Configuration config = Configuration.getInstance();
+    private Vector4f outlineColor = new Vector4f(GLColor.awtColorToVec4(config.getSelectCol()));
 
     private Vector2f pos = new Vector2f();
     private boolean enabled = true;
@@ -414,10 +419,12 @@ public class AddressableQuad implements GLComponent {
         return pos;
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -476,6 +483,16 @@ public class AddressableQuad implements GLComponent {
 
     public Vector2f getPosMax() {
         return posMax;
+    }
+
+    @Override
+    public Vector4f getOutlineColor() {
+        return outlineColor;
+    }
+
+    @Override
+    public void setOutlineColor(Vector4f outlineColor) {
+        this.outlineColor = outlineColor;
     }
 
 }

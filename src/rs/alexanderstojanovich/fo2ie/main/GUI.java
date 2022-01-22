@@ -33,8 +33,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Stack;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -42,24 +41,32 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
 import rs.alexanderstojanovich.fo2ie.helper.ButtonEditor;
 import rs.alexanderstojanovich.fo2ie.helper.ButtonRenderer;
+import rs.alexanderstojanovich.fo2ie.helper.ToggleButtonEditor;
+import rs.alexanderstojanovich.fo2ie.helper.ToggleButtonRenderer;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.GLColor;
 
 /**
  *
@@ -86,22 +93,32 @@ public class GUI extends javax.swing.JFrame {
     private static final DefaultComboBoxModel<Section.SectionName> DCBM = new DefaultComboBoxModel<>(Section.SectionName.values());
     private final Intrface intrface = new Intrface();
     private final FPSAnimator fpsAnim = new FPSAnimator(GL_CANVAS, FPSAnimator.DEFAULT_FRAMES_PER_INTERVAL, true);
-    private final ModuleRenderer renderer = new ModuleRenderer(fpsAnim, intrface) {
+    private final Module module = new Module();
+    private final ModuleRenderer mdlRenderer = new ModuleRenderer(fpsAnim, module, intrface) {
         @Override
         public void afterSelection() {
-            featurePreview();
-            componentsPreview();
+            putSelectedOnLabel();
+            updateFeaturePreview();
+            updateComponentsPreview();
         }
 
         @Override
         public void afterModuleBuild() {
             //btnBuild.setEnabled(true);
             btnMdlePreview.setEnabled(true);
-            featurePreview();
-            componentsPreview();
+            initFeaturePreview();
+            initComponentsPreview();
         }
     };
-    public static final ExecutorService EXEC_BUILD = Executors.newSingleThreadExecutor();
+
+    private final WindowRenderer winRenderer = new WindowRenderer(fpsAnim, module, intrface) {
+        @Override
+        public void afterSelection() {
+            putSelectedOnLabel();
+            updateFeaturePreview();
+            updateComponentsPreview();
+        }
+    };
 
     // cool it's our new logo :)
     private static final String LOGO_FILE_NAME = "fo2ie_logo.png";
@@ -121,6 +138,9 @@ public class GUI extends javax.swing.JFrame {
     public static final String FNT_VERTEX_SHADER = "fontVS.glsl";
     public static final String FNT_FRAGMENT_SHADER = "fontFS.glsl";
 
+    public static final String OUTLINE_VERTEX_SHADER = "contourVS.glsl";
+    public static final String OUTLINE_FRAGMENT_SHADER = "contourFS.glsl";
+
     public static final String FNT_PIC = "font.png";
     public static final String QMARK_PIC = "qmark.png";
 
@@ -132,9 +152,28 @@ public class GUI extends javax.swing.JFrame {
     public static final String SPLASH_FILE_NAME = "fo2ie_splash.png";
     public static final String SCREENSHOT_DIR = "screenshots";
 
+    public static final String ICON_BTN_ENABLED = "eye_enabled_icon.png";
+    public static final String ICON_BTN_DISABLED = "eye_disabled_icon.png";
+
+    public static final String ICON_FEAT_EDIT = "pencil_feat_edit_icon.png";
+    public static final String ICON_COMP_EDIT = "pencil_comp_edit_icon.png";
+
+    public static final String ICON_COMP_SELECT = "select_arrow_tiny.png";
+    public static final String ICON_FEAT_REMOVE = "remove_icon.png";
+
     private File targetIniFile;
 
+    private ImageIcon bteEnabledIcon;
+    private ImageIcon bteDisabledIcon;
+
+    private ImageIcon featEditIcon;
+    private ImageIcon compEditIcon;
+    private ImageIcon compSelIcon;
+    private ImageIcon featRemIcon;
+
     private static float progress = 0.0f;
+
+    private static final int STACK_LIMIT = 1000;
 
     /**
      * Creates new form GUI
@@ -152,6 +191,7 @@ public class GUI extends javax.swing.JFrame {
         initPosition(); // centers the GUI
         initMenuDialogs(); // init menu dialogs
         initTabPaneIcons(); // init tab icons
+        initIconsForFeatTables();
         progress += 25.0f;
     }
 
@@ -193,24 +233,34 @@ public class GUI extends javax.swing.JFrame {
 
     private void initGL() {
         // registering events
-        GL_CANVAS.addGLEventListener(renderer);
+        GL_CANVAS.addGLEventListener(mdlRenderer);
         // for moving GLComponents
-        GL_CANVAS.addMouseListener(renderer);
-        GL_CANVAS.addMouseMotionListener(renderer);
+        GL_CANVAS.addKeyListener(mdlRenderer);
+        GL_CANVAS.addMouseListener(mdlRenderer);
+        GL_CANVAS.addMouseMotionListener(mdlRenderer);
 
         GL_CANVAS.setSize(panelModule.getSize());
         GL_CANVAS.setPreferredSize(panelModule.getPreferredSize());
         this.panelModule.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                mdlRenderer.deselect();
                 buildModuleComponents();
             }
         });
+
         GL_WINDOW.setTitle("Module preview");
-        GL_WINDOW.addGLEventListener(renderer);
-        GL_WINDOW.addKeyListener(renderer);
+        GL_WINDOW.addGLEventListener(winRenderer);
+        GL_WINDOW.addKeyListener(winRenderer);
+
+        GL_WINDOW.addGLEventListener(winRenderer);
+        GL_WINDOW.addMouseListener(winRenderer);
+        GL_WINDOW.addKeyListener(winRenderer);
+
         GL_WINDOW.setSharedAutoDrawable(GL_CANVAS);
-        GL_WINDOW.setSize(800, 600);
+        GL_WINDOW.setFullscreen(true);
+        GL_WINDOW.setVisible(false);
+
         fpsAnim.add(GL_WINDOW);
         this.panelModule.add(GL_CANVAS);
     }
@@ -224,6 +274,7 @@ public class GUI extends javax.swing.JFrame {
         }
 
         btnAddFeat.setEnabled(ok);
+        btnDeselect.setEnabled(ok);
         tabPaneBrowser.setEnabled(ok);
     }
 
@@ -256,7 +307,7 @@ public class GUI extends javax.swing.JFrame {
     // bulding the module priv method
     private void workOnBuildComponents() {
         // dont build if already build in progress
-        if (renderer.state == ModuleRenderer.State.BUILD) {
+        if (mdlRenderer.state == ModuleRenderer.State.BUILD) {
             return;
         }
 
@@ -264,6 +315,58 @@ public class GUI extends javax.swing.JFrame {
 
         initBuildModule();
         buildModuleComponents();
+    }
+
+    private void initIconsForFeatTables() {
+        URL url_bteicon1 = GUI.class.getResource(RESOURCES_DIR + ICON_BTN_ENABLED);
+        bteEnabledIcon = new ImageIcon(url_bteicon1);
+
+        URL url_bteicon2 = GUI.class.getResource(RESOURCES_DIR + ICON_BTN_DISABLED);
+        bteDisabledIcon = new ImageIcon(url_bteicon2);
+
+        URL url_feat_edit = GUI.class.getResource(RESOURCES_DIR + ICON_FEAT_EDIT);
+        this.featEditIcon = new ImageIcon(url_feat_edit);
+
+        URL comp_feat_edit = GUI.class.getResource(RESOURCES_DIR + ICON_COMP_EDIT);
+        this.compEditIcon = new ImageIcon(comp_feat_edit);
+
+        URL feat_rem = GUI.class.getResource(RESOURCES_DIR + ICON_FEAT_REMOVE);
+        this.featRemIcon = new ImageIcon(feat_rem);
+
+        URL cmp_select = GUI.class.getResource(RESOURCES_DIR + ICON_COMP_SELECT);
+        this.compSelIcon = new ImageIcon(cmp_select);
+    }
+
+    private static File[] buildTree(File inDir) {
+        List<File> result = new ArrayList<>();
+
+        Stack<File> stack = new Stack<>();
+        stack.push(inDir);
+
+        while (!stack.isEmpty()) {
+            File file = stack.pop();
+            if (file != null && file.isDirectory()) {
+                String[] list = file.list();
+                if (list != null) {
+                    for (int i = list.length - 1; i >= 0; i--) {
+                        File chldFile = new File(
+                                file.getAbsolutePath() + File.separator + list[i]
+                        );
+
+                        if (stack.size() >= STACK_LIMIT) {
+                            return null;
+                        }
+
+                        stack.push(chldFile);
+                    }
+                }
+            } else {
+                result.add(file);
+            }
+        }
+
+        File[] array = new File[result.size()];
+        return result.toArray(array);
     }
 
     /**
@@ -297,12 +400,18 @@ public class GUI extends javax.swing.JFrame {
         btnTogAllRes = new javax.swing.JToggleButton();
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
+        pnlButtons = new javax.swing.JPanel();
+        btnAddFeat = new javax.swing.JButton();
+        btnDeselect = new javax.swing.JButton();
+        pnlSearch = new javax.swing.JPanel();
+        lblSearch = new javax.swing.JLabel();
+        txtFldSearch = new javax.swing.JTextField();
+        lblSelected = new javax.swing.JLabel();
         tabPaneBrowser = new javax.swing.JTabbedPane();
         sbFeatures = new javax.swing.JScrollPane();
         tblFeats = new javax.swing.JTable();
         sbComps = new javax.swing.JScrollPane();
         tblComps = new javax.swing.JTable();
-        btnAddFeat = new javax.swing.JButton();
         panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
@@ -326,7 +435,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - IODINE");
+        setTitle("FOnline2 S3 Interface Editor - JAPANESE");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -344,7 +453,7 @@ public class GUI extends javax.swing.JFrame {
 
         btnChooseInPath.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChooseInPath.setText("Input dir...");
-        btnChooseInPath.setToolTipText("Choose input directory");
+        btnChooseInPath.setToolTipText("Choose input directory (intrface)");
         btnChooseInPath.setIconTextGap(5);
         btnChooseInPath.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -362,7 +471,7 @@ public class GUI extends javax.swing.JFrame {
 
         btnChoosePathOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChoosePathOut.setText("Output dir...");
-        btnChoosePathOut.setToolTipText("Choose output directory");
+        btnChoosePathOut.setToolTipText("Choose output directory (for .ini store)");
         btnChoosePathOut.setIconTextGap(5);
         btnChoosePathOut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -461,7 +570,51 @@ public class GUI extends javax.swing.JFrame {
         pnlTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Features & Components"));
         pnlTable.setLayout(new java.awt.BorderLayout());
 
+        pnlButtons.setLayout(new java.awt.GridLayout(1, 2));
+
+        btnAddFeat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/feat_plus.png"))); // NOI18N
+        btnAddFeat.setText("Add Feature");
+        btnAddFeat.setToolTipText("Add new feature for this section");
+        btnAddFeat.setEnabled(false);
+        btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddFeatXDeselectActionPerformed(evt);
+            }
+        });
+        pnlButtons.add(btnAddFeat);
+
+        btnDeselect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/deselect_arrow.png"))); // NOI18N
+        btnDeselect.setText("Deselect");
+        btnDeselect.setToolTipText("Deselect all components");
+        btnDeselect.setEnabled(false);
+        btnDeselect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeselectActionPerformed(evt);
+            }
+        });
+        pnlButtons.add(btnDeselect);
+
+        pnlTable.add(pnlButtons, java.awt.BorderLayout.NORTH);
+
+        pnlSearch.setLayout(new java.awt.BorderLayout());
+
+        lblSearch.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblSearch.setText("Filter:");
+        pnlSearch.add(lblSearch, java.awt.BorderLayout.LINE_START);
+        pnlSearch.add(txtFldSearch, java.awt.BorderLayout.CENTER);
+
+        lblSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/select_arrow.png"))); // NOI18N
+        lblSelected.setText("None selected");
+        pnlSearch.add(lblSelected, java.awt.BorderLayout.PAGE_END);
+
+        pnlTable.add(pnlSearch, java.awt.BorderLayout.PAGE_END);
+
         tabPaneBrowser.setEnabled(false);
+        tabPaneBrowser.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                tabPaneBrowserStateChanged(evt);
+            }
+        });
 
         sbFeatures.setPreferredSize(new java.awt.Dimension(240, 135));
 
@@ -494,16 +647,6 @@ public class GUI extends javax.swing.JFrame {
         tabPaneBrowser.addTab("Components", sbComps);
 
         pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
-
-        btnAddFeat.setText("Add Feature");
-        btnAddFeat.setToolTipText("Add new feature for this section");
-        btnAddFeat.setEnabled(false);
-        btnAddFeat.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddFeatXDeselectActionPerformed(evt);
-            }
-        });
-        pnlTable.add(btnAddFeat, java.awt.BorderLayout.PAGE_START);
 
         getContentPane().add(pnlTable);
 
@@ -597,10 +740,10 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnChoosePathOutActionPerformed
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
-        renderer.getModule().components.clear();
+        mdlRenderer.getModule().components.clear();
         loadFromButton();
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_btnLoadActionPerformed
 
@@ -721,9 +864,21 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.1 - IODINE (PUBLIC BUILD reviewed on 2021-11-16 at 02:00).\n");
+            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-22 at 08:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.2 JAPANESE:\n");
+            sb.append("\t- Feature \"eye\" button - to hide/reveal components. [VVish] \n");
+            sb.append("\t- Search bar for the both tables (Feature & Component tabs).\n");
+            sb.append("\t- Reworked selection: CTRL + A -> select by mouse cursor, CTRL + D -> deselect, '[' - ']' -> select range.\n");
+            sb.append("\t  Feature to move selected with arrows.\n");
+            sb.append("\t- Text scales to fit.\n");
+            sb.append("\t- Animations run smoother.\n");
+            sb.append("\t- Preview Module always goes fullscreen (ESC -> close window).\n");
+            sb.append("\t- Added more missing Feature Keys.\n");
+            sb.append("\t- Small fix to Global Map module (chat panel..).\n");
+            sb.append("\t- File query to select file with the default ini when choosing input directory.\n");
             sb.append("\n");
             sb.append("Changelog since v1.1 IODINE:\n");
             sb.append("\t- Fixed that only one popup window\n");
@@ -757,7 +912,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("through linking features/components and modifies only the .ini\n");
             sb.append("and is not an image editor itself.\n");
             sb.append("\n");
-            sb.append("Copyright © 2021\n");
+            sb.append("Copyright © 2022\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
@@ -807,11 +962,11 @@ public class GUI extends javax.swing.JFrame {
     // builds Animator Renderer GL components
     public void buildModuleComponents() {
         if (mode == Mode.ALL_RES) {
-            renderer.buildMode = ModuleRenderer.BuildMode.ALL_RES;
-            renderer.state = ModuleRenderer.State.BUILD;
+            mdlRenderer.buildMode = ModuleRenderer.BuildMode.ALL_RES;
+            mdlRenderer.state = ModuleRenderer.State.BUILD;
         } else if (mode == Mode.TARGET_RES) {
-            renderer.buildMode = ModuleRenderer.BuildMode.TARGET_RES;
-            renderer.state = ModuleRenderer.State.BUILD;
+            mdlRenderer.buildMode = ModuleRenderer.BuildMode.TARGET_RES;
+            mdlRenderer.state = ModuleRenderer.State.BUILD;
         }
     }
 
@@ -850,10 +1005,12 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
 
-//            DefaultTableModel model = (DefaultTableModel) tblFeatsComps.getModel();
-//            model.removeRow(srow);
-            featurePreview();
-            componentsPreview();
+            DefaultTableModel model = (DefaultTableModel) tblFeats.getModel();
+            model.removeRow(srow);
+
+            updateFeaturePreview();
+            updateComponentsPreview();
+
             buildModuleComponents();
         }
     }
@@ -872,21 +1029,51 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // makes preview for the feature table
-    public synchronized void featurePreview() {
+    public synchronized void initFeaturePreview() {
         if (mode == Mode.ALL_RES) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
                 public boolean isCellEditable(int row, int column) {
-                    return column == 3 || column == 4;
+                    return (column == 3 || column == 4);
                 }
             };
+
+            TableRowSorter<DefaultTableModel> sort = new TableRowSorter<>(ftTblMdl);
+            txtFldSearch.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    String str = txtFldSearch.getText();
+                    if (str.trim().length() == 0) {
+                        sort.setRowFilter(null);
+                    } else {
+                        sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                    }
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    String str = txtFldSearch.getText();
+                    if (str.trim().length() == 0) {
+                        sort.setRowFilter(null);
+                    } else {
+                        sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                    }
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+
+                }
+            });
+            tblFeats.setRowSorter(sort);
+
             ftTblMdl.addColumn("Feature Key");
             ftTblMdl.addColumn("Feature Value");
             ftTblMdl.addColumn("Overrides");
             ftTblMdl.addColumn("Edit Feature");
             ftTblMdl.addColumn("Remove Feature");
 
-            final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit"));
+            final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit", featEditIcon));
             btnModifyEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -895,7 +1082,7 @@ public class GUI extends javax.swing.JFrame {
             });
             final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
 
-            final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove"));
+            final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove", featRemIcon));
             btnRemoveEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -952,6 +1139,36 @@ public class GUI extends javax.swing.JFrame {
                         return column == 3 || column == 4;
                     }
                 };
+
+                TableRowSorter<DefaultTableModel> sort = new TableRowSorter<>(ftTblMdl);
+                txtFldSearch.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        String str = txtFldSearch.getText();
+                        if (str.trim().length() == 0) {
+                            sort.setRowFilter(null);
+                        } else {
+                            sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                        }
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        String str = txtFldSearch.getText();
+                        if (str.trim().length() == 0) {
+                            sort.setRowFilter(null);
+                        } else {
+                            sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                        }
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+                });
+                tblFeats.setRowSorter(sort);
+
                 ftTblMdl.addColumn("Feature Key");
                 ftTblMdl.addColumn("Feature Value");
                 ftTblMdl.addColumn("Overrides");
@@ -1002,6 +1219,69 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
+    // makes preview for the feature table
+    public synchronized void updateFeaturePreview() {
+        if (mode == Mode.ALL_RES) {
+            DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblFeats.getModel();
+
+            for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+                FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+                FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
+                int overrides = 0;
+                for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
+                    if (resPragma.getCustomFeatMap().containsKey(featKey)) {
+                        overrides++;
+                    }
+                }
+
+                if (featVal != null) {
+                    Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                    int col = 0;
+                    for (Object obj : objs) {
+                        ftTblMdl.setValueAt(obj, row, col);
+                        col++;
+                    }
+                }
+            }
+
+        } else if (mode == Mode.TARGET_RES) {
+            String resStr = (String) cmbBoxResolution.getSelectedItem();
+            ResolutionPragma resolutionPragma = null;
+            if (resStr != null) {
+                String[] things = resStr.trim().split("x");
+                int width = Integer.parseInt(things[0]);
+                int height = Integer.parseInt(things[1]);
+                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                        resolutionPragma = resolution;
+                        break;
+                    }
+                }
+            }
+
+            if (resolutionPragma != null) {
+                DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblFeats.getModel();
+
+                for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+                    FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+                    FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+
+                    boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
+
+                    if (featVal != null) {
+                        Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                        int col = 0;
+                        for (Object obj : objs) {
+                            ftTblMdl.setValueAt(obj, row, col);
+                            col++;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
     // cuz its called from another thread (and may be called repeatedly)
     private void initBuildModule() {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
@@ -1034,9 +1314,9 @@ public class GUI extends javax.swing.JFrame {
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:        
-        deselect();
-        featurePreview();
-        componentsPreview();
+        mdlRenderer.deselect();
+        updateFeaturePreview();
+        updateComponentsPreview();
         workOnBuildComponents();
         if (intrface.getResolutionPragma() != null) {
             int width = intrface.getResolutionPragma().getWidth();
@@ -1044,6 +1324,7 @@ public class GUI extends javax.swing.JFrame {
             GL_WINDOW.setSize(width, height);
             GL_WINDOW.setTitle(cmbBoxSection.getSelectedItem() + " (Press F12 to take screenshot)");
         }
+        GL_WINDOW.setFullscreen(true);
         GL_WINDOW.setVisible(true);
     }//GEN-LAST:event_btnMdlePreviewActionPerformed
 
@@ -1074,8 +1355,8 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents(); // important!
     }//GEN-LAST:event_btnTogAllResActionPerformed
 
@@ -1088,9 +1369,9 @@ public class GUI extends javax.swing.JFrame {
             txtFldInPath.setText(cfg.getInDir().getPath());
             txtFldInPath.setToolTipText(cfg.getInDir().getPath());
             loadFromMenu();
-            featurePreview();
-            componentsPreview();
-            renderer.getModule().components.clear();
+            initFeaturePreview();
+            initComponentsPreview();
+            mdlRenderer.getModule().components.clear();
             workOnBuildComponents(); // important!
         }
 
@@ -1147,17 +1428,17 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
-        deselect();
-        renderer.module.components.clear();
-        featurePreview();
-        componentsPreview();
+        mdlRenderer.deselect();
+        mdlRenderer.module.components.clear();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed
         // TODO add your handling code here:
-        featurePreview();
-        componentsPreview();
+        initFeaturePreview();
+        initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxResolutionActionPerformed
 
@@ -1168,15 +1449,64 @@ public class GUI extends javax.swing.JFrame {
 
     private void toolsScreenshotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsScreenshotActionPerformed
         // TODO add your handling code here:
-        renderer.state = ModuleRenderer.State.SCREENSHOT;
+        mdlRenderer.state = ModuleRenderer.State.SCREENSHOT;
     }//GEN-LAST:event_toolsScreenshotActionPerformed
+
+    private void tabPaneBrowserStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPaneBrowserStateChanged
+        // TODO add your handling code here:
+        if (tabPaneBrowser.getSelectedIndex() == 0) {
+            updateFeaturePreview();
+        } else if (tabPaneBrowser.getSelectedIndex() == 1) {
+            updateComponentsPreview();
+        }
+    }//GEN-LAST:event_tabPaneBrowserStateChanged
+
+    private void btnDeselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeselectActionPerformed
+        // TODO add your handling code here
+        mdlRenderer.deselect();
+    }//GEN-LAST:event_btnDeselectActionPerformed
 
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            cfg.setInDir(fileChooserDirInput.getSelectedFile());
-            txtFldInPath.setText(cfg.getInDir().getPath());
-            txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+            File selectedFile = fileChooserDirInput.getSelectedFile();
+            if (selectedFile != null && selectedFile.isDirectory()) {
+                btnChooseInPath.setEnabled(false);
+                SwingWorker<Object, Object> swingWorker = new SwingWorker<Object, Object>() {
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        File[] files = buildTree(selectedFile);
+                        if (files != null) {
+                            boolean iniFound = false;
+                            for (File file : files) {
+                                if (file.getAbsolutePath().contains(cfg.getDefaultIni())) {
+                                    cfg.setInDir(file.getParentFile());
+                                    iniFound = true;
+                                    break;
+                                }
+                            }
+
+                            if (!iniFound) {
+                                JOptionPane.showMessageDialog(GUI.this, "App cannot locate the ini!", "Warning", JOptionPane.WARNING_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(GUI.this, "File(s) query too big - aborting!", "Query Error", JOptionPane.ERROR_MESSAGE);
+                        }
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        txtFldInPath.setText(cfg.getInDir().getPath());
+                        txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+                        btnChooseInPath.setEnabled(true);
+                    }
+
+                };
+
+                swingWorker.execute();
+            }
         }
 
         if (!cfg.getInDir().getPath().isEmpty()) {
@@ -1209,30 +1539,46 @@ public class GUI extends javax.swing.JFrame {
 
     }
 
-    private void deselect() {
-        if (renderer.selected != null) {
-            renderer.selected.setColor(renderer.savedColor);
+//    private void deselect() {
+//        if (mdlRenderer.selected != null) {
+//            mdlRenderer.selected.setColor(mdlRenderer.savedColor);
+//        }
+//        mdlRenderer.selected = null;
+//    }
+    public void toggleEnableComponent() {
+        final int srow = tblComps.getSelectedRow();
+        final int scol = tblComps.getSelectedColumn();
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+
+        // deselect
+        mdlRenderer.deselect();
+
+        for (GLComponent glc : mdlRenderer.module.components) {
+            if (glc.getFeatureKey() == featKey) {
+                boolean en = glc.isEnabled();
+                glc.setEnabled(!en);
+                if (glc instanceof Text) {
+                    Text txt = (Text) glc;
+                    txt.getOverlay().setEnabled(!en);
+                }
+                tblComps.setValueAt(glc.isEnabled(), srow, scol);
+                break;
+            }
         }
-        renderer.selected = null;
     }
 
     private void selectComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 6);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
-        deselect();
+        mdlRenderer.deselect();
 
-        for (GLComponent glc : renderer.module.components) {
-            if (glc.getFeatureKey() == featKey) {
-                renderer.selected = glc;
-                renderer.savedColor = glc.getColor();
-                renderer.selected.setColor(GLColor.awtColorToVec4(cfg.getSelectCol()));
-                break;
-            }
-        }
+        // select from module renderer
+        mdlRenderer.select(featKey);
 
     }
 
@@ -1240,7 +1586,7 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
 
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
 
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         FeatureValue featVal = null;
@@ -1255,8 +1601,8 @@ public class GUI extends javax.swing.JFrame {
         }
 
         GLComponent glcKey = null;
-        for (GLComponent glc : renderer.module.components) {
-            if (glc.getFeatureKey() == featKey) {
+        for (GLComponent glc : mdlRenderer.module.components) {
+            if (glc.getFeatureKey() == featKey && glc.isEnabled()) {
                 glcKey = glc;
                 break;
             }
@@ -1272,22 +1618,61 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    public synchronized void componentsPreview() {
+    public synchronized void initComponentsPreview() {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return (column == 4) || (column == 5);
+                return ((column == 4) || (column == 5) || (column == 6));
             }
         };
+
+        TableRowSorter<DefaultTableModel> sort = new TableRowSorter<>(compTblMdl);
+        txtFldSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String str = txtFldSearch.getText();
+                if (str.trim().length() == 0) {
+                    sort.setRowFilter(null);
+                } else {
+                    sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String str = txtFldSearch.getText();
+                if (str.trim().length() == 0) {
+                    sort.setRowFilter(null);
+                } else {
+                    sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+            }
+        });
+        tblComps.setRowSorter(sort);
 
         compTblMdl.addColumn("Name");
         compTblMdl.addColumn("Position");
         compTblMdl.addColumn("Dimension");
         compTblMdl.addColumn("Type");
+        compTblMdl.addColumn("Enabled");
         compTblMdl.addColumn("Edit Position");
         compTblMdl.addColumn("Select & Drag");
 
-        final ButtonEditor propEdit = new ButtonEditor(new JButton("Edit"));
+        final ToggleButtonEditor bteEdit = new ToggleButtonEditor(new JToggleButton("Disable", bteEnabledIcon));
+        bteEdit.getToggleButton().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleEnableComponent();
+            }
+        });
+        final ToggleButtonRenderer bteRend = new ToggleButtonRenderer(bteEdit.getToggleButton(), bteEnabledIcon, bteDisabledIcon);
+
+        final ButtonEditor propEdit = new ButtonEditor(new JButton("Edit", compEditIcon));
         propEdit.getButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1296,7 +1681,7 @@ public class GUI extends javax.swing.JFrame {
         });
         final ButtonRenderer propRend = new ButtonRenderer(propEdit.getButton());
 
-        final ButtonEditor selEdit = new ButtonEditor(new JButton("Select"));
+        final ButtonEditor selEdit = new ButtonEditor(new JButton("Select", compSelIcon));
         selEdit.getButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1305,7 +1690,7 @@ public class GUI extends javax.swing.JFrame {
         });
         final ButtonRenderer selRend = new ButtonRenderer(selEdit.getButton());
 
-        for (GLComponent glc : renderer.module.components) {
+        for (GLComponent glc : mdlRenderer.module.components) {
             FeatureKey fk = glc.getFeatureKey();
             FeatureValue fv = null;
             if (mode == Mode.ALL_RES) {
@@ -1320,12 +1705,17 @@ public class GUI extends javax.swing.JFrame {
             if (fk != null && fv != null) {
                 String dim = glc.getWidth() + "x" + glc.getHeight();
                 String pos = Math.round(glc.getPos().x - glc.getWidth() / 2.0f) + ", " + Math.round(glc.getPos().y - glc.getHeight() / 2.0f);
-                Object[] row = {fk.getStringValue(), pos, dim, glc.getType()};
+                Object[] row = {fk.getStringValue(), pos, dim, glc.getType(), glc.isEnabled()};
                 compTblMdl.addRow(row);
             }
         }
 
         tblComps.setModel(compTblMdl);
+
+        TableColumn enCol = tblComps.getColumn("Enabled");
+        enCol.setCellEditor(bteEdit);
+        enCol.setCellRenderer(bteRend);
+
         TableColumn selCol = tblComps.getColumn("Select & Drag");
         selCol.setCellEditor(selEdit);
         selCol.setCellRenderer(selRend);
@@ -1333,6 +1723,54 @@ public class GUI extends javax.swing.JFrame {
         TableColumn propCol = tblComps.getColumn("Edit Position");
         propCol.setCellEditor(propEdit);
         propCol.setCellRenderer(propRend);
+    }
+
+    public synchronized void updateComponentsPreview() {
+        DefaultTableModel compTblMdl = (DefaultTableModel) tblComps.getModel();
+
+        for (int row = 0; row < tblComps.getRowCount(); row++) {
+            FeatureKey fk = FeatureKey.valueOf((String) compTblMdl.getValueAt(row, 0));
+            FeatureValue fv = null;
+            if (mode == Mode.ALL_RES) {
+                fv = intrface.getCommonFeatMap().get(fk);
+            } else if (mode == Mode.TARGET_RES) {
+                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+                if (resolutionPragma != null) {
+                    fv = resolutionPragma.getCustomFeatMap().get(fk);
+                }
+            }
+
+            if (fk != null && fv != null) {
+                GLComponent glcTarg = null;
+                for (GLComponent glc : mdlRenderer.module.components) {
+                    if (glc.getFeatureKey() == fk) {
+                        glcTarg = glc;
+                        break;
+                    }
+                }
+
+                if (glcTarg != null) {
+                    String dim = glcTarg.getWidth() + "x" + glcTarg.getHeight();
+                    String pos = Math.round(glcTarg.getPos().x - glcTarg.getWidth() / 2.0f) + ", " + Math.round(glcTarg.getPos().y - glcTarg.getHeight() / 2.0f);
+                    Object[] objs = {fk.getStringValue(), pos, dim, glcTarg.getType(), glcTarg.isEnabled()};
+
+                    int col = 0;
+                    for (Object obj : objs) {
+                        compTblMdl.setValueAt(obj, row, col);
+                        col++;
+                    }
+                }
+            }
+
+        }
+    }
+
+    private void putSelectedOnLabel() {
+        if (mdlRenderer.selected != null) {
+            lblSelected.setText(mdlRenderer.selected.getFeatureKey().toString());
+        } else {
+            lblSelected.setText("None selected");
+        }
     }
 
     /**
@@ -1395,6 +1833,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;
+    private javax.swing.JButton btnDeselect;
     private javax.swing.JButton btnLoad;
     private javax.swing.JButton btnMdlePreview;
     private javax.swing.JButton btnSave;
@@ -1416,14 +1855,18 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblInput;
     private javax.swing.JLabel lblOutput;
     private javax.swing.JLabel lblResolution;
+    private javax.swing.JLabel lblSearch;
     private javax.swing.JLabel lblSection;
+    private javax.swing.JLabel lblSelected;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JMenu mainMenuFile;
     private javax.swing.JMenu mainMenuInfo;
     private javax.swing.JMenu mainMenuTools;
     private javax.swing.JPanel panelModule;
+    private javax.swing.JPanel pnlButtons;
     private javax.swing.JPanel pnlFilePaths;
     private javax.swing.JPanel pnlIntrface;
+    private javax.swing.JPanel pnlSearch;
     private javax.swing.JPanel pnlTable;
     private javax.swing.JScrollPane sbComps;
     private javax.swing.JScrollPane sbFeatures;
@@ -1433,5 +1876,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;
+    private javax.swing.JTextField txtFldSearch;
     // End of variables declaration//GEN-END:variables
 }

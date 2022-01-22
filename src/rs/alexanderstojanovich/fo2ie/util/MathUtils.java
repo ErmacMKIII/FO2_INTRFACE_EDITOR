@@ -77,4 +77,28 @@ public class MathUtils {
         return ((maxNew - minNew) * (x - min) / (max - min)) + minNew;
     }
 
+    /**
+     * Linear interpolation
+     *
+     * @param v0 first arg
+     * @param v1 second arg
+     * @param t value
+     * @return interpolated value
+     */
+    public static float lerp(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
+    }
+
+    /**
+     * Linear interpolation
+     *
+     * @param v0 first arg
+     * @param v1 second arg
+     * @param t value
+     * @return interpolated value
+     */
+    public static double lerp(double v0, double v1, double t) {
+        return (1 - t) * v0 + t * v1;
+    }
+
 }

@@ -48,8 +48,8 @@ public abstract class FeatValueEditor extends JFrame {
                 @Override
                 public void execute() {
                     gui.buildModuleComponents();
-                    gui.featurePreview();
-                    gui.componentsPreview();
+                    gui.updateFeaturePreview();
+                    gui.updateComponentsPreview();
                 }
             };
         }

@@ -61,8 +61,8 @@ public abstract class FeatValueAdder extends JFrame {
                 @Override
                 public void execute() {
                     gui.buildModuleComponents();
-                    gui.featurePreview();
-                    gui.componentsPreview();
+                    gui.initFeaturePreview();
+                    gui.initComponentsPreview();
                 }
             };
         }
@@ -137,21 +137,23 @@ public abstract class FeatValueAdder extends JFrame {
     private void setInitTxtFld() {
         FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
         FeatureValue.Type featValType = FeatureValue.Type.UNKNOWN;
-        switch (featKey.getType()) {
-            case PIC:
-                featValType = FeatureValue.Type.IMAGE;
-                break;
-            case OFFSET:
-            case VALUE:
-                featValType = FeatureValue.Type.SINGLE_VALUE;
-                break;
-            case ARRAY:
-                featValType = FeatureValue.Type.ARRAY;
-                break;
-            case PIC_POS:
-            case TXT:
-                featValType = FeatureValue.Type.RECT4;
-                break;
+        if (featKey != null) { // fix for null ptr exception!
+            switch (featKey.getType()) {
+                case PIC:
+                    featValType = FeatureValue.Type.IMAGE;
+                    break;
+                case OFFSET:
+                case VALUE:
+                    featValType = FeatureValue.Type.SINGLE_VALUE;
+                    break;
+                case ARRAY:
+                    featValType = FeatureValue.Type.ARRAY;
+                    break;
+                case PIC_POS:
+                case TXT:
+                    featValType = FeatureValue.Type.RECT4;
+                    break;
+            }
         }
         txtFldFtValType.setText(featValType.name());
     }

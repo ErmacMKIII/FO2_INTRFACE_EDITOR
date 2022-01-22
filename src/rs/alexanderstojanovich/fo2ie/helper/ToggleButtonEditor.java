@@ -20,21 +20,21 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractCellEditor;
-import javax.swing.JButton;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.table.TableCellEditor;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
+public class ToggleButtonEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private final JButton button;
+    private final JToggleButton toggleButton;
 
-    public ButtonEditor(JButton button) {
-        this.button = button;
-        this.button.addActionListener(new ActionListener() {
+    public ToggleButtonEditor(JToggleButton toggleButton) {
+        this.toggleButton = toggleButton;
+        this.toggleButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cancelCellEditing();
@@ -45,7 +45,12 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        return button;
+        if (value != null) {
+            boolean en = (boolean) value;
+            toggleButton.setSelected(!en);
+            toggleButton.setText(en ? "Disable" : "Enable");
+        }
+        return toggleButton;
     }
 
     @Override
@@ -53,8 +58,8 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
         return null;
     }
 
-    public JButton getButton() {
-        return button;
+    public JToggleButton getToggleButton() {
+        return toggleButton;
     }
 
 }

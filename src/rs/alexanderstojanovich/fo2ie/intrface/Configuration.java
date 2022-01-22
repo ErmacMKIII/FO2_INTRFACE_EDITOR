@@ -51,7 +51,7 @@ public class Configuration {
 
     private static Configuration instance;
 
-    private int animationTicks = 15;
+    private int animationTicks = 80; // will be used as TPS in GameTime
 
     private Configuration() {
 

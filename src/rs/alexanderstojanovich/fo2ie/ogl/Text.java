@@ -25,7 +25,9 @@ import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
+import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.main.GUI;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
 
@@ -70,6 +72,9 @@ public class Text implements GLComponent {
     protected int charHeight = STD_FONT_HEIGHT;
 
     protected final PrimitiveQuad overlay;
+
+    protected final Configuration config = Configuration.getInstance();
+    protected Vector4f outlineColor = new Vector4f(GLColor.awtColorToVec4(config.getSelectCol()));
 
     /**
      * Constructs OpenGL text component
@@ -439,6 +444,16 @@ public class Text implements GLComponent {
     public void setScale(float scale) {
         this.scale = scale;
         buffered = false;
+    }
+
+    @Override
+    public Vector4f getOutlineColor() {
+        return outlineColor;
+    }
+
+    @Override
+    public void setOutlineColor(Vector4f outlineColor) {
+        this.outlineColor = outlineColor;
     }
 
 }

@@ -44,6 +44,20 @@ public interface GLComponent {
     public FeatureKey getFeatureKey();
 
     /**
+     * Is component enabled
+     *
+     * @return enabled flag
+     */
+    public boolean isEnabled();
+
+    /**
+     * Set enable/disable depending on passed boolean
+     *
+     * @param enabled GLComponent enabled flag
+     */
+    public void setEnabled(boolean enabled);
+
+    /**
      * Gets color of this component
      *
      * @return
@@ -56,6 +70,20 @@ public interface GLComponent {
      * @param color chosen color
      */
     public void setColor(Vector4f color);
+
+    /**
+     * Gets color of this component
+     *
+     * @return
+     */
+    public Vector4f getOutlineColor();
+
+    /**
+     * Sets color for this component
+     *
+     * @param outlineColor chosen outline color
+     */
+    public void setOutlineColor(Vector4f outlineColor);
 
     /**
      * Gets OpenGL position of this component
@@ -148,4 +176,5 @@ public interface GLComponent {
      * @return pixel rectangular GL surface
      */
     public Rectanglef getGLArea();
+
 }

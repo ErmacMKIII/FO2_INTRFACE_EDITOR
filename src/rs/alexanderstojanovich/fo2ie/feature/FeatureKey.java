@@ -570,6 +570,7 @@ public interface FeatureKey {
         ChaNamePass,
         ChaNamePassText,
         ChaNamePicDn,
+        ChaNameSingleplayerMainPic,
         ChaNextLevel,
         ChaOk,
         ChaOkPicDn,
@@ -658,6 +659,7 @@ public interface FeatureKey {
                 case ChaSwitchScrUpPicDn:
                 case ChaSwitchScrUpPic:
                 case ChaSexPicDn:
+                case ChaNameSingleplayerMainPic:
                     return Type.PIC;
                 case ChaAge:
                 case ChaSex:
@@ -828,6 +830,7 @@ public interface FeatureKey {
                 ChaCancelPicDn,
                 ChaMainPic,
                 ChaNameMainPic,
+                ChaNameSingleplayerMainPic,
                 ChaNamePicDn,
                 ChaOkPicDn,
                 ChaPrintPicDn,
@@ -1623,6 +1626,7 @@ public interface FeatureKey {
 
     // Global map (World map)
     public static enum GlobalMap implements FeatureKey {
+        GmapBlankTabPic,
         GmapCar,
         GmapCha,
         GmapChaPicDn,
@@ -1632,8 +1636,13 @@ public interface FeatureKey {
         GmapFixPicDn,
         GmapFollowCritPic,
         GmapFollowCritSelfPic,
+        GmapGroupLocPic,
+        GmapGroupTargPic,
         GmapInv,
         GmapInvPicDn,
+        GmapLightPic0,
+        GmapLightPic1,
+        GmapLocPic,
         GmapLock,
         GmapMain,
         GmapMainPic,
@@ -1650,6 +1659,14 @@ public interface FeatureKey {
         GmapStayPic,
         GmapStayPicDn,
         GmapStayPicMask,
+        GmapTab,
+        GmapTabLoc,
+        GmapTabLocImage,
+        GmapTabNextX,
+        GmapTabNextY,
+        GmapTabLocPic,
+        GmapTabLocPicDn,
+        GmapTabPic,
         GmapTabs,
         GmapTabsScrDn,
         GmapTabsScrDnPicDn,
@@ -1702,6 +1719,12 @@ public interface FeatureKey {
                 case GmapStayPicMask:
                 case GmapDayTimeAnim:
                 case GmapInvPicDn:
+                case GmapGroupLocPic:
+                case GmapGroupTargPic:
+                case GmapLightPic0:
+                case GmapLightPic1:
+                case GmapTabLocPic:
+                case GmapTabLocPicDn:
                     return Type.PIC;
                 case GmapCha:
                 case GmapFix:
@@ -1717,6 +1740,9 @@ public interface FeatureKey {
                 case GmapPanel:
                 case GmapTabsScrDn:
                 case GmapTabsScrUp:
+                case GmapTab:
+                case GmapTabLoc:
+                case GmapTabLocImage:
                     return Type.PIC_POS;
                 case GmapName:
                 case GmapLock:
@@ -1776,14 +1802,23 @@ public interface FeatureKey {
                 case GmapMenu:
                     result.add(GmapMenuPicDn);
                     break;
-                case GmapPanel:
-                    break;
                 case GmapTabsScrDn:
                     result.add(GmapTabsScrDnPicDn);
                     break;
                 case GmapTabsScrUp:
                     result.add(GmapTabsScrUpPicDn);
                     break;
+                case GmapTab:
+                    result.add(GmapBlankTabPic);
+                    result.add(GmapTabPic);
+                    break;
+                case GmapTabLoc:
+                    result.add(GmapTab);
+                    break;
+                case GmapTabLocImage:
+                    result.add(GmapTabLocPicDn);
+                    break;
+
             }
             return result;
         }
@@ -1832,8 +1867,14 @@ public interface FeatureKey {
                 GmapTilesPic,
                 GmapStayPicMask,
                 GmapDayTimeAnim,
-                GmapInvPicDn
-            };
+                GmapInvPicDn,
+                GmapLocPic,
+                GmapGroupLocPic,
+                GmapGroupTargPic,
+                GmapLightPic0,
+                GmapLightPic1,
+                GmapTabPic,
+                GmapBlankTabPic,};
         }
 
         @Override
@@ -1850,9 +1891,11 @@ public interface FeatureKey {
                 GmapInv,
                 GmapMap,
                 GmapMenu,
-                GmapPanel,
                 GmapTabsScrDn,
-                GmapTabsScrUp
+                GmapTabsScrUp,
+                GmapTab,
+                GmapTabLoc,
+                GmapTabLocImage
             };
         }
 
@@ -1862,8 +1905,8 @@ public interface FeatureKey {
                 GmapName,
                 GmapLock,
                 GmapMessageBox,
-                GmapTime
-            };
+                GmapTime,
+                GmapPanel,};
         }
 
         @Override
@@ -1880,7 +1923,7 @@ public interface FeatureKey {
 
         @Override
         public FeatureKey[] getSplitValues() {
-            return new FeatureKey[]{GmapNameStepX, GmapNameStepY};
+            return new FeatureKey[]{GmapNameStepX, GmapNameStepY, GmapTabNextX, GmapTabNextY};
         }
 
     }
@@ -2158,6 +2201,7 @@ public interface FeatureKey {
         IntAmmoCountText,
         IntAp,
         IntApCost,
+        IntApCostPic,
         IntApGreenPic,
         IntApMax,
         IntApRedPic,
@@ -2196,9 +2240,13 @@ public interface FeatureKey {
         IntMessFilter1PicDn,
         IntMessFilter2,
         IntMessFilter2PicDn,
+        IntMessFilter3,
+        IntMessFilter3PicDn,
         IntMessLarge,
         IntPip,
         IntPipPicDn,
+        IntScrUpPicDn,
+        IntScrDownPicDn,
         IntSkill,
         IntSkillPicDn,
         IntUseX,
@@ -2218,6 +2266,7 @@ public interface FeatureKey {
                 case IntAddMessPicDn:
                 case IntAddMessWindowPic:
                 case IntAimPic:
+                case IntApCostPic:
                 case IntApGreenPic:
                 case IntApRedPic:
                 case IntApYellowPic:
@@ -2234,6 +2283,7 @@ public interface FeatureKey {
                 case IntMenuPicDn:
                 case IntMessFilter1PicDn:
                 case IntMessFilter2PicDn:
+                case IntMessFilter3PicDn:
                 case IntPipPicDn:
                 case IntSkillPicDn:
                 case IntCombatAnim:
@@ -2246,6 +2296,7 @@ public interface FeatureKey {
                 case IntCombatEnd:
                 case IntMessFilter1:
                 case IntMessFilter2:
+                case IntMessFilter3:
                 case IntSkill:
                 case IntPip:
                 case IntFix:
@@ -2317,6 +2368,9 @@ public interface FeatureKey {
                     break;
                 case IntMessFilter2:
                     result.add(IntMessFilter2PicDn);
+                    break;
+                case IntMessFilter3:
+                    result.add(IntMessFilter3PicDn);
                     break;
                 case IntSkill:
                     result.add(IntSkillPicDn);
@@ -2406,9 +2460,12 @@ public interface FeatureKey {
                 IntMenuPicDn,
                 IntMessFilter1PicDn,
                 IntMessFilter2PicDn,
+                IntMessFilter3PicDn,
                 IntPipPicDn,
                 IntSkillPicDn,
-                IntCombatAnim
+                IntCombatAnim,
+                IntScrUpPicDn,
+                IntScrDownPicDn
             };
         }
 
@@ -2423,6 +2480,7 @@ public interface FeatureKey {
                 IntCombatEnd,
                 IntMessFilter1,
                 IntMessFilter2,
+                IntMessFilter3,
                 IntSkill,
                 IntPip,
                 IntFix,
