@@ -1501,16 +1501,16 @@ public class GUI extends javax.swing.JFrame {
                         txtFldInPath.setText(cfg.getInDir().getPath());
                         txtFldInPath.setToolTipText(cfg.getInDir().getPath());
                         btnChooseInPath.setEnabled(true);
+
+                        if (!cfg.getInDir().getPath().isEmpty()) {
+                            btnLoad.setEnabled(true);
+                        }
                     }
 
                 };
 
                 swingWorker.execute();
             }
-        }
-
-        if (!cfg.getInDir().getPath().isEmpty()) {
-            btnLoad.setEnabled(true);
         }
 
         if (fileChooserDirInput.getSelectedFile() != null

@@ -472,7 +472,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         // move across the OpenGL render space
         if (selected != null) {
             selected.setPos(scrnMouseCoords);
-            afterSelection();
+            endMovingSelected();
         }
     }
 
