@@ -116,8 +116,9 @@ public class AddressableQuad implements GLComponent {
         final int countX = (stepX == 0) ? 0 : Math.round(Math.abs(posMax.x - pos.x) / stepX);
         final int countY = (stepY == 0) ? 0 : Math.round(Math.abs(posMax.y - pos.y) / stepY);
 
-        int i = (countX == 0) ? 0 : (int) Math.floorMod(Math.round(gameTime.getGameTicks()), countX);
-        int j = (countY == 0) ? 0 : (int) Math.floorMod(Math.round(gameTime.getGameTicks()), countY);
+        double q = (GameTime.TPS - gameTime.getGameTicks()) / (double) GameTime.TPS;
+        int i = (countX == 0) ? 0 : (int) Math.floorMod(Math.round((1.0 - q) * countX), countX);
+        int j = (countY == 0) ? 0 : (int) Math.floorMod(Math.round((1.0 - q) * countY), countY);
 
         res.x = pos.x + i * stepX;
         res.y = pos.y + j * stepY;

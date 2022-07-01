@@ -10,16 +10,15 @@ uniform vec4 color;
 uniform sampler2D colorMap;
 uniform float GameTime;
 
-vec3 cvet(vec2 texCoords, vec3 inCol) {
-	vec3 outCol = inCol;
+vec3 cvet(vec2 texCoords, vec3 inCol) {	
 	float v = (texCoords.y - unit) / (1.0 - unit);
-	v += 1.0 - mod(1.75 * GameTime, 2.0);
+	v += 1.0 - 0.75 * mod(1.75 * GameTime, 2.0);
 	if(v > 1.0) {
 		v = 2.0 - v;
 	} else if(v < 0.0) {
 		v = -v;
-	}
-	outCol += vec3(v) * 0.5 - 0.25;
+	}	
+	vec3 outCol = vec3(v * 0.3 + 0.15) * inCol / (vec3(1.0) + inCol);
 	
 	return outCol;
 }

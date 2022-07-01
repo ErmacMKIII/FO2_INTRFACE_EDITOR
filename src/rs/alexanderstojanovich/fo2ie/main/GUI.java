@@ -435,7 +435,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - JAPANESE");
+        setTitle("FOnline2 S3 Interface Editor - KOREANS");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -626,6 +626,7 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblFeats.setCellSelectionEnabled(true);
         tblFeats.setRowHeight(24);
         sbFeatures.setViewportView(tblFeats);
 
@@ -641,6 +642,7 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblComps.setCellSelectionEnabled(true);
         tblComps.setRowHeight(24);
         sbComps.setViewportView(tblComps);
 
@@ -864,9 +866,15 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 - JAPANESE (PUBLIC BUILD reviewed on 2022-01-22 at 08:00).\n");
+            sb.append("VERSION v1.3 - KOREANS (PUBLIC BUILD reviewed on 2022-07-01 at 11:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.3 KOREANS:\n");
+            sb.append("\t- Fixed Missing components of Main Pics for PriceSetup and GroundPickup.\n");
+            sb.append("\t- Showing hint text when mouse cursor is hovered over and CTRL is pressed\n");
+            sb.append("\t- Reworked shader for component selection to be less stressful for the eyes. \n");
+            sb.append("\t- Reworked question mark with changing locations (whenn pic is missing) to be less stressful for the eyes. \n");
             sb.append("\n");
             sb.append("Changelog since v1.2 JAPANESE:\n");
             sb.append("\t- Feature \"eye\" button - to hide/reveal components. [VVish] \n");
@@ -1428,11 +1436,13 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
-        mdlRenderer.deselect();
-        mdlRenderer.module.components.clear();
-        initFeaturePreview();
-        initComponentsPreview();
-        workOnBuildComponents();
+        if (intrface.getSectionName() != cmbBoxSection.getSelectedItem()) {
+            mdlRenderer.deselect();
+            mdlRenderer.module.components.clear();
+            initFeaturePreview();
+            initComponentsPreview();
+            workOnBuildComponents();
+        }
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed

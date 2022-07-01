@@ -133,7 +133,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 }
 
                 Vector2f rootPos = new Vector2f(intrface.mainPicWidth * scaleXYFactor.getKey() / 2.0f, intrface.mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -452,7 +452,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 }
 
                 Vector2f rootPos = new Vector2f(intrface.mainPicWidth * scaleXYFactor.getKey() / 2.0f, intrface.mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
