@@ -879,7 +879,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Fixed Missing components of Main Pics for PriceSetup and GroundPickup.\n");
             sb.append("\t- Showing hint text when mouse cursor is hovered over and CTRL is pressed.\n");
             sb.append("\t- Reworked shader for component selection to be less stressful for the eyes. \n");
-            sb.append("\t- Reworked question mark with changing locations (whenn pic is missing) to be less stressful for the eyes. \n");
+            sb.append("\t- Reworked question mark with changing locations (when pic is missing) to be less stressful for the eyes. \n");
             sb.append("\n");
             sb.append("Changelog since v1.2 JAPANESE:\n");
             sb.append("\t- Feature \"eye\" button - to hide/reveal components. [VVish] \n");
