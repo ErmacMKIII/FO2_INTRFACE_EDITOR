@@ -245,8 +245,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             case BUILD:
                 // suspend the loop until all components are built
                 animator.pause();
-                buildComponents(gl20);
                 textHint.unbuffer();
+                synchronized (OBJ_MUTEX) {
+                    buildComponents(gl20);
+                }
                 state = State.SUSPEND;
                 break;
             case SCREENSHOT:
@@ -380,11 +382,27 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     // selects one component by feature key
+    @Deprecated
     public void select(FeatureKey featureKey) {
         deselect();
 
         for (GLComponent glc : module.components) {
             if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
+                selected = glc;
+                selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                break;
+            }
+        }
+
+        afterSelection();
+    }
+
+    // selects one component by feature key
+    public void select(String uniqueId) {
+        deselect();
+
+        for (GLComponent glc : module.components) {
+            if (glc.isEnabled() && glc.getUniqueId().equals(uniqueId)) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
                 break;

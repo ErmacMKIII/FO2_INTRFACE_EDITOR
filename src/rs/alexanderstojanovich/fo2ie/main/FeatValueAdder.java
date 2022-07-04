@@ -75,6 +75,7 @@ public abstract class FeatValueAdder extends JFrame {
         this.setType(Window.Type.POPUP);
         this.setAlwaysOnTop(true);
         this.setIconImages(GUI.ICONS);
+        this.setPreferredSize(new Dimension(300, 225));
         initPosition();
     }
 

@@ -100,7 +100,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
-        if (section != null && section != intrface.getPopUp()) {
+        if (section != null) {
             FeatureKey mainPicKey = section.getRoot().getMainPic();
             MyRectangle mainPicPosVal = null;
 
@@ -419,7 +419,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
-        if (section != null && section != intrface.getPopUp()) {
+        if (section != null) {
             FeatureKey mainPicKey = section.getRoot().getMainPic();
             MyRectangle mainPicPosVal = null;
 

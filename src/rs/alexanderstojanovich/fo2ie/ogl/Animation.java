@@ -21,6 +21,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Objects;
+import java.util.UUID;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
@@ -74,6 +75,8 @@ public class Animation implements GLComponent {
     public static final int VERTEX_COUNT = 4;
 
     private boolean buffered = false;
+
+    private final String uniqueId = UUID.randomUUID().toString();
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -502,6 +505,11 @@ public class Animation implements GLComponent {
     @Override
     public void setOutlineColor(Vector4f outlineColor) {
         this.outlineColor = outlineColor;
+    }
+
+    @Override
+    public String getUniqueId() {
+        return uniqueId;
     }
 
 }

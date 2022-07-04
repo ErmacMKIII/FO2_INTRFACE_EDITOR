@@ -35,6 +35,11 @@ public interface FeatureValue {
         IMAGE, RECT4, SINGLE_VALUE, ARRAY, UNKNOWN
     };
 
+    /**
+     * Set value of this feature
+     *
+     * @param value string value to set
+     */
     public void setStringValue(String value);
 
     /**

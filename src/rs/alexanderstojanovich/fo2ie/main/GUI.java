@@ -105,6 +105,9 @@ public class GUI extends javax.swing.JFrame {
         @Override
         public void afterModuleBuild() {
             //btnBuild.setEnabled(true);
+            GUI.this.cmbBoxSection.setEnabled(true);
+            GUI.this.cmbBoxResolution.setEnabled(true);
+
             btnMdlePreview.setEnabled(true);
             initFeaturePreview();
             initComponentsPreview();
@@ -307,14 +310,14 @@ public class GUI extends javax.swing.JFrame {
     // bulding the module priv method
     private void workOnBuildComponents() {
         // dont build if already build in progress
-        if (mdlRenderer.state == ModuleRenderer.State.BUILD) {
-            return;
-        }
-
+        this.cmbBoxSection.setEnabled(false);
+        this.cmbBoxResolution.setEnabled(false);
         btnMdlePreview.setEnabled(false);
 
-        initBuildModule();
-        buildModuleComponents();
+        synchronized (ModuleRenderer.OBJ_MUTEX) {
+            initBuildModule();
+            buildModuleComponents();
+        }
     }
 
     private void initIconsForFeatTables() {
@@ -866,11 +869,13 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.3 - KOREANS (PUBLIC BUILD reviewed on 2022-07-01 at 11:00).\n");
+            sb.append("VERSION v1.3 - KOREANS (PUBLIC BUILD reviewed on 2022-07-04 at 07:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v1.3 KOREANS:\n");
+            sb.append("\t- Fixed crashes of Chosen & PopUp Menu. Set to no display.\n");
+            sb.append("\t- Fixed crashes of some cases in Edit Feature Value.\n");
             sb.append("\t- Fixed Missing components of Main Pics for PriceSetup and GroundPickup.\n");
             sb.append("\t- Showing hint text when mouse cursor is hovered over and CTRL is pressed.\n");
             sb.append("\t- Reworked shader for component selection to be less stressful for the eyes. \n");
@@ -1558,14 +1563,14 @@ public class GUI extends javax.swing.JFrame {
     public void toggleEnableComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 4);
-        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        Object uuid = tblComps.getValueAt(srow, scol - 5);
+        //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
         mdlRenderer.deselect();
 
         for (GLComponent glc : mdlRenderer.module.components) {
-            if (glc.getFeatureKey() == featKey) {
+            if (glc.getUniqueId().equals(uuid)) {
                 boolean en = glc.isEnabled();
                 glc.setEnabled(!en);
                 if (glc instanceof Text) {
@@ -1581,14 +1586,14 @@ public class GUI extends javax.swing.JFrame {
     private void selectComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 6);
-        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        Object uuid = tblComps.getValueAt(srow, scol - 7);
+        //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
         mdlRenderer.deselect();
 
         // select from module renderer
-        mdlRenderer.select(featKey);
+        mdlRenderer.select((String) uuid);
 
     }
 
@@ -1597,6 +1602,7 @@ public class GUI extends javax.swing.JFrame {
         final int scol = tblComps.getSelectedColumn();
 
         Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
+        Object uuid = tblComps.getValueAt(srow, scol - 6);
 
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         FeatureValue featVal = null;
@@ -1612,7 +1618,7 @@ public class GUI extends javax.swing.JFrame {
 
         GLComponent glcKey = null;
         for (GLComponent glc : mdlRenderer.module.components) {
-            if (glc.getFeatureKey() == featKey && glc.isEnabled()) {
+            if (glc.getUniqueId().equals(uuid) && glc.isEnabled()) {
                 glcKey = glc;
                 break;
             }
@@ -1632,7 +1638,7 @@ public class GUI extends javax.swing.JFrame {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return ((column == 4) || (column == 5) || (column == 6));
+                return ((column == 5) || (column == 6) || (column == 7));
             }
         };
 
@@ -1665,6 +1671,7 @@ public class GUI extends javax.swing.JFrame {
         });
         tblComps.setRowSorter(sort);
 
+        compTblMdl.addColumn("Unique Id");
         compTblMdl.addColumn("Name");
         compTblMdl.addColumn("Position");
         compTblMdl.addColumn("Dimension");
@@ -1715,7 +1722,7 @@ public class GUI extends javax.swing.JFrame {
             if (fk != null && fv != null) {
                 String dim = glc.getWidth() + "x" + glc.getHeight();
                 String pos = Math.round(glc.getPos().x - glc.getWidth() / 2.0f) + ", " + Math.round(glc.getPos().y - glc.getHeight() / 2.0f);
-                Object[] row = {fk.getStringValue(), pos, dim, glc.getType(), glc.isEnabled()};
+                Object[] row = {glc.getUniqueId(), fk.getStringValue(), pos, dim, glc.getType(), glc.isEnabled()};
                 compTblMdl.addRow(row);
             }
         }
@@ -1762,7 +1769,7 @@ public class GUI extends javax.swing.JFrame {
                 if (glcTarg != null) {
                     String dim = glcTarg.getWidth() + "x" + glcTarg.getHeight();
                     String pos = Math.round(glcTarg.getPos().x - glcTarg.getWidth() / 2.0f) + ", " + Math.round(glcTarg.getPos().y - glcTarg.getHeight() / 2.0f);
-                    Object[] objs = {fk.getStringValue(), pos, dim, glcTarg.getType(), glcTarg.isEnabled()};
+                    Object[] objs = {glcTarg.getUniqueId(), fk.getStringValue(), pos, dim, glcTarg.getType(), glcTarg.isEnabled()};
 
                     int col = 0;
                     for (Object obj : objs) {

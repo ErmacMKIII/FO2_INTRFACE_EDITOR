@@ -37,6 +37,13 @@ public interface GLComponent {
     }
 
     /**
+     * Gets UniqueId bound to this component.
+     *
+     * @return unique id.
+     */
+    public String getUniqueId();
+
+    /**
      * Gets Feature Key bound to this component.
      *
      * @return bound feature key.

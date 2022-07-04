@@ -20,6 +20,7 @@ import com.jogamp.opengl.GL2;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
@@ -75,6 +76,8 @@ public class Text implements GLComponent {
 
     protected final Configuration config = Configuration.getInstance();
     protected Vector4f outlineColor = new Vector4f(GLColor.awtColorToVec4(config.getSelectCol()));
+
+    protected final String uniqueId = UUID.randomUUID().toString();
 
     /**
      * Constructs OpenGL text component
@@ -454,6 +457,11 @@ public class Text implements GLComponent {
     @Override
     public void setOutlineColor(Vector4f outlineColor) {
         this.outlineColor = outlineColor;
+    }
+
+    @Override
+    public String getUniqueId() {
+        return uniqueId;
     }
 
 }

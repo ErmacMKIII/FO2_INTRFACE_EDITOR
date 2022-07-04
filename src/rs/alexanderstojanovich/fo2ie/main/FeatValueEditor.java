@@ -61,6 +61,7 @@ public abstract class FeatValueEditor extends JFrame {
         this.setType(Type.POPUP);
         this.setAlwaysOnTop(true);
         this.setIconImages(GUI.ICONS);
+        this.setPreferredSize(new Dimension(300, 225));
         initPosition();
     }
 
@@ -133,12 +134,12 @@ public abstract class FeatValueEditor extends JFrame {
                 this.setLayout(new GridLayout(3, 2));
                 final JLabel lbla = new JLabel(featureKey.getStringValue() + ":");
                 this.getContentPane().add(lbla);
-                final JSpinner spinval = new JSpinner(new SpinnerNumberModel(Integer.parseInt(featureValue.getStringValue()), -5000, 5000, 1));
-                this.getContentPane().add(spinval);
+                final JTextField txtVal = new JTextField(featureValue.getStringValue());
+                this.getContentPane().add(txtVal);
                 btnSet.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        featureValue.setStringValue(String.valueOf((int) spinval.getValue()));
+                        featureValue.setStringValue(txtVal.getText());
                         execute();
                         apply(featureKey, featureValue, intrface, allRes);
 
@@ -149,7 +150,7 @@ public abstract class FeatValueEditor extends JFrame {
                 btnReset.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        spinval.setValue(Integer.parseInt(strFVal));
+                        txtVal.setText(strFVal);
                         featureValue.setStringValue(strFVal);
                     }
                 });
