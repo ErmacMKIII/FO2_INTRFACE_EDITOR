@@ -20,7 +20,6 @@ import com.jogamp.opengl.GL2;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
@@ -31,6 +30,7 @@ import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
+import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
 
 /**
  *
@@ -39,6 +39,7 @@ import rs.alexanderstojanovich.fo2ie.util.Pair;
 public class Text implements GLComponent {
 
     private final FeatureKey featureKey;
+    private final Inheritance inheritance;
 
     private final Type type = Type.TXT;
 
@@ -77,19 +78,22 @@ public class Text implements GLComponent {
     protected final Configuration config = Configuration.getInstance();
     protected Vector4f outlineColor = new Vector4f(GLColor.awtColorToVec4(config.getSelectCol()));
 
-    protected final String uniqueId = UUID.randomUUID().toString();
+    protected final String uniqueId;
 
     /**
      * Constructs OpenGL text component
      *
      * @param featureKey bound feature key
+     * @param inheritance {BASE = ALL_RES, DERIVED = TARGET_RES}
      * @param texture bound texture
      * @param content display text
      * @param color text color
      * @param pos text pos
      */
-    public Text(FeatureKey featureKey, Texture texture, String content, Vector4f color, Vector2f pos) {
+    public Text(FeatureKey featureKey, Inheritance inheritance, Texture texture, String content, Vector4f color, Vector2f pos) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, charWidth, charHeight);
         this.texture = texture;
         this.content = content;
         this.color = color;
@@ -102,14 +106,17 @@ public class Text implements GLComponent {
      * Constructs OpenGL text component
      *
      * @param featureKey bound feature key
+     * @param inheritance {BASE = ALL_RES, DERIVED = TARGET_RES}
      * @param texture bound texture
      * @param content display text
      * @param pos text pos
      * @param charWidth char width in pixels
      * @param charHeight char height in pixels
      */
-    public Text(FeatureKey featureKey, Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
+    public Text(FeatureKey featureKey, Inheritance inheritance, Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, charWidth, charHeight);
         this.texture = texture;
         this.content = content;
         this.pos = pos;
@@ -144,7 +151,7 @@ public class Text implements GLComponent {
                 pairList.add(new Pair<>(xinc, ydec));
 
                 // pass null feat key as it is only used for rendering charactters
-                Quad quad = new Quad(null, charWidth, charHeight, texture, pos);
+                Quad quad = new Quad(null, null, charWidth, charHeight, texture, pos);
 
                 quad.setColor(color);
                 quad.setScale(scale);
@@ -462,6 +469,11 @@ public class Text implements GLComponent {
     @Override
     public String getUniqueId() {
         return uniqueId;
+    }
+
+    @Override
+    public Inheritance getInheritance() {
+        return inheritance;
     }
 
 }

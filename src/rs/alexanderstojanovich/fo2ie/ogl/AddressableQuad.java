@@ -32,6 +32,7 @@ import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.main.GameTime;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
+import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
 
 /**
  *
@@ -40,6 +41,7 @@ import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 public class AddressableQuad implements GLComponent {
 
     private final FeatureKey featureKey;
+    private final Inheritance inheritance;
     private final Type type = Type.ADDR;
 
     private int width;
@@ -71,7 +73,7 @@ public class AddressableQuad implements GLComponent {
 
     private final GameTime gameTime = GameTime.getInstance();
 
-    private final String uniqueId = UUID.randomUUID().toString();
+    private final String uniqueId;
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -92,6 +94,7 @@ public class AddressableQuad implements GLComponent {
      * Create addressable new quad with resize factor
      *
      * @param featureKey bound feature key
+     * @param inheritance {BASE = ALL_RES, DERIVED = TARGET_RES}
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
@@ -100,12 +103,13 @@ public class AddressableQuad implements GLComponent {
      * @param stepY step Y-coord for positon
      * @param posMax coordinates of max position (the furthest)
      */
-    public AddressableQuad(FeatureKey featureKey, int width, int height, Texture texture, Vector2f pos, float stepX, float stepY, Vector2f posMax) {
+    public AddressableQuad(FeatureKey featureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos, float stepX, float stepY, Vector2f posMax) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
         this.width = width;
         this.height = height;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
         this.texture = texture;
-
         this.pos = pos;
         this.stepX = stepX;
         this.stepY = stepY;
@@ -502,6 +506,11 @@ public class AddressableQuad implements GLComponent {
     @Override
     public String getUniqueId() {
         return uniqueId;
+    }
+
+    @Override
+    public Inheritance getInheritance() {
+        return inheritance;
     }
 
 }

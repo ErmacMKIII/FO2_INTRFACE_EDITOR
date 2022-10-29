@@ -185,7 +185,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             setPerspective();
         }
 
-        textHint = new Text(null, fntTexture, "", GLColor.awtColorToVec4(config.getHintCol()), null);
+        textHint = new Text(null, null, fntTexture, "", GLColor.awtColorToVec4(config.getHintCol()), null);
 
         this.animator.start();
         state = State.INIT;
@@ -449,6 +449,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         selected = null;
         outline = null;
 
+        endMovingSelected();
         afterSelection();
     }
 

@@ -98,7 +98,8 @@ public class GUI extends javax.swing.JFrame {
         @Override
         public void afterSelection() {
             putSelectedOnLabel();
-            updateFeaturePreview();
+            updateBaseFeaturePreview();
+            updateDerivedFeaturePreview();
             updateComponentsPreview();
         }
 
@@ -109,7 +110,8 @@ public class GUI extends javax.swing.JFrame {
             GUI.this.cmbBoxResolution.setEnabled(true);
 
             btnMdlePreview.setEnabled(true);
-            initFeaturePreview();
+            initBaseFeaturePreview();
+            initDerivedFeaturePreview();
             initComponentsPreview();
         }
     };
@@ -118,7 +120,8 @@ public class GUI extends javax.swing.JFrame {
         @Override
         public void afterSelection() {
             putSelectedOnLabel();
-            updateFeaturePreview();
+            updateBaseFeaturePreview();
+            updateDerivedFeaturePreview();
             updateComponentsPreview();
         }
     };
@@ -149,7 +152,8 @@ public class GUI extends javax.swing.JFrame {
 
     public static final String BUILD_ICON = "build_icon.png";
 
-    public static final String FEAT_ICON = "feat_icon.png";
+    public static final String FEAT_BASE_ICON = "feat_base_icon.png";
+    public static final String FEAT_DERIVED_ICON = "feat_derived_icon.png";
     public static final String COMP_ICON = "comp_icon.png";
 
     public static final String SPLASH_FILE_NAME = "fo2ie_splash.png";
@@ -294,16 +298,22 @@ public class GUI extends javax.swing.JFrame {
 
     // init tab icons (tab pane browser)
     private void initTabPaneIcons() {
-        URL featURL = GUI.class.getResource(RESOURCES_DIR + FEAT_ICON);
+        URL featBaseURL = GUI.class.getResource(RESOURCES_DIR + FEAT_BASE_ICON);
+        URL featDerivedURL = GUI.class.getResource(RESOURCES_DIR + FEAT_DERIVED_ICON);
         URL compURL = GUI.class.getResource(RESOURCES_DIR + COMP_ICON);
-        if (featURL != null) {
-            ImageIcon featIcon = new ImageIcon(featURL);
+        if (featBaseURL != null) {
+            ImageIcon featIcon = new ImageIcon(featBaseURL);
             tabPaneBrowser.setIconAt(0, featIcon);
+        }
+
+        if (featDerivedURL != null) {
+            ImageIcon featIcon = new ImageIcon(featDerivedURL);
+            tabPaneBrowser.setIconAt(1, featIcon);
         }
 
         if (compURL != null) {
             ImageIcon compIcon = new ImageIcon(compURL);
-            tabPaneBrowser.setIconAt(1, compIcon);
+            tabPaneBrowser.setIconAt(2, compIcon);
         }
     }
 
@@ -406,15 +416,17 @@ public class GUI extends javax.swing.JFrame {
         pnlButtons = new javax.swing.JPanel();
         btnAddFeat = new javax.swing.JButton();
         btnDeselect = new javax.swing.JButton();
+        tabPaneBrowser = new javax.swing.JTabbedPane();
+        sbBaseFeatures = new javax.swing.JScrollPane();
+        tblBaseFeats = new javax.swing.JTable();
+        sbDerivedFeatures = new javax.swing.JScrollPane();
+        tblDerivedFeats = new javax.swing.JTable();
+        sbComps = new javax.swing.JScrollPane();
+        tblComps = new javax.swing.JTable();
         pnlSearch = new javax.swing.JPanel();
         lblSearch = new javax.swing.JLabel();
         txtFldSearch = new javax.swing.JTextField();
         lblSelected = new javax.swing.JLabel();
-        tabPaneBrowser = new javax.swing.JTabbedPane();
-        sbFeatures = new javax.swing.JScrollPane();
-        tblFeats = new javax.swing.JTable();
-        sbComps = new javax.swing.JScrollPane();
-        tblComps = new javax.swing.JTable();
         panelModule = new javax.swing.JPanel();
         mainMenu = new javax.swing.JMenuBar();
         mainMenuFile = new javax.swing.JMenu();
@@ -438,7 +450,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - KOREANS");
+        setTitle("FOnline2 S3 Interface Editor - LATVIA");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -599,19 +611,6 @@ public class GUI extends javax.swing.JFrame {
 
         pnlTable.add(pnlButtons, java.awt.BorderLayout.NORTH);
 
-        pnlSearch.setLayout(new java.awt.BorderLayout());
-
-        lblSearch.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblSearch.setText("Filter:");
-        pnlSearch.add(lblSearch, java.awt.BorderLayout.LINE_START);
-        pnlSearch.add(txtFldSearch, java.awt.BorderLayout.CENTER);
-
-        lblSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/select_arrow.png"))); // NOI18N
-        lblSelected.setText("None selected");
-        pnlSearch.add(lblSelected, java.awt.BorderLayout.PAGE_END);
-
-        pnlTable.add(pnlSearch, java.awt.BorderLayout.PAGE_END);
-
         tabPaneBrowser.setEnabled(false);
         tabPaneBrowser.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -619,9 +618,9 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        sbFeatures.setPreferredSize(new java.awt.Dimension(240, 135));
+        sbBaseFeatures.setPreferredSize(new java.awt.Dimension(240, 135));
 
-        tblFeats.setModel(new javax.swing.table.DefaultTableModel(
+        tblBaseFeats.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -629,11 +628,27 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
-        tblFeats.setCellSelectionEnabled(true);
-        tblFeats.setRowHeight(24);
-        sbFeatures.setViewportView(tblFeats);
+        tblBaseFeats.setCellSelectionEnabled(true);
+        tblBaseFeats.setRowHeight(24);
+        sbBaseFeatures.setViewportView(tblBaseFeats);
 
-        tabPaneBrowser.addTab("Features", sbFeatures);
+        tabPaneBrowser.addTab("Base Features", sbBaseFeatures);
+
+        sbDerivedFeatures.setPreferredSize(new java.awt.Dimension(240, 135));
+
+        tblDerivedFeats.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblDerivedFeats.setCellSelectionEnabled(true);
+        tblDerivedFeats.setRowHeight(24);
+        sbDerivedFeatures.setViewportView(tblDerivedFeats);
+
+        tabPaneBrowser.addTab("Derived Features", sbDerivedFeatures);
 
         sbComps.setPreferredSize(new java.awt.Dimension(240, 135));
 
@@ -652,6 +667,19 @@ public class GUI extends javax.swing.JFrame {
         tabPaneBrowser.addTab("Components", sbComps);
 
         pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
+
+        pnlSearch.setLayout(new java.awt.BorderLayout());
+
+        lblSearch.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblSearch.setText("Filter:");
+        pnlSearch.add(lblSearch, java.awt.BorderLayout.LINE_START);
+        pnlSearch.add(txtFldSearch, java.awt.BorderLayout.CENTER);
+
+        lblSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/select_arrow.png"))); // NOI18N
+        lblSelected.setText("None selected");
+        pnlSearch.add(lblSelected, java.awt.BorderLayout.PAGE_END);
+
+        pnlTable.add(pnlSearch, java.awt.BorderLayout.PAGE_END);
 
         getContentPane().add(pnlTable);
 
@@ -731,6 +759,8 @@ public class GUI extends javax.swing.JFrame {
 
         setJMenuBar(mainMenu);
 
+        getAccessibleContext().setAccessibleName("FOnline2 S3 Interface Editor - LATVIA");
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -747,8 +777,9 @@ public class GUI extends javax.swing.JFrame {
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadActionPerformed
         mdlRenderer.getModule().components.clear();
         loadFromButton();
-        initFeaturePreview();
+        initBaseFeaturePreview();
         initComponentsPreview();
+        initDerivedFeaturePreview();
         workOnBuildComponents();
     }//GEN-LAST:event_btnLoadActionPerformed
 
@@ -797,8 +828,8 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Interface Load Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        DefaultTableModel defFtTblModel = (DefaultTableModel) tblFeats.getModel();
-        for (int i = tblFeats.getRowCount() - 1; i >= 0; i--) {
+        DefaultTableModel defFtTblModel = (DefaultTableModel) tblBaseFeats.getModel();
+        for (int i = tblBaseFeats.getRowCount() - 1; i >= 0; i--) {
             defFtTblModel.removeRow(i);
         }
 
@@ -830,8 +861,8 @@ public class GUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "App cannot find desired interface,\ncheck paths again!", "Interface Load Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        DefaultTableModel defFtTblModel = (DefaultTableModel) tblFeats.getModel();
-        for (int i = tblFeats.getRowCount() - 1; i >= 0; i--) {
+        DefaultTableModel defFtTblModel = (DefaultTableModel) tblBaseFeats.getModel();
+        for (int i = tblBaseFeats.getRowCount() - 1; i >= 0; i--) {
             defFtTblModel.removeRow(i);
         }
 
@@ -869,7 +900,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.3 - KOREANS (PUBLIC BUILD reviewed on 2022-07-08 at 00:00).\n");
+            sb.append("VERSION v1.3 - LATVIA (PUBLIC BUILD reviewed on 2022-07-08 at 00:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -984,11 +1015,29 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // edit feature value in the subform
-    private void editFeatureValue() {
-        final int srow = tblFeats.getSelectedRow();
-        final int scol = tblFeats.getSelectedColumn();
-        Object valueAtKey = tblFeats.getValueAt(srow, scol - 3);
-        Object valueAtVal = tblFeats.getValueAt(srow, scol - 2);
+    private void editBaseFeatureValue() {
+        final int srow = tblBaseFeats.getSelectedRow();
+        final int scol = tblBaseFeats.getSelectedColumn();
+        Object valueAtKey = tblBaseFeats.getValueAt(srow, scol - 3);
+        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 2);
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        final FeatureValue featVal = FeatureValue.valueOf((String) valueAtVal);
+
+        // featKey, featVal, intrface, btnTogAllRes.isSelected()
+        final FeatValueEditor fve = FeatValueEditor.getInstance(this);
+        fve.popUp(featKey, featVal, intrface, btnTogAllRes.isSelected());
+
+        fve.setVisible(true);
+        fve.setResizable(false);
+        fve.pack();
+    }
+
+    // edit feature value in the subform
+    private void editDerivedFeatureValue() {
+        final int srow = tblDerivedFeats.getSelectedRow();
+        final int scol = tblDerivedFeats.getSelectedColumn();
+        Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 3);
+        Object valueAtVal = tblDerivedFeats.getValueAt(srow, scol - 2);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         final FeatureValue featVal = FeatureValue.valueOf((String) valueAtVal);
 
@@ -1002,26 +1051,43 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // remove feature (with yes/no "are you sure" dialog)
-    private void removeFeature() {
-        final int srow = tblFeats.getSelectedRow();
-        final int scol = tblFeats.getSelectedColumn();
-        Object valueAtKey = tblFeats.getValueAt(srow, scol - 4);
+    private void removeBaseFeature() {
+        final int srow = tblBaseFeats.getSelectedRow();
+        final int scol = tblBaseFeats.getSelectedColumn();
+        Object valueAtKey = tblBaseFeats.getValueAt(srow, scol - 4);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
         if (val == JOptionPane.YES_OPTION) {
-            if (mode == Mode.ALL_RES) {
-                intrface.getCommonFeatMap().remove(featKey);
-            } else if (mode == Mode.TARGET_RES) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null) {
-                    resolutionPragma.getCustomFeatMap().remove(featKey);
-                }
-            }
-
-            DefaultTableModel model = (DefaultTableModel) tblFeats.getModel();
+            intrface.getCommonFeatMap().remove(featKey);
+            DefaultTableModel model = (DefaultTableModel) tblBaseFeats.getModel();
             model.removeRow(srow);
 
-            updateFeaturePreview();
+            updateBaseFeaturePreview();
+            updateDerivedFeaturePreview();
+            updateComponentsPreview();
+
+            buildModuleComponents();
+        }
+    }
+
+    // remove feature (with yes/no "are you sure" dialog)
+    private void removeDerivedFeature() {
+        final int srow = tblDerivedFeats.getSelectedRow();
+        final int scol = tblDerivedFeats.getSelectedColumn();
+        Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 4);
+        final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+        int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
+        if (val == JOptionPane.YES_OPTION) {
+            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+            if (resolutionPragma != null) {
+                resolutionPragma.getCustomFeatMap().remove(featKey);
+            }
+
+            DefaultTableModel model = (DefaultTableModel) tblDerivedFeats.getModel();
+            model.removeRow(srow);
+
+            updateDerivedFeaturePreview();
+            updateDerivedFeaturePreview();
             updateComponentsPreview();
 
             buildModuleComponents();
@@ -1042,12 +1108,114 @@ public class GUI extends javax.swing.JFrame {
     }
 
     // makes preview for the feature table
-    public synchronized void initFeaturePreview() {
-        if (mode == Mode.ALL_RES) {
+    public synchronized void initBaseFeaturePreview() {
+        final DefaultTableModel ftTblMdl = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return (column == 3 || column == 4);
+            }
+        };
+
+        TableRowSorter<DefaultTableModel> sort = new TableRowSorter<>(ftTblMdl);
+        txtFldSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String str = txtFldSearch.getText();
+                if (str.trim().length() == 0) {
+                    sort.setRowFilter(null);
+                } else {
+                    sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String str = txtFldSearch.getText();
+                if (str.trim().length() == 0) {
+                    sort.setRowFilter(null);
+                } else {
+                    sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+            }
+        });
+        tblBaseFeats.setRowSorter(sort);
+
+        ftTblMdl.addColumn("Feature Key");
+        ftTblMdl.addColumn("Feature Value");
+        ftTblMdl.addColumn("Overrides");
+        ftTblMdl.addColumn("Edit Feature");
+        ftTblMdl.addColumn("Remove Feature");
+
+        final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit", featEditIcon));
+        btnModifyEditor.getButton().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editBaseFeatureValue();
+            }
+        });
+        final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
+
+        final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove", featRemIcon));
+        btnRemoveEditor.getButton().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeBaseFeature();
+            }
+        });
+        final ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
+
+        SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
+        Section section = intrface.getNameToSectionMap().get(sectionName);
+        for (FeatureKey featKey : section.getKeys()) {
+            FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
+            int overrides = 0;
+            for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
+                if (resPragma.getCustomFeatMap().containsKey(featKey)) {
+                    overrides++;
+                }
+            }
+
+            if (featVal != null) {
+                Object[] row = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                ftTblMdl.addRow(row);
+            }
+        }
+
+        tblBaseFeats.setModel(ftTblMdl);
+        TableColumn editCol = tblBaseFeats.getColumn("Edit Feature");
+        editCol.setCellEditor(btnModifyEditor);
+        editCol.setCellRenderer(btnModifyRenderer);
+
+        TableColumn remCol = tblBaseFeats.getColumn("Remove Feature");
+        remCol.setCellEditor(btnRemoveEditor);
+        remCol.setCellRenderer(btnRemoveRenderer);
+    }
+
+    public synchronized void initDerivedFeaturePreview() {
+        String resStr = (String) cmbBoxResolution.getSelectedItem();
+        ResolutionPragma resolutionPragma = null;
+        if (resStr != null) {
+            String[] things = resStr.trim().split("x");
+            int width = Integer.parseInt(things[0]);
+            int height = Integer.parseInt(things[1]);
+            for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                    resolutionPragma = resolution;
+                    break;
+                }
+            }
+        }
+
+        if (resolutionPragma != null) {
             final DefaultTableModel ftTblMdl = new DefaultTableModel() {
                 @Override
                 public boolean isCellEditable(int row, int column) {
-                    return (column == 3 || column == 4);
+                    return column == 3 || column == 4;
                 }
             };
 
@@ -1078,7 +1246,7 @@ public class GUI extends javax.swing.JFrame {
 
                 }
             });
-            tblFeats.setRowSorter(sort);
+            tblDerivedFeats.setRowSorter(sort);
 
             ftTblMdl.addColumn("Feature Key");
             ftTblMdl.addColumn("Feature Value");
@@ -1090,7 +1258,7 @@ public class GUI extends javax.swing.JFrame {
             btnModifyEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    editFeatureValue();
+                    editDerivedFeatureValue();
                 }
             });
             final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
@@ -1099,7 +1267,7 @@ public class GUI extends javax.swing.JFrame {
             btnRemoveEditor.getButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    removeFeature();
+                    removeDerivedFeature();
                 }
             });
             final ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
@@ -1107,13 +1275,9 @@ public class GUI extends javax.swing.JFrame {
             SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
             Section section = intrface.getNameToSectionMap().get(sectionName);
             for (FeatureKey featKey : section.getKeys()) {
-                FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
-                int overrides = 0;
-                for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
-                    if (resPragma.getCustomFeatMap().containsKey(featKey)) {
-                        overrides++;
-                    }
-                }
+                FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+
+                boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
 
                 if (featVal != null) {
                     Object[] row = {featKey.getStringValue(), featVal.getStringValue(), overrides};
@@ -1121,131 +1285,65 @@ public class GUI extends javax.swing.JFrame {
                 }
             }
 
-            tblFeats.setModel(ftTblMdl);
-            TableColumn editCol = tblFeats.getColumn("Edit Feature");
+            tblDerivedFeats.setModel(ftTblMdl);
+            TableColumn editCol = tblDerivedFeats.getColumn("Edit Feature");
             editCol.setCellEditor(btnModifyEditor);
             editCol.setCellRenderer(btnModifyRenderer);
 
-            TableColumn remCol = tblFeats.getColumn("Remove Feature");
+            TableColumn remCol = tblDerivedFeats.getColumn("Remove Feature");
             remCol.setCellEditor(btnRemoveEditor);
             remCol.setCellRenderer(btnRemoveRenderer);
-
-        } else if (mode == Mode.TARGET_RES) {
-            String resStr = (String) cmbBoxResolution.getSelectedItem();
-            ResolutionPragma resolutionPragma = null;
-            if (resStr != null) {
-                String[] things = resStr.trim().split("x");
-                int width = Integer.parseInt(things[0]);
-                int height = Integer.parseInt(things[1]);
-                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                        resolutionPragma = resolution;
-                        break;
-                    }
-                }
-            }
-
-            if (resolutionPragma != null) {
-                final DefaultTableModel ftTblMdl = new DefaultTableModel() {
-                    @Override
-                    public boolean isCellEditable(int row, int column) {
-                        return column == 3 || column == 4;
-                    }
-                };
-
-                TableRowSorter<DefaultTableModel> sort = new TableRowSorter<>(ftTblMdl);
-                txtFldSearch.getDocument().addDocumentListener(new DocumentListener() {
-                    @Override
-                    public void insertUpdate(DocumentEvent e) {
-                        String str = txtFldSearch.getText();
-                        if (str.trim().length() == 0) {
-                            sort.setRowFilter(null);
-                        } else {
-                            sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
-                        }
-                    }
-
-                    @Override
-                    public void removeUpdate(DocumentEvent e) {
-                        String str = txtFldSearch.getText();
-                        if (str.trim().length() == 0) {
-                            sort.setRowFilter(null);
-                        } else {
-                            sort.setRowFilter(RowFilter.regexFilter("(?i)" + str));
-                        }
-                    }
-
-                    @Override
-                    public void changedUpdate(DocumentEvent e) {
-
-                    }
-                });
-                tblFeats.setRowSorter(sort);
-
-                ftTblMdl.addColumn("Feature Key");
-                ftTblMdl.addColumn("Feature Value");
-                ftTblMdl.addColumn("Overrides");
-                ftTblMdl.addColumn("Edit Feature");
-                ftTblMdl.addColumn("Remove Feature");
-
-                final ButtonEditor btnModifyEditor = new ButtonEditor(new JButton("Edit", featEditIcon));
-                btnModifyEditor.getButton().addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        editFeatureValue();
-                    }
-                });
-                final ButtonRenderer btnModifyRenderer = new ButtonRenderer(btnModifyEditor.getButton());
-
-                final ButtonEditor btnRemoveEditor = new ButtonEditor(new JButton("Remove", featRemIcon));
-                btnRemoveEditor.getButton().addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        removeFeature();
-                    }
-                });
-                final ButtonRenderer btnRemoveRenderer = new ButtonRenderer(btnRemoveEditor.getButton());
-
-                SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
-                Section section = intrface.getNameToSectionMap().get(sectionName);
-                for (FeatureKey featKey : section.getKeys()) {
-                    FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
-
-                    boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
-
-                    if (featVal != null) {
-                        Object[] row = {featKey.getStringValue(), featVal.getStringValue(), overrides};
-                        ftTblMdl.addRow(row);
-                    }
-                }
-
-                tblFeats.setModel(ftTblMdl);
-                TableColumn editCol = tblFeats.getColumn("Edit Feature");
-                editCol.setCellEditor(btnModifyEditor);
-                editCol.setCellRenderer(btnModifyRenderer);
-
-                TableColumn remCol = tblFeats.getColumn("Remove Feature");
-                remCol.setCellEditor(btnRemoveEditor);
-                remCol.setCellRenderer(btnRemoveRenderer);
-
-            }
         }
     }
 
     // makes preview for the feature table
-    public synchronized void updateFeaturePreview() {
-        if (mode == Mode.ALL_RES) {
-            DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblFeats.getModel();
+    public synchronized void updateBaseFeaturePreview() {
+        DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblBaseFeats.getModel();
+
+        for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+            FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+            FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
+            int overrides = 0;
+            for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
+                if (resPragma.getCustomFeatMap().containsKey(featKey)) {
+                    overrides++;
+                }
+            }
+
+            if (featVal != null) {
+                Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                int col = 0;
+                for (Object obj : objs) {
+                    ftTblMdl.setValueAt(obj, row, col);
+                    col++;
+                }
+            }
+        }
+    }
+
+    public synchronized void updateDerivedFeaturePreview() {
+        String resStr = (String) cmbBoxResolution.getSelectedItem();
+        ResolutionPragma resolutionPragma = null;
+        if (resStr != null) {
+            String[] things = resStr.trim().split("x");
+            int width = Integer.parseInt(things[0]);
+            int height = Integer.parseInt(things[1]);
+            for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
+                if (resolution.getWidth() == width && resolution.getHeight() == height) {
+                    resolutionPragma = resolution;
+                    break;
+                }
+            }
+        }
+
+        if (resolutionPragma != null) {
+            DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblDerivedFeats.getModel();
 
             for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
                 FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
-                FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
-                int overrides = 0;
-                for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
-                    if (resPragma.getCustomFeatMap().containsKey(featKey)) {
-                        overrides++;
-                    }
-                }
+                FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+
+                boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
 
                 if (featVal != null) {
                     Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
@@ -1255,42 +1353,7 @@ public class GUI extends javax.swing.JFrame {
                         col++;
                     }
                 }
-            }
 
-        } else if (mode == Mode.TARGET_RES) {
-            String resStr = (String) cmbBoxResolution.getSelectedItem();
-            ResolutionPragma resolutionPragma = null;
-            if (resStr != null) {
-                String[] things = resStr.trim().split("x");
-                int width = Integer.parseInt(things[0]);
-                int height = Integer.parseInt(things[1]);
-                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                        resolutionPragma = resolution;
-                        break;
-                    }
-                }
-            }
-
-            if (resolutionPragma != null) {
-                DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblFeats.getModel();
-
-                for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
-                    FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
-                    FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
-
-                    boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
-
-                    if (featVal != null) {
-                        Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
-                        int col = 0;
-                        for (Object obj : objs) {
-                            ftTblMdl.setValueAt(obj, row, col);
-                            col++;
-                        }
-                    }
-
-                }
             }
         }
     }
@@ -1328,7 +1391,8 @@ public class GUI extends javax.swing.JFrame {
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
         // TODO add your handling code here:        
         mdlRenderer.deselect();
-        updateFeaturePreview();
+        updateBaseFeaturePreview();
+        updateDerivedFeaturePreview();
         updateComponentsPreview();
         workOnBuildComponents();
         if (intrface.getResolutionPragma() != null) {
@@ -1368,7 +1432,8 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.mode = btnTogAllRes.isSelected() ? Mode.ALL_RES : Mode.TARGET_RES;
         cmbBoxResolution.setEnabled(!btnTogAllRes.isSelected());
-        initFeaturePreview();
+        initBaseFeaturePreview();
+        initDerivedFeaturePreview();
         initComponentsPreview();
         workOnBuildComponents(); // important!
     }//GEN-LAST:event_btnTogAllResActionPerformed
@@ -1382,7 +1447,7 @@ public class GUI extends javax.swing.JFrame {
             txtFldInPath.setText(cfg.getInDir().getPath());
             txtFldInPath.setToolTipText(cfg.getInDir().getPath());
             loadFromMenu();
-            initFeaturePreview();
+            initBaseFeaturePreview();
             initComponentsPreview();
             mdlRenderer.getModule().components.clear();
             workOnBuildComponents(); // important!
@@ -1444,7 +1509,7 @@ public class GUI extends javax.swing.JFrame {
         if (intrface.getSectionName() != cmbBoxSection.getSelectedItem()) {
             mdlRenderer.deselect();
             mdlRenderer.module.components.clear();
-            initFeaturePreview();
+            initBaseFeaturePreview();
             initComponentsPreview();
             workOnBuildComponents();
         }
@@ -1452,7 +1517,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed
         // TODO add your handling code here:
-        initFeaturePreview();
+        initBaseFeaturePreview();
         initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxResolutionActionPerformed
@@ -1467,19 +1532,15 @@ public class GUI extends javax.swing.JFrame {
         mdlRenderer.state = ModuleRenderer.State.SCREENSHOT;
     }//GEN-LAST:event_toolsScreenshotActionPerformed
 
-    private void tabPaneBrowserStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPaneBrowserStateChanged
-        // TODO add your handling code here:
-        if (tabPaneBrowser.getSelectedIndex() == 0) {
-            updateFeaturePreview();
-        } else if (tabPaneBrowser.getSelectedIndex() == 1) {
-            updateComponentsPreview();
-        }
-    }//GEN-LAST:event_tabPaneBrowserStateChanged
-
     private void btnDeselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeselectActionPerformed
         // TODO add your handling code here
         mdlRenderer.deselect();
     }//GEN-LAST:event_btnDeselectActionPerformed
+
+    private void tabPaneBrowserStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPaneBrowserStateChanged
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_tabPaneBrowserStateChanged
 
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
@@ -1563,7 +1624,7 @@ public class GUI extends javax.swing.JFrame {
     public void toggleEnableComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object uuid = tblComps.getValueAt(srow, scol - 5);
+        Object uuid = tblComps.getValueAt(srow, scol - 6);
         //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
@@ -1586,7 +1647,7 @@ public class GUI extends javax.swing.JFrame {
     private void selectComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
-        Object uuid = tblComps.getValueAt(srow, scol - 7);
+        Object uuid = tblComps.getValueAt(srow, scol - 8);
         //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
         // deselect
@@ -1601,20 +1662,11 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
 
-        Object valueAtKey = tblComps.getValueAt(srow, scol - 5);
-        Object uuid = tblComps.getValueAt(srow, scol - 6);
+        Object valueAtKey = tblComps.getValueAt(srow, scol - 6);
+        Object uuid = tblComps.getValueAt(srow, scol - 7);
 
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         FeatureValue featVal = null;
-
-        if (mode == Mode.ALL_RES) {
-            featVal = intrface.getCommonFeatMap().get(featKey);
-        } else if (mode == Mode.TARGET_RES) {
-            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-            if (resolutionPragma != null) {
-                featVal = resolutionPragma.getCustomFeatMap().get(featKey);
-            }
-        }
 
         GLComponent glcKey = null;
         for (GLComponent glc : mdlRenderer.module.components) {
@@ -1624,10 +1676,19 @@ public class GUI extends javax.swing.JFrame {
             }
         }
 
+        if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.BASE) {
+            featVal = intrface.getCommonFeatMap().get(featKey);
+        } else if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.DERIVED) {
+            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+            if (resolutionPragma != null) {
+                featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+            }
+        }
+
         if (glcKey != null && featVal != null) {
             //(featKey, featVal, intrface, btnTogAllRes.isSelected(), glcKey)
             final ComponentEditor compEditor = ComponentEditor.getInstance(this);
-            compEditor.popUp(featKey, featVal, intrface, rootPaneCheckingEnabled, glcKey);
+            compEditor.popUp(featKey, featVal, intrface, glcKey.getInheritance() == GLComponent.Inheritance.BASE, glcKey);
             compEditor.setVisible(true);
             compEditor.setResizable(false);
             compEditor.pack();
@@ -1638,7 +1699,7 @@ public class GUI extends javax.swing.JFrame {
         final DefaultTableModel compTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return ((column == 5) || (column == 6) || (column == 7));
+                return ((column == 6) || (column == 7) || (column == 8));
             }
         };
 
@@ -1676,6 +1737,8 @@ public class GUI extends javax.swing.JFrame {
         compTblMdl.addColumn("Position");
         compTblMdl.addColumn("Dimension");
         compTblMdl.addColumn("Type");
+        compTblMdl.addColumn("Inheritance");
+
         compTblMdl.addColumn("Enabled");
         compTblMdl.addColumn("Edit Position");
         compTblMdl.addColumn("Select & Drag");
@@ -1709,20 +1772,10 @@ public class GUI extends javax.swing.JFrame {
 
         for (GLComponent glc : mdlRenderer.module.components) {
             FeatureKey fk = glc.getFeatureKey();
-            FeatureValue fv = null;
-            if (mode == Mode.ALL_RES) {
-                fv = intrface.getCommonFeatMap().get(fk);
-            } else if (mode == Mode.TARGET_RES) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null) {
-                    fv = resolutionPragma.getCustomFeatMap().get(fk);
-                }
-            }
-
-            if (fk != null && fv != null) {
+            if (fk != null) {
                 String dim = glc.getWidth() + "x" + glc.getHeight();
                 String pos = Math.round(glc.getPos().x - glc.getWidth() / 2.0f) + ", " + Math.round(glc.getPos().y - glc.getHeight() / 2.0f);
-                Object[] row = {glc.getUniqueId(), fk.getStringValue(), pos, dim, glc.getType(), glc.isEnabled()};
+                Object[] row = {glc.getUniqueId(), fk.getStringValue(), pos, dim, glc.getType(), glc.getInheritance(), glc.isEnabled()};
                 compTblMdl.addRow(row);
             }
         }
@@ -1744,41 +1797,27 @@ public class GUI extends javax.swing.JFrame {
 
     public synchronized void updateComponentsPreview() {
         DefaultTableModel compTblMdl = (DefaultTableModel) tblComps.getModel();
-
         for (int row = 0; row < tblComps.getRowCount(); row++) {
-            FeatureKey fk = FeatureKey.valueOf((String) compTblMdl.getValueAt(row, 0));
-            FeatureValue fv = null;
-            if (mode == Mode.ALL_RES) {
-                fv = intrface.getCommonFeatMap().get(fk);
-            } else if (mode == Mode.TARGET_RES) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null) {
-                    fv = resolutionPragma.getCustomFeatMap().get(fk);
+            Object uuid = compTblMdl.getValueAt(row, 0);
+            GLComponent glcTarg = null;
+            for (GLComponent glc : mdlRenderer.module.components) {
+                if (glc.getUniqueId().equals(uuid)) {
+                    glcTarg = glc;
+                    break;
                 }
             }
 
-            if (fk != null && fv != null) {
-                GLComponent glcTarg = null;
-                for (GLComponent glc : mdlRenderer.module.components) {
-                    if (glc.getFeatureKey() == fk) {
-                        glcTarg = glc;
-                        break;
-                    }
-                }
+            if (glcTarg != null) {
+                String dim = glcTarg.getWidth() + "x" + glcTarg.getHeight();
+                String pos = Math.round(glcTarg.getPos().x - glcTarg.getWidth() / 2.0f) + ", " + Math.round(glcTarg.getPos().y - glcTarg.getHeight() / 2.0f);
+                Object[] objs = {glcTarg.getUniqueId(), glcTarg.getFeatureKey().getStringValue(), pos, dim, glcTarg.getType(), glcTarg.getInheritance(), glcTarg.isEnabled()};
 
-                if (glcTarg != null) {
-                    String dim = glcTarg.getWidth() + "x" + glcTarg.getHeight();
-                    String pos = Math.round(glcTarg.getPos().x - glcTarg.getWidth() / 2.0f) + ", " + Math.round(glcTarg.getPos().y - glcTarg.getHeight() / 2.0f);
-                    Object[] objs = {glcTarg.getUniqueId(), fk.getStringValue(), pos, dim, glcTarg.getType(), glcTarg.isEnabled()};
-
-                    int col = 0;
-                    for (Object obj : objs) {
-                        compTblMdl.setValueAt(obj, row, col);
-                        col++;
-                    }
+                int col = 0;
+                for (Object obj : objs) {
+                    compTblMdl.setValueAt(obj, row, col);
+                    col++;
                 }
             }
-
         }
     }
 
@@ -1885,11 +1924,13 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JPanel pnlIntrface;
     private javax.swing.JPanel pnlSearch;
     private javax.swing.JPanel pnlTable;
+    private javax.swing.JScrollPane sbBaseFeatures;
     private javax.swing.JScrollPane sbComps;
-    private javax.swing.JScrollPane sbFeatures;
+    private javax.swing.JScrollPane sbDerivedFeatures;
     private javax.swing.JTabbedPane tabPaneBrowser;
+    private javax.swing.JTable tblBaseFeats;
     private javax.swing.JTable tblComps;
-    private javax.swing.JTable tblFeats;
+    private javax.swing.JTable tblDerivedFeats;
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;

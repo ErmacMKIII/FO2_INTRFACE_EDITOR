@@ -51,7 +51,8 @@ public abstract class ComponentEditor extends JFrame {
                 @Override
                 public void execute() {
                     gui.buildModuleComponents();
-                    gui.updateFeaturePreview();
+                    gui.updateBaseFeaturePreview();
+                    gui.updateDerivedFeaturePreview();
                     gui.updateComponentsPreview();
                 }
             };
