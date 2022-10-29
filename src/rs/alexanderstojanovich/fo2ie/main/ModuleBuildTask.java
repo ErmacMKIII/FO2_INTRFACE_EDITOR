@@ -100,7 +100,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
-        if (section != null && section != intrface.getPopUp()) {
+        if (section != null) {
             FeatureKey mainPicKey = section.getRoot().getMainPic();
             MyRectangle mainPicPosVal = null;
 
@@ -133,7 +133,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 }
 
                 Vector2f rootPos = new Vector2f(intrface.mainPicWidth * scaleXYFactor.getKey() / 2.0f, intrface.mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -202,7 +202,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                                 // texture from loaded image
                                                 Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                                Quad imgComp = new Quad(picKey, width, height, tex, pos);
+                                                Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
                                                 picComps.add(imgComp);
                                             }
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
@@ -220,7 +220,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                             // texture from loaded image
                                             Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            AddressableQuad aq = new AddressableQuad(picKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                            AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
                                             picComps.add(aq);
                                         } else {
                                             // pixel dimension                                            
@@ -244,7 +244,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                     texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
                                                     index++;
                                                 }
-                                                Animation anim = new Animation(picKey, iw.getFps(), width, height, texas, pos);
+                                                Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
                                                 picComps.add(anim);
                                             }
                                         }
@@ -419,7 +419,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
-        if (section != null && section != intrface.getPopUp()) {
+        if (section != null) {
             FeatureKey mainPicKey = section.getRoot().getMainPic();
             MyRectangle mainPicPosVal = null;
 
@@ -452,7 +452,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 }
 
                 Vector2f rootPos = new Vector2f(intrface.mainPicWidth * scaleXYFactor.getKey() / 2.0f, intrface.mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -521,7 +521,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                                 // texture from loaded image
                                                 Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                                Quad imgComp = new Quad(picKey, width, height, tex, pos);
+                                                Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
                                                 picComps.add(imgComp);
                                             }
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
@@ -539,7 +539,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                                 // texture from loaded image
                                                 Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                                AddressableQuad aq = new AddressableQuad(picKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                                AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
                                                 picComps.add(aq);
                                             }
                                         } else {
@@ -565,7 +565,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                     texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
                                                     index++;
                                                 }
-                                                Animation anim = new Animation(picKey, iw.getFps(), width, height, texas, pos);
+                                                Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
                                                 picComps.add(anim);
                                             }
                                         }

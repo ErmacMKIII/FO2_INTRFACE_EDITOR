@@ -31,11 +31,12 @@ public class MyArray implements FeatureValue {
         StringBuilder sb = new StringBuilder();
         int index = 0;
         for (int f : array) {
-            if (index < array.length) {
+            if (index < array.length - 1) {
                 sb.append(f).append(" ");
-            } else if (index == array.length) {
+            } else if (index == array.length - 1) {
                 sb.append(f);
             }
+            index++;
         }
         return sb.toString();
     }

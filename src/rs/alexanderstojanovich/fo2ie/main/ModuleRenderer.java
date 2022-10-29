@@ -90,11 +90,15 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     protected GLComponent selected;
     protected GLComponent outline;
 
+    protected Text textHint;
+
     protected boolean dragging = false;
 //    protected Vector4f savedColor = new Vector4f();
-    private Vector2f scrnMouseCoords;
+    private Vector2f scrnMouseCoords = new Vector2f();
 
     private int selectedIndex = -1;
+
+    private boolean hasFocus = false;
 
     /**
      * State of the machine
@@ -181,6 +185,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             setPerspective();
         }
 
+        textHint = new Text(null, fntTexture, "", GLColor.awtColorToVec4(config.getHintCol()), null);
+
         this.animator.start();
         state = State.INIT;
     }
@@ -231,11 +237,18 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 if (selected != null) {
                     selected.render(gl20, projMat4, cntSProgram);
                 }
+                if (!textHint.isBuffered()) {
+                    textHint.buffer(gl20);
+                }
+                textHint.render(gl20, projMat4, fntSProgram);
                 break;
             case BUILD:
                 // suspend the loop until all components are built
                 animator.pause();
-                buildComponents(gl20);
+                textHint.unbuffer();
+                synchronized (OBJ_MUTEX) {
+                    buildComponents(gl20);
+                }
                 state = State.SUSPEND;
                 break;
             case SCREENSHOT:
@@ -358,7 +371,23 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         deselect();
 
         for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)) {
+            if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords) && glc.getFeatureKey().getStringValue().equals(textHint.getContent())) {
+                selected = glc;
+                selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                break;
+            }
+        }
+        textHint.setEnabled(false);
+        afterSelection();
+    }
+
+    // selects one component by feature key
+    @Deprecated
+    public void select(FeatureKey featureKey) {
+        deselect();
+
+        for (GLComponent glc : module.components) {
+            if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
                 break;
@@ -369,11 +398,11 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     }
 
     // selects one component by feature key
-    public void select(FeatureKey featureKey) {
+    public void select(String uniqueId) {
         deselect();
 
         for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
+            if (glc.isEnabled() && glc.getUniqueId().equals(uniqueId)) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
                 break;
@@ -472,7 +501,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         // move across the OpenGL render space
         if (selected != null) {
             selected.setPos(scrnMouseCoords);
-            afterSelection();
+            endMovingSelected();
         }
     }
 
@@ -502,6 +531,18 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         float y = scrnMouseCoords.y;
 
         moveSelected(x, y - amount);
+    }
+
+    private void showHintText() {
+        if (hasFocus && selected == null) {
+            for (GLComponent glc : module.components) {
+                if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)) {
+                    textHint.setPos(scrnMouseCoords);
+                    textHint.setContent(glc.getFeatureKey().getStringValue());
+                }
+            }
+            textHint.setEnabled(true);
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -544,12 +585,15 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        // ..IGNORE
+        hasFocus = true;
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        //deselect();
+        hasFocus = false;
+        if (textHint != null) {
+            textHint.setEnabled(false);
+        }
     }
 
     @Override
@@ -565,6 +609,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        if (e.getX() != scrnMouseCoords.x && e.getY() != scrnMouseCoords.y && textHint != null) {
+            textHint.setEnabled(false);
+        }
         scrnMouseCoords = new Vector2f(e.getX(), e.getY());
     }
 
@@ -575,11 +622,16 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         }
 
         if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_D) {
+            textHint.setEnabled(false);
             deselect();
         }
 
         if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             select();
+        }
+
+        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_D) {
+            showHintText();
         }
 
         if (ke.getKeyCode() == KeyEvent.VK_OPEN_BRACKET) {

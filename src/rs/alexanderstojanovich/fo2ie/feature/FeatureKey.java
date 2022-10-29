@@ -76,6 +76,72 @@ public interface FeatureKey {
         autocursor_hex_anim
     }
 
+    // Empty feature key
+    public static enum Empty implements FeatureKey {
+        None;
+
+        @Override
+        public FeatureKey getMainPic() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey getMainPicPos() {
+            return null;
+        }
+
+        @Override
+        public String getStringValue() {
+            return null;
+        }
+
+        @Override
+        public int getNumericValue() {
+            return 0;
+        }
+
+        @Override
+        public String getPrefix() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getPicValues() {
+            return null;
+        }
+
+        @Override
+        public List<FeatureKey> getPics() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getPicPosValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getTextValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getOffsetValues() {
+            return null;
+        }
+
+        @Override
+        public FeatureKey[] getSplitValues() {
+            return null;
+        }
+
+        @Override
+        public Type getType() {
+            return null;
+        }
+
+    }
+
     // Aim
     public static enum Aim implements FeatureKey {
         AimCancel,
@@ -951,7 +1017,7 @@ public interface FeatureKey {
                 case ChosenTabPic:
                     return Type.PIC;
                 case ChosenTab:
-                    return Type.PIC_POS;
+                    return Type.ARRAY;
                 case ChosenTabStepX:
                 case ChosenTabStepY:
                     return Type.VALUE;
@@ -987,12 +1053,12 @@ public interface FeatureKey {
 
         @Override
         public FeatureKey getMainPic() {
-            return ChosenTabPic;
+            return null;
         }
 
         @Override
         public FeatureKey getMainPicPos() {
-            return ChosenTab;
+            return null;
         }
 
         @Override
@@ -1002,7 +1068,7 @@ public interface FeatureKey {
 
         @Override
         public FeatureKey[] getPicPosValues() {
-            return new FeatureKey[]{ChosenTab};
+            return null;
         }
 
         @Override
@@ -1024,6 +1090,7 @@ public interface FeatureKey {
 
     // Console
     public static enum Console implements FeatureKey {
+
         ConsoleMainPic,
         ConsoleMainPicX,
         ConsoleMainPicY,

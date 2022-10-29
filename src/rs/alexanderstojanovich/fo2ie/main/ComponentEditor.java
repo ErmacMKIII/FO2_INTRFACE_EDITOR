@@ -64,6 +64,7 @@ public abstract class ComponentEditor extends JFrame {
         this.setType(Type.POPUP);
         this.setAlwaysOnTop(true);
         this.setIconImages(GUI.ICONS);
+        this.setPreferredSize(new Dimension(300, 225));
         initPosition();
     }
 

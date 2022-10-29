@@ -21,6 +21,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Objects;
+import java.util.UUID;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
@@ -70,6 +71,8 @@ public class AddressableQuad implements GLComponent {
 
     private final GameTime gameTime = GameTime.getInstance();
 
+    private final String uniqueId = UUID.randomUUID().toString();
+
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
         VERTICES[1] = new Vector2f(1.0f, -1.0f);
@@ -116,8 +119,9 @@ public class AddressableQuad implements GLComponent {
         final int countX = (stepX == 0) ? 0 : Math.round(Math.abs(posMax.x - pos.x) / stepX);
         final int countY = (stepY == 0) ? 0 : Math.round(Math.abs(posMax.y - pos.y) / stepY);
 
-        int i = (countX == 0) ? 0 : (int) Math.floorMod(Math.round(gameTime.getGameTicks()), countX);
-        int j = (countY == 0) ? 0 : (int) Math.floorMod(Math.round(gameTime.getGameTicks()), countY);
+        double q = (GameTime.TPS - gameTime.getGameTicks()) / (double) GameTime.TPS;
+        int i = (countX == 0) ? 0 : (int) Math.floorMod(Math.round((1.0 - q) * countX), countX);
+        int j = (countY == 0) ? 0 : (int) Math.floorMod(Math.round((1.0 - q) * countY), countY);
 
         res.x = pos.x + i * stepX;
         res.y = pos.y + j * stepY;
@@ -493,6 +497,11 @@ public class AddressableQuad implements GLComponent {
     @Override
     public void setOutlineColor(Vector4f outlineColor) {
         this.outlineColor = outlineColor;
+    }
+
+    @Override
+    public String getUniqueId() {
+        return uniqueId;
     }
 
 }
