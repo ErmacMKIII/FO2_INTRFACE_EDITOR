@@ -900,9 +900,13 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.3 - LATVIA (PUBLIC BUILD reviewed on 2022-07-08 at 00:00).\n");
+            sb.append("VERSION v1.4 - LATVIA (PUBLIC BUILD reviewed on 2022-10-30 at 07:15).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.4 LATVIA:\n");
+            sb.append("\t- Reworked features and components.\n");
+            sb.append("\t- \"Toggle All Resolutions\" affects only module building (and not display of features & components).\n");
             sb.append("\n");
             sb.append("Changelog since v1.3 KOREANS:\n");
             sb.append("\t- Fixed crashes of Chosen & PopUp Menu. Set to no display.\n");
@@ -1094,13 +1098,12 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    // gives ability to add new features
     private void addFeature() {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
         Section section = intrface.getNameToSectionMap().get(sectionName);
 
         FeatValueAdder fva = FeatValueAdder.getInstance(this);
-        fva.popUp(section, intrface, btnTogAllRes.isSelected());
+        fva.popUp(section, intrface);
 
         fva.setVisible(true);
         fva.setResizable(false);
