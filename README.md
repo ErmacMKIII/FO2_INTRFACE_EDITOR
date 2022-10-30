@@ -6,7 +6,7 @@ not released by original game developers.
 A way to edit interface through linking interface features 
 & OpenGL rendered interface components.
 
-![alt text](/misc/FO2InterfaceEditor?raw=true "FO2InterfaceEditor")
+![alt text](/misc/FO2InterfaceEditor.png?raw=true "FO2InterfaceEditor")
 
 Designed primarily for FOnline2 S3 although it can be adapted to other
 FOnline servers (variations).
