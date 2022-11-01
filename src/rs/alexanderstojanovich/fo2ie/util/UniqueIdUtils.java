@@ -27,6 +27,13 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
  */
 public class UniqueIdUtils {
 
+    public static final String GenerateNewUniqueId(String description) {
+        UUID guid = UUID.nameUUIDFromBytes(description.getBytes());
+        String guidStr = guid.toString();
+        String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);
+        return result;
+    }
+
     public static final String GenerateNewUniqueId(FeatureKey featureKey, GLComponent.Type type, Inheritance inheritance, int width, int height) {
         String dim = String.valueOf(width) + "x" + String.valueOf(height);
         String string = String.valueOf(featureKey) + type + inheritance + dim;

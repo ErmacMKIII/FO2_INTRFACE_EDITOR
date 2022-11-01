@@ -182,6 +182,8 @@ public class GUI extends javax.swing.JFrame {
 
     private static final int STACK_LIMIT = 1000;
 
+    protected static final List<Action> ACTIONS = new ArrayList<>();
+
     /**
      * Creates new form GUI
      */
@@ -437,6 +439,7 @@ public class GUI extends javax.swing.JFrame {
         fileMenuSep1 = new javax.swing.JPopupMenu.Separator();
         fileMenuExit = new javax.swing.JMenuItem();
         mainMenuTools = new javax.swing.JMenu();
+        toolsActionTable = new javax.swing.JMenuItem();
         toolsScreenshot = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
         infoMenuAbout = new javax.swing.JMenuItem();
@@ -622,14 +625,20 @@ public class GUI extends javax.swing.JFrame {
 
         tblBaseFeats.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
 
             }
         ));
-        tblBaseFeats.setCellSelectionEnabled(true);
+        tblBaseFeats.setColumnSelectionAllowed(false);
         tblBaseFeats.setRowHeight(24);
+        tblBaseFeats.setRowSelectionAllowed(false);
+        tblBaseFeats.getTableHeader().setResizingAllowed(false);
+        tblBaseFeats.getTableHeader().setReorderingAllowed(false);
         sbBaseFeatures.setViewportView(tblBaseFeats);
 
         tabPaneBrowser.addTab("Base Features", sbBaseFeatures);
@@ -638,14 +647,20 @@ public class GUI extends javax.swing.JFrame {
 
         tblDerivedFeats.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
 
             }
         ));
-        tblDerivedFeats.setCellSelectionEnabled(true);
+        tblDerivedFeats.setColumnSelectionAllowed(false);
         tblDerivedFeats.setRowHeight(24);
+        tblDerivedFeats.setRowSelectionAllowed(false);
+        tblDerivedFeats.getTableHeader().setResizingAllowed(false);
+        tblDerivedFeats.getTableHeader().setReorderingAllowed(false);
         sbDerivedFeatures.setViewportView(tblDerivedFeats);
 
         tabPaneBrowser.addTab("Derived Features", sbDerivedFeatures);
@@ -654,14 +669,20 @@ public class GUI extends javax.swing.JFrame {
 
         tblComps.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
 
             }
         ));
-        tblComps.setCellSelectionEnabled(true);
+        tblComps.setColumnSelectionAllowed(false);
         tblComps.setRowHeight(24);
+        tblComps.setRowSelectionAllowed(false);
+        tblComps.getTableHeader().setResizingAllowed(false);
+        tblComps.getTableHeader().setReorderingAllowed(false);
         sbComps.setViewportView(tblComps);
 
         tabPaneBrowser.addTab("Components", sbComps);
@@ -727,6 +748,14 @@ public class GUI extends javax.swing.JFrame {
 
         mainMenuTools.setText("Tools");
 
+        toolsActionTable.setText("Action Table");
+        toolsActionTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolsActionTableActionPerformed(evt);
+            }
+        });
+        mainMenuTools.add(toolsActionTable);
+
         toolsScreenshot.setText("Take Screenshot");
         toolsScreenshot.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -758,8 +787,6 @@ public class GUI extends javax.swing.JFrame {
         mainMenu.add(mainMenuInfo);
 
         setJMenuBar(mainMenu);
-
-        getAccessibleContext().setAccessibleName("FOnline2 S3 Interface Editor - LATVIA");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -1071,6 +1098,9 @@ public class GUI extends javax.swing.JFrame {
             updateComponentsPreview();
 
             buildModuleComponents();
+
+            Action action = new FeatureAction.RemoveFeature(intrface, GLComponent.Inheritance.BASE, featKey);
+            GUI.ACTIONS.add(action);
         }
     }
 
@@ -1090,11 +1120,14 @@ public class GUI extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tblDerivedFeats.getModel();
             model.removeRow(srow);
 
-            updateDerivedFeaturePreview();
+            updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
 
             buildModuleComponents();
+
+            Action action = new FeatureAction.RemoveFeature(intrface, GLComponent.Inheritance.DERIVED, featKey);
+            GUI.ACTIONS.add(action);
         }
     }
 
@@ -1545,6 +1578,15 @@ public class GUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_tabPaneBrowserStateChanged
 
+    private void toolsActionTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsActionTableActionPerformed
+        // TODO add your handling code here:
+        ActionTable instance = ActionTable.getInstance(this);
+        instance.popUp();
+        instance.setVisible(true);
+        instance.setResizable(false);
+        instance.pack();
+    }//GEN-LAST:event_toolsActionTableActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1934,6 +1976,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTable tblBaseFeats;
     private javax.swing.JTable tblComps;
     private javax.swing.JTable tblDerivedFeats;
+    private javax.swing.JMenuItem toolsActionTable;
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;

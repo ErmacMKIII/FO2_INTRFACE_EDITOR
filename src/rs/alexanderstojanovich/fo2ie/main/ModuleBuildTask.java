@@ -458,7 +458,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 } else if (intrface.getCommonFeatMap().containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.BASE;
                 }
-                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 

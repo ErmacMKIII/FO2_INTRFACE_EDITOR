@@ -76,14 +76,20 @@ public abstract class ComponentEditor extends JFrame {
     }
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
+        FeatureValue oldFeatureValue = null;
         if (allRes) {
+            oldFeatureValue = intrface.getCommonFeatMap().get(featureKey);
             intrface.getCommonFeatMap().replace(featureKey, featureValue);
         } else {
             ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
             if (resolutionPragma != null) {
+                oldFeatureValue = intrface.getCommonFeatMap().get(featureKey);
                 resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
             }
         }
+
+        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, allRes ? GLComponent.Inheritance.BASE : GLComponent.Inheritance.DERIVED, featureKey);
+        GUI.ACTIONS.add(action);
     }
 
     public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes, GLComponent glComponent) {

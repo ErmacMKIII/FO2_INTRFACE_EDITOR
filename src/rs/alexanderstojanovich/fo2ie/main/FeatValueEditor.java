@@ -33,6 +33,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
 /**
  *
@@ -73,14 +74,20 @@ public abstract class FeatValueEditor extends JFrame {
     }
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
+        FeatureValue oldFeatureValue = null;
         if (allRes) {
+            oldFeatureValue = intrface.getCommonFeatMap().get(featureKey);
             intrface.getCommonFeatMap().replace(featureKey, featureValue);
         } else {
             ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
             if (resolutionPragma != null) {
+                oldFeatureValue = intrface.getCommonFeatMap().get(featureKey);
                 resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
             }
         }
+
+        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, allRes ? GLComponent.Inheritance.BASE : GLComponent.Inheritance.DERIVED, featureKey);
+        GUI.ACTIONS.add(action);
     }
 
     public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {

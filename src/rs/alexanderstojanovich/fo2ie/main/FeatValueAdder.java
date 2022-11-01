@@ -46,21 +46,21 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public abstract class FeatValueAdder extends JFrame {
-    
+
     private final JLabel lblInheritance = new JLabel("Inheritance:");
     private JComboBox<GLComponent.Inheritance> cmbInheritance;
-    
+
     private final JLabel lblFeatName = new JLabel("Feature key:");
     private JComboBox<FeatureKey> cmbFtKeys;
-    
+
     private final JLabel lblFtValType = new JLabel("Feature value type:");
     private final JTextField txtFldFtValType = new JTextField();
-    
+
     private final JButton btnOK = new JButton("OK");
     private final JButton btnCancel = new JButton("Cancel");
-    
+
     private static FeatValueAdder instance;
-    
+
     public static FeatValueAdder getInstance(GUI gui) {
         if (instance == null) {
             instance = new FeatValueAdder() {
@@ -73,10 +73,10 @@ public abstract class FeatValueAdder extends JFrame {
                 }
             };
         }
-        
+
         return instance;
     }
-    
+
     public FeatValueAdder() {
         this.setTitle("Add feature");
         this.setType(Window.Type.POPUP);
@@ -101,13 +101,13 @@ public abstract class FeatValueAdder extends JFrame {
     // depending on the selected type of val corresponding feature (featKey, featValue) will be added
     private boolean addFeature(Intrface intrface) {
         this.setTitle("Add feature");
-        
+
         boolean ok = false;
-        
+
         GLComponent.Inheritance inheritance = (GLComponent.Inheritance) cmbInheritance.getSelectedItem();
-        
+
         FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
-        
+
         if (featKey == null) {
             JOptionPane.showMessageDialog(this, "Feature name is erroneous!", "Feature Key Error", JOptionPane.ERROR_MESSAGE);
         } else {
@@ -127,7 +127,7 @@ public abstract class FeatValueAdder extends JFrame {
                     featVal = new MyRectangle();
                     break;
             }
-            
+
             if (featVal == null) {
                 JOptionPane.showMessageDialog(this, "Feature value type does not match its key!", "Feature Value Error", JOptionPane.ERROR_MESSAGE);
             } else if (inheritance == GLComponent.Inheritance.BASE) {
@@ -141,21 +141,26 @@ public abstract class FeatValueAdder extends JFrame {
                 }
             }
         }
-        
+
+        if (ok) {
+            Action action = new FeatureAction.AddFeature(intrface, inheritance, featKey);
+            GUI.ACTIONS.add(action);
+        }
+
         return ok;
     }
-    
+
     private void setInitCmbInheritance(Section section, Intrface intrface) {
         GLComponent.Inheritance inheritance = (GLComponent.Inheritance) cmbInheritance.getSelectedItem();
         boolean allRes = inheritance == GLComponent.Inheritance.BASE;
         FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, allRes);
-        DefaultComboBoxModel<FeatureKey> model = new DefaultComboBoxModel<>();        
+        DefaultComboBoxModel<FeatureKey> model = new DefaultComboBoxModel<>();
         for (FeatureKey fk : unmappedKeys) {
             model.addElement(fk);
-        }        
+        }
         cmbFtKeys.setModel(model);
     }
-    
+
     private void setInitTxtFld() {
         FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
         FeatureValue.Type featValType = FeatureValue.Type.UNKNOWN;
@@ -179,7 +184,7 @@ public abstract class FeatValueAdder extends JFrame {
         }
         txtFldFtValType.setText(featValType.name());
     }
-    
+
     public void popUp(Section section, Intrface intrface) {
         this.setTitle("Add feature");
         this.getContentPane().removeAll(); // removes all the components
@@ -187,27 +192,28 @@ public abstract class FeatValueAdder extends JFrame {
         cmbInheritance = new JComboBox<>(GLComponent.Inheritance.values());
         FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, true);
         cmbFtKeys = new JComboBox<>(unmappedKeys);
-        
+
         this.setLayout(new GridLayout(4, 3));
         this.getContentPane().add(lblInheritance);
         this.getContentPane().add(cmbInheritance);
-        
+
         this.getContentPane().add(lblFeatName);
         this.getContentPane().add(cmbFtKeys);
-        
+
         this.getContentPane().add(lblFtValType);
         this.getContentPane().add(txtFldFtValType);
-        
+
         this.txtFldFtValType.setEditable(false);
-        
+
         this.cmbInheritance.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setInitCmbInheritance(section, intrface);
+                setInitTxtFld();
             }
         });
         setInitCmbInheritance(section, intrface);
-        
+
         this.cmbFtKeys.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -215,7 +221,7 @@ public abstract class FeatValueAdder extends JFrame {
             }
         });
         setInitTxtFld();
-        
+
         this.btnOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -226,40 +232,40 @@ public abstract class FeatValueAdder extends JFrame {
                 }
             }
         });
-        
+
         this.btnCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
             }
         });
-        
+
         this.getContentPane().add(btnOK);
         this.getContentPane().add(btnCancel);
     }
-    
+
     public JLabel getLblFeatName() {
         return lblFeatName;
     }
-    
+
     public JComboBox<FeatureKey> getCmbFtKeys() {
         return cmbFtKeys;
     }
-    
+
     public JLabel getLblFtValType() {
         return lblFtValType;
     }
-    
+
     public JTextField getTxtFldFtValType() {
         return txtFldFtValType;
     }
-    
+
     public JButton getBtnOK() {
         return btnOK;
     }
-    
+
     public JButton getBtnCancel() {
         return btnCancel;
     }
-    
+
 }
