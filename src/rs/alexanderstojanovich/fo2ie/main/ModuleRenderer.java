@@ -100,6 +100,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     private boolean hasFocus = false;
 
+    protected FeatureAction.EditFeature currentAction = null;
+    protected FeatureValue prevFeatureValue = new MyRectangle();
+
     /**
      * State of the machine
      */
@@ -374,6 +377,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords) && glc.getFeatureKey().getStringValue().equals(textHint.getContent())) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
                 break;
             }
         }
@@ -390,6 +394,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
                 break;
             }
         }
@@ -405,6 +410,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (glc.isEnabled() && glc.getUniqueId().equals(uniqueId)) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+                prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
                 break;
             }
         }
@@ -420,6 +426,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             GLComponent glc = module.components.get(Math.max(--selectedIndex, 0));
             selected = glc;
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+            prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
         }
 
         afterSelection();
@@ -433,8 +440,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             deselect();
             GLComponent glc = module.components.get(Math.min(++selectedIndex, size - 1));
             selected = glc;
-//            savedColor = glc.getColor();
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
+            prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
         }
 
         afterSelection();
@@ -442,35 +449,53 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     // deselects all (CTRL + D)
     public void deselect() {
-        // same as deselect from the GUI
-//        if (selected != null) {
-//            selected.setOutlineColor(savedColor);
-//        }
+        if (selected != null && currentAction == null) {
+            currentAction = new FeatureAction.EditFeature(intrface, prevFeatureValue, selected.getInheritance(), selected.getFeatureKey());            
+        }
+        
+        endMovingSelected();
+        if (isChangeMadeForAction() && !GUI.ACTIONS.contains(currentAction)) {
+            GUI.ACTIONS.add(currentAction);
+            currentAction = null;
+        }
+        afterSelection();
+        
         selected = null;
         outline = null;
-
-        endMovingSelected();
-        afterSelection();
     }
 
+    protected FeatureValue getSelectedFeatureValue() {
+        if (selected == null) {
+            return null;
+        }
+        
+        FeatureValue featureValue = null;        
+        if (buildMode == BuildMode.ALL_RES) {
+            featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+        } else if (buildMode == BuildMode.TARGET_RES) {
+            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+            if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
+                featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+            } else {
+                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+            }
+        }
+
+        return featureValue;
+    }
+
+    private boolean isChangeMadeForAction() {
+        return currentAction != null && !prevFeatureValue.equals(getSelectedFeatureValue());
+    }
+            
     // finalize moving selected
     private void endMovingSelected() {
         // process mouse release
         if (selected != null) {
             // try to find corrseponding feature value
             FeatureValue featureValue = null;
-            // based on module build mode do something..
-            if (buildMode == BuildMode.ALL_RES) {
-                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-            } else if (buildMode == BuildMode.TARGET_RES) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
-                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-                } else {
-                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-                }
-            }
-
+            // based on module build mode do something..            
+            featureValue = getSelectedFeatureValue();
             // try to set feature value with corresponding glMouseCoords
             if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
                 MyRectangle mr = (MyRectangle) featureValue;
@@ -490,7 +515,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 mr.minY = Math.round(xr.minY / skvp.getValue());
                 mr.maxY = Math.round(xr.maxY / skvp.getValue());
 
-                afterSelection();
+                afterSelection();                
             }
 
         }

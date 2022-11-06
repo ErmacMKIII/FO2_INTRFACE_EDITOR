@@ -18,6 +18,7 @@ package rs.alexanderstojanovich.fo2ie.util;
 
 import java.util.UUID;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
+import rs.alexanderstojanovich.fo2ie.main.Action;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
 
@@ -27,8 +28,8 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
  */
 public class UniqueIdUtils {
 
-    public static final String GenerateNewUniqueId(String description) {
-        UUID guid = UUID.nameUUIDFromBytes(description.getBytes());
+    public static String GenerateNewUniqueId(FeatureKey featureKey, Action.Type type, Inheritance inheritance, String description) {
+        UUID guid = UUID.nameUUIDFromBytes(featureKey.toString().concat(type.name()).concat(inheritance.name()).concat(description).getBytes());
         String guidStr = guid.toString();
         String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);
         return result;

@@ -18,6 +18,7 @@ package rs.alexanderstojanovich.fo2ie.main;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
@@ -44,6 +45,7 @@ public abstract class FeatureAction implements Action {
         this.timestamp = Date.from(Instant.now());
     }
 
+    @Override
     public GLComponent.Inheritance getInheritance() {
         return inheritance;
     }
@@ -52,12 +54,10 @@ public abstract class FeatureAction implements Action {
         return intrface;
     }
 
+    @Override
     public FeatureKey getFeatureKey() {
         return featureKey;
     }
-
-    @Override
-    public abstract void undo();
 
     @Override
     public Date getTimestamp() {
@@ -65,13 +65,48 @@ public abstract class FeatureAction implements Action {
     }
 
     @Override
-    public abstract String getDescription();
-
-    @Override
     public Type getType() {
         return type;
+    }  
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + Objects.hashCode(this.uniqueId);
+        hash = 29 * hash + Objects.hashCode(this.inheritance);
+        hash = 29 * hash + Objects.hashCode(this.intrface);
+        hash = 29 * hash + Objects.hashCode(this.type);
+        hash = 29 * hash + Objects.hashCode(this.featureKey);
+        return hash;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FeatureAction other = (FeatureAction) obj;
+        if (!Objects.equals(this.uniqueId, other.uniqueId)) {
+            return false;
+        }
+        if (this.inheritance != other.inheritance) {
+            return false;
+        }
+        if (!Objects.equals(this.intrface, other.intrface)) {
+            return false;
+        }
+        if (this.type != other.type) {
+            return false;
+        }
+        return Objects.equals(this.featureKey, other.featureKey);
+    }
+    
     @Override
     public String getUniqueId() {
         return uniqueId;
@@ -82,7 +117,7 @@ public abstract class FeatureAction implements Action {
         public AddFeature(Intrface intrface, GLComponent.Inheritance inheritance, FeatureKey featureKey) {
             super(intrface, inheritance, featureKey);
             this.type = Type.ADD_FEATURE;
-            this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(getDescription());
+            this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, getDescription());
         }
 
         @Override
@@ -96,20 +131,21 @@ public abstract class FeatureAction implements Action {
 
         @Override
         public String getDescription() {
-            return type + ">" + inheritance + ":" + featureKey.getStringValue() + "@" + timestamp.toString();
+            return featureKey.getStringValue();
         }
 
+        
     }
 
     public static class EditFeature extends FeatureAction {
 
-        private final FeatureValue prevFeatureValue;
+        protected FeatureValue prevFeatureValue;
 
         public EditFeature(Intrface intrface, FeatureValue prevFeatureValue, GLComponent.Inheritance inheritance, FeatureKey featureKey) {
             super(intrface, inheritance, featureKey);
             this.type = Type.EDIT_FEATURE;
             this.prevFeatureValue = prevFeatureValue;
-            this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(getDescription());
+            this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, getDescription());
         }
 
         @Override
@@ -133,42 +169,42 @@ public abstract class FeatureAction implements Action {
 
         @Override
         public String getDescription() {
-            return type + ">" + inheritance + ":" + featureKey.getStringValue() + "(" + prevFeatureValue + "=>" + getCurrentFeatureValue() + ")" + "@" + timestamp.toString();
+            return prevFeatureValue + " => " + getCurrentFeatureValue();
+        }
+
+        public FeatureValue getPrevFeatureValue() {
+            return prevFeatureValue;
+        }
+
+        public void setPrevFeatureValue(FeatureValue prevFeatureValue) {
+            this.prevFeatureValue = prevFeatureValue;
         }
 
     }
 
     public static class RemoveFeature extends FeatureAction {
 
-        public RemoveFeature(Intrface intrface, GLComponent.Inheritance inheritance, FeatureKey featureKey) {
+        protected FeatureValue prevFeatureValue;
+
+        public RemoveFeature(Intrface intrface, FeatureValue prevFeatureValue, GLComponent.Inheritance inheritance, FeatureKey featureKey) {
             super(intrface, inheritance, featureKey);
             this.type = Type.REMOVE_FEATURE;
-            this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(getDescription());
-        }
-
-        private FeatureValue getCurrentFeatureValue() {
-            FeatureValue result = null;
-            if (inheritance == GLComponent.Inheritance.BASE) {
-                result = intrface.getCommonFeatMap().get(featureKey);
-            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                result = intrface.getResolutionPragma().getCustomFeatMap().get(featureKey);
-            }
-            return result;
+            this.prevFeatureValue = prevFeatureValue;
+            this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, getDescription());
         }
 
         @Override
         public void undo() {
-            FeatureValue currentFeatureValue = getCurrentFeatureValue();
             if (inheritance == GLComponent.Inheritance.BASE) {
-                intrface.getCommonFeatMap().put(featureKey, currentFeatureValue);
+                intrface.getCommonFeatMap().put(featureKey, prevFeatureValue);
             } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                intrface.getResolutionPragma().getCustomFeatMap().remove(featureKey, currentFeatureValue);
+                intrface.getResolutionPragma().getCustomFeatMap().put(featureKey, prevFeatureValue);
             }
         }
 
         @Override
         public String getDescription() {
-            return type + ">" + inheritance + ":" + featureKey.getStringValue() + "@" + timestamp.toString();
+            return featureKey.getStringValue();
         }
 
     }
