@@ -16,6 +16,8 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import rs.alexanderstojanovich.fo2ie.action.Action;
+import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -37,6 +39,7 @@ import rs.alexanderstojanovich.fo2ie.feature.MyArray;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.feature.SingleValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
@@ -130,11 +133,55 @@ public abstract class FeatValueAdder extends JFrame {
 
             if (featVal == null) {
                 JOptionPane.showMessageDialog(this, "Feature value type does not match its key!", "Feature Value Error", JOptionPane.ERROR_MESSAGE);
-            } else if (inheritance == GLComponent.Inheritance.BASE) {
-                intrface.getCommonFeatMap().put(featKey, featVal);
+            } else {
+                intrface.getWorkingBinds().commonFeatMap.put(featKey, featVal);
                 ok = true;
-            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+            }
+        }
+
+        if (ok) {
+            Action action = new FeatureAction.AddFeature(intrface, inheritance, featKey);
+            GUI.ACTIONS.add(action);
+        }
+
+        return ok;
+    }
+
+    // add feature (internal)
+    // depending on the selected type of val corresponding feature (featKey, featValue) will be added
+    private boolean addFeature(Intrface intrface, Resolution resolution) {
+        this.setTitle("Add feature");
+
+        boolean ok = false;
+
+        GLComponent.Inheritance inheritance = (GLComponent.Inheritance) cmbInheritance.getSelectedItem();
+
+        FeatureKey featKey = (FeatureKey) cmbFtKeys.getSelectedItem();
+
+        if (featKey == null) {
+            JOptionPane.showMessageDialog(this, "Feature name is erroneous!", "Feature Key Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            FeatureValue featVal = null;
+            FeatureValue.Type featValType = FeatureValue.Type.valueOf(txtFldFtValType.getText());
+            switch (featValType) {
+                case IMAGE:
+                    featVal = new ImageWrapper("");
+                    break;
+                case SINGLE_VALUE:
+                    featVal = new SingleValue();
+                    break;
+                case ARRAY:
+                    featVal = new MyArray();
+                    break;
+                case RECT4:
+                    featVal = new MyRectangle();
+                    break;
+            }
+
+            if (featVal == null) {
+                JOptionPane.showMessageDialog(this, "Feature value type does not match its key!", "Feature Value Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 if (resolutionPragma != null) {
                     resolutionPragma.getCustomFeatMap().put(featKey, featVal);
                     ok = true;
@@ -151,9 +198,16 @@ public abstract class FeatValueAdder extends JFrame {
     }
 
     private void setInitCmbInheritance(Section section, Intrface intrface) {
-        GLComponent.Inheritance inheritance = (GLComponent.Inheritance) cmbInheritance.getSelectedItem();
-        boolean allRes = inheritance == GLComponent.Inheritance.BASE;
-        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, allRes);
+        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section);
+        DefaultComboBoxModel<FeatureKey> model = new DefaultComboBoxModel<>();
+        for (FeatureKey fk : unmappedKeys) {
+            model.addElement(fk);
+        }
+        cmbFtKeys.setModel(model);
+    }
+
+    private void setInitCmbInheritance(Section section, Intrface intrface, Resolution resolution) {
+        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, resolution);
         DefaultComboBoxModel<FeatureKey> model = new DefaultComboBoxModel<>();
         for (FeatureKey fk : unmappedKeys) {
             model.addElement(fk);
@@ -190,7 +244,7 @@ public abstract class FeatValueAdder extends JFrame {
         this.getContentPane().removeAll(); // removes all the components
 
         cmbInheritance = new JComboBox<>(GLComponent.Inheritance.values());
-        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, true);
+        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section);
         cmbFtKeys = new JComboBox<>(unmappedKeys);
 
         this.setLayout(new GridLayout(4, 3));
@@ -213,6 +267,65 @@ public abstract class FeatValueAdder extends JFrame {
             }
         });
         setInitCmbInheritance(section, intrface);
+
+        this.cmbFtKeys.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setInitTxtFld();
+            }
+        });
+        setInitTxtFld();
+
+        this.btnOK.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean ok = addFeature(intrface);
+                if (ok) {
+                    execute();
+                    dispose();
+                }
+            }
+        });
+
+        this.btnCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+
+        this.getContentPane().add(btnOK);
+        this.getContentPane().add(btnCancel);
+    }
+
+    public void popUp(Section section, Intrface intrface, Resolution resolution) {
+        this.setTitle("Add feature");
+        this.getContentPane().removeAll(); // removes all the components
+
+        cmbInheritance = new JComboBox<>(GLComponent.Inheritance.values());
+        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, resolution);
+        cmbFtKeys = new JComboBox<>(unmappedKeys);
+
+        this.setLayout(new GridLayout(4, 3));
+        this.getContentPane().add(lblInheritance);
+        this.getContentPane().add(cmbInheritance);
+
+        this.getContentPane().add(lblFeatName);
+        this.getContentPane().add(cmbFtKeys);
+
+        this.getContentPane().add(lblFtValType);
+        this.getContentPane().add(txtFldFtValType);
+
+        this.txtFldFtValType.setEditable(false);
+
+        this.cmbInheritance.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setInitCmbInheritance(section, intrface, resolution);
+                setInitTxtFld();
+            }
+        });
+        setInitCmbInheritance(section, intrface, resolution);
 
         this.cmbFtKeys.addActionListener(new ActionListener() {
             @Override

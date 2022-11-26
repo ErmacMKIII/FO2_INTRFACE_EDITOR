@@ -36,7 +36,9 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
+import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import static rs.alexanderstojanovich.fo2ie.main.GUI.GL_WINDOW;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
@@ -96,28 +98,34 @@ public abstract class WindowRenderer implements GLEventListener, MouseListener, 
 
     protected BuildMode buildMode = BuildMode.TARGET_RES;
 
+    protected Resolution guiResolution;
+    protected Section.SectionName guiSectionName;
+
     /**
      * Create JOGL Animator of the built module
      *
      * @param animator parsed FPS animator
-     * @param module module with GL Components
+     * @param module GL module with components
      * @param intrface FOnline interface
+     * @param guiResolution GUI resolution field
+     * @param guiSectionName GUI section name
      */
-    public WindowRenderer(FPSAnimator animator, Module module, Intrface intrface) {
-        this.module = module;
+    public WindowRenderer(FPSAnimator animator, Module module, Intrface intrface, Resolution guiResolution, Section.SectionName guiSectionName) {
         this.animator = animator;
+        this.module = module;
         this.intrface = intrface;
+        this.guiResolution = guiResolution;
+        this.guiSectionName = guiSectionName;
     }
 
     /**
      * Sets the prespective according to the Interface pragma. Call this if
      * resizing occured
+     *
+     * @param resolution Resolution
      */
-    protected void setPerspective() {
-        ResolutionPragma pragma = intrface.getResolutionPragma();
-        final float width = (pragma == null) ? DEF_WIDTH : pragma.getWidth();
-        final float height = (pragma == null) ? DEF_HEIGHT : pragma.getHeight();
-        final float aspect = (float) width / (float) height;
+    protected void setPerspective(Resolution resolution) {
+        final float aspect = (float) resolution.getWidth() / (float) resolution.getHeight();
         projMat4.identity().setOrtho2D(-aspect, aspect, -1.0f, 1.0f);
     }
 
@@ -156,7 +164,7 @@ public abstract class WindowRenderer implements GLEventListener, MouseListener, 
         qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
 
         if (config.isKeepAspectRatio()) {
-            setPerspective();
+            setPerspective(guiResolution);
         }
 
         this.animator.start();
@@ -187,7 +195,7 @@ public abstract class WindowRenderer implements GLEventListener, MouseListener, 
         GL2 gl20 = glad.getGL().getGL2();
         //gl20.glViewport(0, 0, i2, i3);
         if (config.isKeepAspectRatio()) {
-            setPerspective();
+            setPerspective(guiResolution);
         }
     }
 

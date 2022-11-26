@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package rs.alexanderstojanovich.fo2ie.main;
+package rs.alexanderstojanovich.fo2ie.action;
 
 import java.time.Instant;
 import java.util.Date;
@@ -67,7 +67,7 @@ public abstract class FeatureAction implements Action {
     @Override
     public Type getType() {
         return type;
-    }  
+    }
 
     @Override
     public int hashCode() {
@@ -106,7 +106,7 @@ public abstract class FeatureAction implements Action {
         }
         return Objects.equals(this.featureKey, other.featureKey);
     }
-    
+
     @Override
     public String getUniqueId() {
         return uniqueId;
@@ -123,9 +123,9 @@ public abstract class FeatureAction implements Action {
         @Override
         public void undo() {
             if (inheritance == GLComponent.Inheritance.BASE) {
-                intrface.getCommonFeatMap().remove(featureKey);
+                intrface.getWorkingBinds().getCommonFeatMap().remove(featureKey);
             } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                intrface.getResolutionPragma().getCustomFeatMap().remove(featureKey);
+                //intrface.getWorkingBinds().getResolutionPragma().getCustomFeatMap().remove(featureKey);
             }
         }
 
@@ -134,7 +134,6 @@ public abstract class FeatureAction implements Action {
             return featureKey.getStringValue();
         }
 
-        
     }
 
     public static class EditFeature extends FeatureAction {
@@ -150,20 +149,20 @@ public abstract class FeatureAction implements Action {
 
         @Override
         public void undo() {
-            if (inheritance == GLComponent.Inheritance.BASE) {
-                intrface.getCommonFeatMap().replace(featureKey, prevFeatureValue);
-            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                intrface.getResolutionPragma().getCustomFeatMap().replace(featureKey, prevFeatureValue);
-            }
+//            if (inheritance == GLComponent.Inheritance.BASE) {
+//                intrface.getCommonFeatMap().replace(featureKey, prevFeatureValue);
+//            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
+//                intrface.getResolutionPragma().getCustomFeatMap().replace(featureKey, prevFeatureValue);
+//            }
         }
 
         private FeatureValue getCurrentFeatureValue() {
             FeatureValue result = null;
-            if (inheritance == GLComponent.Inheritance.BASE) {
-                result = intrface.getCommonFeatMap().get(featureKey);
-            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                result = intrface.getResolutionPragma().getCustomFeatMap().get(featureKey);
-            }
+//            if (inheritance == GLComponent.Inheritance.BASE) {
+//                result = intrface.getCommonFeatMap().get(featureKey);
+//            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
+//                result = intrface.getResolutionPragma().getCustomFeatMap().get(featureKey);
+//            }
             return result;
         }
 
@@ -195,11 +194,11 @@ public abstract class FeatureAction implements Action {
 
         @Override
         public void undo() {
-            if (inheritance == GLComponent.Inheritance.BASE) {
-                intrface.getCommonFeatMap().put(featureKey, prevFeatureValue);
-            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
-                intrface.getResolutionPragma().getCustomFeatMap().put(featureKey, prevFeatureValue);
-            }
+//            if (inheritance == GLComponent.Inheritance.BASE) {
+//                intrface.getCommonFeatMap().put(featureKey, prevFeatureValue);
+//            } else if (inheritance == GLComponent.Inheritance.DERIVED) {
+//                intrface.getResolutionPragma().getCustomFeatMap().put(featureKey, prevFeatureValue);
+//            }
         }
 
         @Override

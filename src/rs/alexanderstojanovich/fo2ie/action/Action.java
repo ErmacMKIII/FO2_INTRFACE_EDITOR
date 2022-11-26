@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package rs.alexanderstojanovich.fo2ie.main;
+package rs.alexanderstojanovich.fo2ie.action;
 
 import java.util.Date;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;

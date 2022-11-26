@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -43,7 +44,9 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
+import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
@@ -119,6 +122,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         ALL_RES, TARGET_RES;
     };
 
+    protected Resolution guiResolution;
+    protected SectionName guiSectionName;
+
     protected BuildMode buildMode = BuildMode.TARGET_RES;
 
     /**
@@ -127,22 +133,25 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
      * @param animator parsed FPS animator
      * @param module GL module with components
      * @param intrface FOnline interface
+     * @param guiResolution GUI resolution field
+     * @param guiSectionName GUI section name
      */
-    public ModuleRenderer(FPSAnimator animator, Module module, Intrface intrface) {
+    public ModuleRenderer(FPSAnimator animator, Module module, Intrface intrface, Resolution guiResolution, SectionName guiSectionName) {
         this.animator = animator;
         this.module = module;
         this.intrface = intrface;
+        this.guiResolution = guiResolution;
+        this.guiSectionName = guiSectionName;
     }
 
     /**
      * Sets the prespective according to the Interface pragma. Call this if
      * resizing occured
+     *
+     * @param resolution Resolution
      */
-    protected void setPerspective() {
-        ResolutionPragma pragma = intrface.getResolutionPragma();
-        final float width = (pragma == null) ? DEF_WIDTH : pragma.getWidth();
-        final float height = (pragma == null) ? DEF_HEIGHT : pragma.getHeight();
-        final float aspect = (float) width / (float) height;
+    protected void setPerspective(Resolution resolution) {
+        final float aspect = (float) resolution.getWidth() / (float) resolution.getHeight();
         projMat4.identity().setOrtho2D(-aspect, aspect, -1.0f, 1.0f);
     }
 
@@ -185,7 +194,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
 
         if (config.isKeepAspectRatio()) {
-            setPerspective();
+            setPerspective(guiResolution);
         }
 
         textHint = new Text(null, null, fntTexture, "", GLColor.awtColorToVec4(config.getHintCol()), null);
@@ -218,7 +227,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         GL2 gl20 = glad.getGL().getGL2();
         //gl20.glViewport(0, 0, i2, i3);
         if (config.isKeepAspectRatio()) {
-            setPerspective();
+            setPerspective(guiResolution);
         }
     }
 
@@ -273,7 +282,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     //--------------------------------------------------------------------------
     private void buildComponents(GL2 gl20) {
         final ProgressWindow window = new ProgressWindow();
-        ModuleBuildTask task = new ModuleBuildTask(intrface.getSectionName(), intrface, module, buildMode, gl20, fntTexture, qmarkTexture) {
+        ModuleBuildTask task = new ModuleBuildTask(guiSectionName, intrface, module, buildMode, gl20, fntTexture, qmarkTexture) {
             @Override
             protected void done() {
                 afterModuleBuild();
@@ -293,6 +302,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 }
             }
         });
+        task.buildResolution = guiResolution;
         task.execute();
     }
 
@@ -450,16 +460,16 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     // deselects all (CTRL + D)
     public void deselect() {
         if (selected != null && currentAction == null) {
-            currentAction = new FeatureAction.EditFeature(intrface, prevFeatureValue, selected.getInheritance(), selected.getFeatureKey());            
+            currentAction = new FeatureAction.EditFeature(intrface, prevFeatureValue, selected.getInheritance(), selected.getFeatureKey());
         }
-        
+
         endMovingSelected();
         if (isChangeMadeForAction() && !GUI.ACTIONS.contains(currentAction)) {
             GUI.ACTIONS.add(currentAction);
             currentAction = null;
         }
         afterSelection();
-        
+
         selected = null;
         outline = null;
     }
@@ -468,17 +478,13 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         if (selected == null) {
             return null;
         }
-        
-        FeatureValue featureValue = null;        
+
+        FeatureValue featureValue = null;
         if (buildMode == BuildMode.ALL_RES) {
-            featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
+            featureValue = intrface.getWorkingBinds().commonFeatMap.get(selected.getFeatureKey());
         } else if (buildMode == BuildMode.TARGET_RES) {
-            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-            if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
-                featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-            } else {
-                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-            }
+            ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
         }
 
         return featureValue;
@@ -487,7 +493,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     private boolean isChangeMadeForAction() {
         return currentAction != null && !prevFeatureValue.equals(getSelectedFeatureValue());
     }
-            
+
     // finalize moving selected
     private void endMovingSelected() {
         // process mouse release
@@ -508,14 +514,14 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                     xr = selected.getPixelArea();
                 }
 
-                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(intrface.getModeWidth(), intrface.getModeHeight(), intrface.getMainPicWidth(), intrface.getMainPicHeight());
+                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(guiResolution.getWidth(), guiResolution.getHeight(), ModuleBuildTask.mainPicWidth, ModuleBuildTask.mainPicHeight);
 
                 mr.minX = Math.round(xr.minX / skvp.getKey());
                 mr.maxX = Math.round(xr.maxX / skvp.getKey());
                 mr.minY = Math.round(xr.minY / skvp.getValue());
                 mr.maxY = Math.round(xr.maxY / skvp.getValue());
 
-                afterSelection();                
+                afterSelection();
             }
 
         }
@@ -806,6 +812,22 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     public GLComponent getOutline() {
         return outline;
+    }
+
+    public boolean isHasFocus() {
+        return hasFocus;
+    }
+
+    public FeatureAction.EditFeature getCurrentAction() {
+        return currentAction;
+    }
+
+    public Resolution getGuiResolution() {
+        return guiResolution;
+    }
+
+    public SectionName getGuiSectionName() {
+        return guiSectionName;
     }
 
 }

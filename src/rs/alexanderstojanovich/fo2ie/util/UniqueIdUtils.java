@@ -18,7 +18,7 @@ package rs.alexanderstojanovich.fo2ie.util;
 
 import java.util.UUID;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
-import rs.alexanderstojanovich.fo2ie.main.Action;
+import rs.alexanderstojanovich.fo2ie.action.Action;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
 

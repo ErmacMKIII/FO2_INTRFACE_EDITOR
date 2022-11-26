@@ -16,6 +16,8 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import rs.alexanderstojanovich.fo2ie.action.Action;
+import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -32,6 +34,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
@@ -73,24 +76,26 @@ public abstract class FeatValueEditor extends JFrame {
         this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
     }
 
-    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
+    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface) {
         FeatureValue oldFeatureValue = null;
-        if (allRes) {
-            oldFeatureValue = intrface.getCommonFeatMap().get(featureKey);
-            intrface.getCommonFeatMap().replace(featureKey, featureValue);
-        } else {
-            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-            if (resolutionPragma != null) {
-                oldFeatureValue = intrface.getCommonFeatMap().get(featureKey);
-                resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
-            }
-        }
-
-        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, allRes ? GLComponent.Inheritance.BASE : GLComponent.Inheritance.DERIVED, featureKey);
+        oldFeatureValue = intrface.getWorkingBinds().getCommonFeatMap().get(featureKey);
+        intrface.getWorkingBinds().commonFeatMap.replace(featureKey, featureValue);
+        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, GLComponent.Inheritance.BASE, featureKey);
         GUI.ACTIONS.add(action);
     }
 
-    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
+    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution) {
+        FeatureValue oldFeatureValue = null;
+        ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+        if (resolutionPragma != null) {
+            oldFeatureValue = resolutionPragma.getCustomFeatMap().get(featureKey);
+            resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
+        }
+        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, GLComponent.Inheritance.DERIVED, featureKey);
+        GUI.ACTIONS.add(action);
+    }
+
+    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface) {
         // remove all components
         this.getContentPane().removeAll();
         this.setTitle(featureKey.getStringValue());
@@ -113,7 +118,7 @@ public abstract class FeatValueEditor extends JFrame {
                     public void actionPerformed(ActionEvent e) {
                         featureValue.setStringValue(txtFld.getText());
                         execute();
-                        apply(featureKey, featureValue, intrface, allRes);
+                        apply(featureKey, featureValue, intrface);
 
                         FeatValueEditor.this.dispose();
                     }
@@ -149,7 +154,7 @@ public abstract class FeatValueEditor extends JFrame {
                     public void actionPerformed(ActionEvent e) {
                         featureValue.setStringValue(txtVal.getText());
                         execute();
-                        apply(featureKey, featureValue, intrface, allRes);
+                        apply(featureKey, featureValue, intrface);
 
                         FeatValueEditor.this.dispose();
                     }
@@ -194,7 +199,143 @@ public abstract class FeatValueEditor extends JFrame {
                         myRect4.maxX = (int) spinZ.getValue();
                         myRect4.maxY = (int) spinW.getValue();
                         execute();
-                        apply(featureKey, featureValue, intrface, allRes);
+                        apply(featureKey, featureValue, intrface);
+
+                        FeatValueEditor.this.dispose();
+                    }
+                });
+                this.getContentPane().add(btnSet);
+
+                btnReset.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        spinX.setValue(Math.round(myRect.minX));
+                        spinY.setValue(Math.round(myRect.minY));
+                        spinZ.setValue(Math.round(myRect.maxX));
+                        spinW.setValue(Math.round(myRect.maxY));
+                        featureValue.setStringValue(strFVal);
+                    }
+                });
+                this.getContentPane().add(btnReset);
+
+                btnCancel.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        FeatValueEditor.this.dispose();
+                    }
+                });
+
+                this.getContentPane().add(btnCancel);
+                break;
+        }
+
+    }
+
+    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution) {
+        // remove all components
+        this.getContentPane().removeAll();
+        this.setTitle(featureKey.getStringValue());
+        // this value is kept for reset
+        final String strFVal = featureValue.getStringValue();
+
+        final JButton btnSet = new JButton("Set");
+        final JButton btnReset = new JButton("Reset");
+        final JButton btnCancel = new JButton("Cancel");
+
+        switch (featureValue.getType()) {
+            case IMAGE:
+                this.setLayout(new GridLayout(3, 2));
+                final JLabel lbl = new JLabel(featureKey.getStringValue() + ":");
+                this.getContentPane().add(lbl);
+                final JTextField txtFld = new JTextField(featureValue.getStringValue(), 16);
+                this.getContentPane().add(txtFld);
+                btnSet.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        featureValue.setStringValue(txtFld.getText());
+                        execute();
+                        apply(featureKey, featureValue, intrface, resolution);
+
+                        FeatValueEditor.this.dispose();
+                    }
+                });
+                this.getContentPane().add(btnSet);
+                btnReset.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        txtFld.setText(strFVal);
+                        featureValue.setStringValue(strFVal);
+                    }
+                });
+                this.getContentPane().add(btnReset);
+
+                btnCancel.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        FeatValueEditor.this.dispose();
+                    }
+                });
+
+                this.getContentPane().add(btnCancel);
+                break;
+            case ARRAY:
+            case SINGLE_VALUE:
+                this.setLayout(new GridLayout(3, 2));
+                final JLabel lbla = new JLabel(featureKey.getStringValue() + ":");
+                this.getContentPane().add(lbla);
+                final JTextField txtVal = new JTextField(featureValue.getStringValue());
+                this.getContentPane().add(txtVal);
+                btnSet.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        featureValue.setStringValue(txtVal.getText());
+                        execute();
+                        apply(featureKey, featureValue, intrface, resolution);
+
+                        FeatValueEditor.this.dispose();
+                    }
+                });
+                this.getContentPane().add(btnSet);
+                btnReset.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        txtVal.setText(strFVal);
+                        featureValue.setStringValue(strFVal);
+                    }
+                });
+                this.getContentPane().add(btnReset);
+                btnCancel.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        FeatValueEditor.this.dispose();
+                    }
+                });
+                this.getContentPane().add(btnCancel);
+                break;
+            case RECT4:
+                this.setLayout(new GridLayout(3, 4));
+                MyRectangle myRect = (MyRectangle) featureValue;
+
+                JLabel lblTL = new JLabel("Top Left:");
+                JSpinner spinX = new JSpinner(new SpinnerNumberModel(Math.round(myRect.minX), -5000, 5000, 1));
+                JSpinner spinY = new JSpinner(new SpinnerNumberModel(Math.round(myRect.minY), -5000, 5000, 1));
+                JLabel lblBR = new JLabel("Bottom Right:");
+                JSpinner spinZ = new JSpinner(new SpinnerNumberModel(Math.round(myRect.maxX), -5000, 5000, 1));
+                JSpinner spinW = new JSpinner(new SpinnerNumberModel(Math.round(myRect.maxY), -5000, 5000, 1));
+                JComponent[] comps = {lblTL, spinX, spinY, lblBR, spinZ, spinW};
+                for (JComponent comp : comps) {
+                    this.getContentPane().add(comp);
+                }
+                btnSet.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        MyRectangle myRect4 = (MyRectangle) featureValue;
+                        myRect4.minX = (int) spinX.getValue();
+                        myRect4.minY = (int) spinY.getValue();
+                        myRect4.maxX = (int) spinZ.getValue();
+                        myRect4.maxY = (int) spinW.getValue();
+                        execute();
+                        apply(featureKey, featureValue, intrface, resolution);
 
                         FeatValueEditor.this.dispose();
                     }

@@ -54,6 +54,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
+import rs.alexanderstojanovich.fo2ie.action.Action;
+import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
@@ -63,6 +65,7 @@ import rs.alexanderstojanovich.fo2ie.helper.ToggleButtonEditor;
 import rs.alexanderstojanovich.fo2ie.helper.ToggleButtonRenderer;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
@@ -98,13 +101,13 @@ public class GUI extends javax.swing.JFrame {
     private final Intrface intrface = new Intrface();
     private final FPSAnimator fpsAnim = new FPSAnimator(GL_CANVAS, FPSAnimator.DEFAULT_FRAMES_PER_INTERVAL, true);
     private final Module module = new Module();
-    private final ModuleRenderer mdlRenderer = new ModuleRenderer(fpsAnim, module, intrface) {
+    private final ModuleRenderer mdlRenderer = new ModuleRenderer(fpsAnim, module, intrface, this.currentResolution, this.currentSectionName) {
         @Override
         public void afterSelection() {
             putSelectedOnLabel();
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
-            updateComponentsPreview();                       
+            updateComponentsPreview();
             displayActionLog();
         }
 
@@ -122,7 +125,7 @@ public class GUI extends javax.swing.JFrame {
         }
     };
 
-    private final WindowRenderer winRenderer = new WindowRenderer(fpsAnim, module, intrface) {
+    private final WindowRenderer winRenderer = new WindowRenderer(fpsAnim, module, intrface, this.currentResolution, this.currentSectionName) {
         @Override
         public void afterSelection() {
             putSelectedOnLabel();
@@ -195,6 +198,9 @@ public class GUI extends javax.swing.JFrame {
 
     protected static final List<Action> ACTIONS = new ArrayList<>();
 
+    protected Section.SectionName currentSectionName = Section.SectionName.Aim;
+    protected Resolution currentResolution = Resolution.DEFAULT;
+
     /**
      * Creates new form GUI
      */
@@ -213,6 +219,7 @@ public class GUI extends javax.swing.JFrame {
         initMenuDialogs(); // init menu dialogs
         initTabPaneIcons(); // init tab icons
         initIconsForFeatTables();
+        this.cmbBoxSection.getSelectedItem();
         progress += 25.0f;
     }
 
@@ -883,19 +890,16 @@ public class GUI extends javax.swing.JFrame {
     private void loadFromButton() {
         boolean ok = intrface.readIniFile();
         if (ok) {
-            final List<String> resStrs = new ArrayList<>();
-            List<ResolutionPragma> customResolutions = intrface.getCustomResolutions();
-
-            for (ResolutionPragma resPrag : customResolutions) {
-                String resStr = String.valueOf(resPrag.getWidth()) + "x" + String.valueOf(resPrag.getHeight());
-                resStrs.add(resStr);
-            }
-
-            final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
-            this.cmbBoxResolution.setModel(resModel);
-
             if (intrface.getErrorNum() == 0) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
+                final List<String> resStrs = new ArrayList<>();
+                List<ResolutionPragma> customResolutions = intrface.getWorkingBinds().customResolutions;
+                for (ResolutionPragma resPrag : customResolutions) {
+                    String resStr = String.valueOf(resPrag.getResolution().getWidth()) + "x" + String.valueOf(resPrag.getResolution().getHeight());
+                    resStrs.add(resStr);
+                }
+                final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
+                this.cmbBoxResolution.setModel(resModel);
             } else if (cfg.isIgnoreErrors()) {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
@@ -916,19 +920,16 @@ public class GUI extends javax.swing.JFrame {
     private void loadFromMenu() {
         boolean ok = intrface.readIniFile(targetIniFile);
         if (ok) {
-            final List<String> resStrs = new ArrayList<>();
-            List<ResolutionPragma> customResolutions = intrface.getCustomResolutions();
-
-            for (ResolutionPragma resPrag : customResolutions) {
-                String resStr = String.valueOf(resPrag.getWidth()) + "x" + String.valueOf(resPrag.getHeight());
-                resStrs.add(resStr);
-            }
-
-            final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
-            this.cmbBoxResolution.setModel(resModel);
-
             if (intrface.getErrorNum() == 0) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
+                final List<String> resStrs = new ArrayList<>();
+                List<ResolutionPragma> customResolutions = intrface.getWorkingBinds().customResolutions;
+                for (ResolutionPragma resPrag : customResolutions) {
+                    String resStr = String.valueOf(resPrag.getResolution().getWidth()) + "x" + String.valueOf(resPrag.getResolution().getHeight());
+                    resStrs.add(resStr);
+                }
+                final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
+                this.cmbBoxResolution.setModel(resModel);
             } else if (cfg.isIgnoreErrors()) {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
@@ -1106,7 +1107,7 @@ public class GUI extends javax.swing.JFrame {
 
         // featKey, featVal, intrface, btnTogAllRes.isSelected()
         final FeatValueEditor fve = FeatValueEditor.getInstance(this);
-        fve.popUp(featKey, featVal, intrface, btnTogAllRes.isSelected());
+        fve.popUp(featKey, featVal, intrface);
 
         tblBaseFeats.getSelectionModel().clearSelection();
 
@@ -1126,7 +1127,7 @@ public class GUI extends javax.swing.JFrame {
 
         // featKey, featVal, intrface, btnTogAllRes.isSelected()
         final FeatValueEditor fve = FeatValueEditor.getInstance(this);
-        fve.popUp(featKey, featVal, intrface, btnTogAllRes.isSelected());
+        fve.popUp(featKey, featVal, intrface, currentResolution);
 
         tblDerivedFeats.getSelectionModel().clearSelection();
 
@@ -1145,7 +1146,7 @@ public class GUI extends javax.swing.JFrame {
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
         if (val == JOptionPane.YES_OPTION) {
-            intrface.getCommonFeatMap().remove(featKey);
+            intrface.getWorkingBinds().getCommonFeatMap().remove(featKey);
             DefaultTableModel model = (DefaultTableModel) tblBaseFeats.getModel();
             model.removeRow(srow);
 
@@ -1172,9 +1173,10 @@ public class GUI extends javax.swing.JFrame {
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
         if (val == JOptionPane.YES_OPTION) {
-            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-            if (resolutionPragma != null) {
-                resolutionPragma.getCustomFeatMap().remove(featKey);
+            Resolution resolution = currentResolution;
+            if (resolution != null) {
+                ResolutionPragma resPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+                resPragma.getCustomFeatMap().remove(featKey);
             }
 
             DefaultTableModel model = (DefaultTableModel) tblDerivedFeats.getModel();
@@ -1270,9 +1272,9 @@ public class GUI extends javax.swing.JFrame {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
         Section section = intrface.getNameToSectionMap().get(sectionName);
         for (FeatureKey featKey : section.getKeys()) {
-            FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
+            FeatureValue featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
             int overrides = 0;
-            for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
+            for (ResolutionPragma resPragma : intrface.getWorkingBinds().getCustomResolutions()) {
                 if (resPragma.getCustomFeatMap().containsKey(featKey)) {
                     overrides++;
                 }
@@ -1301,8 +1303,8 @@ public class GUI extends javax.swing.JFrame {
             String[] things = resStr.trim().split("x");
             int width = Integer.parseInt(things[0]);
             int height = Integer.parseInt(things[1]);
-            for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                if (resolution.getWidth() == width && resolution.getHeight() == height) {
+            for (ResolutionPragma resolution : intrface.getWorkingBinds().getCustomResolutions()) {
+                if (resolution.getResolution().getWidth() == width && resolution.getResolution().getHeight() == height) {
                     resolutionPragma = resolution;
                     break;
                 }
@@ -1375,7 +1377,7 @@ public class GUI extends javax.swing.JFrame {
             for (FeatureKey featKey : section.getKeys()) {
                 FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
 
-                boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
+                boolean overrides = intrface.getWorkingBinds().getCommonFeatMap().containsKey(featKey);
 
                 if (featVal != null) {
                     Object[] row = {featKey.getStringValue(), featVal.getStringValue(), overrides};
@@ -1400,9 +1402,9 @@ public class GUI extends javax.swing.JFrame {
 
         for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
             FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
-            FeatureValue featVal = intrface.getCommonFeatMap().get(featKey);
+            FeatureValue featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
             int overrides = 0;
-            for (ResolutionPragma resPragma : intrface.getCustomResolutions()) {
+            for (ResolutionPragma resPragma : intrface.getWorkingBinds().getCustomResolutions()) {
                 if (resPragma.getCustomFeatMap().containsKey(featKey)) {
                     overrides++;
                 }
@@ -1426,9 +1428,9 @@ public class GUI extends javax.swing.JFrame {
             String[] things = resStr.trim().split("x");
             int width = Integer.parseInt(things[0]);
             int height = Integer.parseInt(things[1]);
-            for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                    resolutionPragma = resolution;
+            for (ResolutionPragma resPragma : intrface.getWorkingBinds().getCustomResolutions()) {
+                if (resPragma.getResolution().getWidth() == width && resPragma.getResolution().getHeight() == height) {
+                    resolutionPragma = resPragma;
                     break;
                 }
             }
@@ -1441,7 +1443,7 @@ public class GUI extends javax.swing.JFrame {
                 FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
                 FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
 
-                boolean overrides = intrface.getCommonFeatMap().containsKey(featKey);
+                boolean overrides = intrface.getWorkingBinds().getCommonFeatMap().containsKey(featKey);
 
                 if (featVal != null) {
                     Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
@@ -1458,10 +1460,9 @@ public class GUI extends javax.swing.JFrame {
 
     // cuz its called from another thread (and may be called repeatedly)
     private void initBuildModule() {
-        SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
+        this.currentSectionName = (SectionName) cmbBoxSection.getSelectedItem();
         if (mode == Mode.ALL_RES) {
-            intrface.setSectionName(sectionName);
-            intrface.setResolutionPragma(null);
+            this.currentResolution = Resolution.DEFAULT;
         } else if (mode == Mode.TARGET_RES) {
             String resStr = (String) cmbBoxResolution.getSelectedItem();
             if (resStr != null) {
@@ -1469,21 +1470,11 @@ public class GUI extends javax.swing.JFrame {
                 int width = Integer.parseInt(things[0]);
                 int height = Integer.parseInt(things[1]);
 
-                ResolutionPragma resolutionPragma = null;
-                for (ResolutionPragma resolution : intrface.getCustomResolutions()) {
-                    if (resolution.getWidth() == width && resolution.getHeight() == height) {
-                        resolutionPragma = resolution;
-                        break;
-                    }
-                }
-
-                if (resolutionPragma != null) {
-                    intrface.setSectionName(sectionName);
-                    intrface.setResolutionPragma(resolutionPragma);
-                }
+                this.currentResolution = new Resolution(width, height);
             }
         }
-
+        mdlRenderer.guiResolution = currentResolution;
+        mdlRenderer.guiSectionName = currentSectionName;        
     }
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
@@ -1493,10 +1484,8 @@ public class GUI extends javax.swing.JFrame {
         updateDerivedFeaturePreview();
         updateComponentsPreview();
         workOnBuildComponents();
-        if (intrface.getResolutionPragma() != null) {
-            int width = intrface.getResolutionPragma().getWidth();
-            int height = intrface.getResolutionPragma().getHeight();
-            GL_WINDOW.setSize(width, height);
+        if (currentResolution != null) {
+            GL_WINDOW.setSize(currentResolution.getWidth(), currentResolution.getHeight());
             GL_WINDOW.setTitle(cmbBoxSection.getSelectedItem() + " (Press F12 to take screenshot)");
         }
         GL_WINDOW.setFullscreen(true);
@@ -1605,18 +1594,22 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
-        if (intrface.getSectionName() != cmbBoxSection.getSelectedItem()) {
+        String[] things = cmbBoxResolution.getSelectedItem().toString().split("x");
+        currentResolution = new Resolution(Integer.parseInt(things[0]), Integer.parseInt(things[1]));
+        if (currentResolution != cmbBoxSection.getSelectedItem()) {
             mdlRenderer.deselect();
             mdlRenderer.module.components.clear();
             initBaseFeaturePreview();
+            initDerivedFeaturePreview();
             initComponentsPreview();
             workOnBuildComponents();
-        }
+        }                
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed
         // TODO add your handling code here:
         initBaseFeaturePreview();
+        initDerivedFeaturePreview();
         initComponentsPreview();
         workOnBuildComponents();
     }//GEN-LAST:event_cmbBoxResolutionActionPerformed
@@ -1787,22 +1780,23 @@ public class GUI extends javax.swing.JFrame {
         }
 
         if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.BASE) {
-            featVal = intrface.getCommonFeatMap().get(featKey);
-        } else if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.DERIVED) {
-            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-            if (resolutionPragma != null) {
-                featVal = resolutionPragma.getCustomFeatMap().get(featKey);
-            }
-        }
-
-        if (glcKey != null && featVal != null) {
             tblComps.getSelectionModel().clearSelection();
-            //(featKey, featVal, intrface, btnTogAllRes.isSelected(), glcKey)
             final ComponentEditor compEditor = ComponentEditor.getInstance(this);
-            compEditor.popUp(featKey, featVal, intrface, glcKey.getInheritance() == GLComponent.Inheritance.BASE, glcKey);
+            featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
+            compEditor.popUp(featKey, featVal, intrface, glcKey);
             compEditor.setVisible(true);
             compEditor.setResizable(false);
             compEditor.pack();
+        } else if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.DERIVED) {
+            if (currentResolution != null) {
+                tblComps.getSelectionModel().clearSelection();
+                final ComponentEditor compEditor = ComponentEditor.getInstance(this);
+                featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
+                compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
+                compEditor.setVisible(true);
+                compEditor.setResizable(false);
+                compEditor.pack();
+            }
         }
     }
 
@@ -1947,7 +1941,7 @@ public class GUI extends javax.swing.JFrame {
         if (srow <= 0 || srow >= tblActions.getModel().getRowCount()) {
             return;
         }
-        
+
         Object uuid = tblActions.getValueAt(srow, scol - 6);
 
         Action actKey = null;
@@ -1967,7 +1961,7 @@ public class GUI extends javax.swing.JFrame {
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
-            buildModuleComponents();            
+            buildModuleComponents();
         }
 
     }
