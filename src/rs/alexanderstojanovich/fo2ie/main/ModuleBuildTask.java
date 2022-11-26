@@ -60,11 +60,11 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     protected final GL2 gl20;
     protected final SectionName sectionName;
     protected final ModuleRenderer.BuildMode buildMode;
-    
+
     protected Resolution buildResolution = Resolution.DEFAULT;
     protected static int mainPicWidth = 800;
     protected static int mainPicHeight = 600;
-    
+
     /**
      * Create new task to build the module
      *

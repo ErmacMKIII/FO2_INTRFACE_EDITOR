@@ -71,5 +71,4 @@ public class Resolution {
         return "Resolution{" + "width=" + width + ", height=" + height + '}';
     }
 
-    
 }

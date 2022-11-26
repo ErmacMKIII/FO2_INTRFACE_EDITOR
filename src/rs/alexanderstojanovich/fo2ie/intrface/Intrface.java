@@ -781,6 +781,6 @@ public class Intrface {
 
     public Vector4f getQmarkColor() {
         return qmarkColor;
-    }    
+    }
 
 }

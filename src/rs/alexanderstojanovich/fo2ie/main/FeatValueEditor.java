@@ -80,8 +80,6 @@ public abstract class FeatValueEditor extends JFrame {
         FeatureValue oldFeatureValue = null;
         oldFeatureValue = intrface.getWorkingBinds().getCommonFeatMap().get(featureKey);
         intrface.getWorkingBinds().commonFeatMap.replace(featureKey, featureValue);
-        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, GLComponent.Inheritance.BASE, featureKey);
-        GUI.ACTIONS.add(action);
     }
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution) {
@@ -91,8 +89,6 @@ public abstract class FeatValueEditor extends JFrame {
             oldFeatureValue = resolutionPragma.getCustomFeatMap().get(featureKey);
             resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
         }
-        Action action = new FeatureAction.EditFeature(intrface, oldFeatureValue, GLComponent.Inheritance.DERIVED, featureKey);
-        GUI.ACTIONS.add(action);
     }
 
     public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface) {

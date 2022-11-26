@@ -24,7 +24,6 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -139,11 +138,6 @@ public abstract class FeatValueAdder extends JFrame {
             }
         }
 
-        if (ok) {
-            Action action = new FeatureAction.AddFeature(intrface, inheritance, featKey);
-            GUI.ACTIONS.add(action);
-        }
-
         return ok;
     }
 
@@ -187,11 +181,6 @@ public abstract class FeatValueAdder extends JFrame {
                     ok = true;
                 }
             }
-        }
-
-        if (ok) {
-            Action action = new FeatureAction.AddFeature(intrface, inheritance, featKey);
-            GUI.ACTIONS.add(action);
         }
 
         return ok;

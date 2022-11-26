@@ -16,7 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
-import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -103,9 +102,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     private boolean hasFocus = false;
 
-    protected FeatureAction.EditFeature currentAction = null;
-    protected FeatureValue prevFeatureValue = new MyRectangle();
-
     /**
      * State of the machine
      */
@@ -122,8 +118,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         ALL_RES, TARGET_RES;
     };
 
-    protected Resolution guiResolution;
-    protected SectionName guiSectionName;
+    protected Resolution guiResolution = Resolution.DEFAULT;
+    protected SectionName guiSectionName = SectionName.Aim;
 
     protected BuildMode buildMode = BuildMode.TARGET_RES;
 
@@ -387,7 +383,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords) && glc.getFeatureKey().getStringValue().equals(textHint.getContent())) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-                prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
                 break;
             }
         }
@@ -404,7 +399,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-                prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
                 break;
             }
         }
@@ -420,7 +414,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (glc.isEnabled() && glc.getUniqueId().equals(uniqueId)) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-                prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
                 break;
             }
         }
@@ -436,7 +429,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             GLComponent glc = module.components.get(Math.max(--selectedIndex, 0));
             selected = glc;
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-            prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
         }
 
         afterSelection();
@@ -451,7 +443,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             GLComponent glc = module.components.get(Math.min(++selectedIndex, size - 1));
             selected = glc;
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-            prevFeatureValue.setStringValue(getSelectedFeatureValue().getStringValue());
         }
 
         afterSelection();
@@ -459,15 +450,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     // deselects all (CTRL + D)
     public void deselect() {
-        if (selected != null && currentAction == null) {
-            currentAction = new FeatureAction.EditFeature(intrface, prevFeatureValue, selected.getInheritance(), selected.getFeatureKey());
-        }
-
         endMovingSelected();
-        if (isChangeMadeForAction() && !GUI.ACTIONS.contains(currentAction)) {
-            GUI.ACTIONS.add(currentAction);
-            currentAction = null;
-        }
         afterSelection();
 
         selected = null;
@@ -485,13 +468,12 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         } else if (buildMode == BuildMode.TARGET_RES) {
             ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
             featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+            if (featureValue == null) {
+                featureValue = intrface.getWorkingBinds().commonFeatMap.get(selected.getFeatureKey());
+            }
         }
 
         return featureValue;
-    }
-
-    private boolean isChangeMadeForAction() {
-        return currentAction != null && !prevFeatureValue.equals(getSelectedFeatureValue());
     }
 
     // finalize moving selected
@@ -816,10 +798,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     public boolean isHasFocus() {
         return hasFocus;
-    }
-
-    public FeatureAction.EditFeature getCurrentAction() {
-        return currentAction;
     }
 
     public Resolution getGuiResolution() {

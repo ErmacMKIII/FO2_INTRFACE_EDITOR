@@ -16,8 +16,8 @@
  */
 package rs.alexanderstojanovich.fo2ie.action;
 
-import java.util.Date;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
 /**
@@ -26,22 +26,16 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
  */
 public interface Action {
 
-    public static enum Type {
-        ADD_FEATURE, EDIT_FEATURE, REMOVE_FEATURE;
-    }
-
     public String getUniqueId();
 
     public FeatureKey getFeatureKey();
 
-    public Type getType();
+    public FeatureValue getWorkingValue();
+
+    public FeatureValue getOriginalValue();
 
     public GLComponent.Inheritance getInheritance();
 
     public void undo();
-
-    public Date getTimestamp();
-
-    public String getDescription();
 
 }

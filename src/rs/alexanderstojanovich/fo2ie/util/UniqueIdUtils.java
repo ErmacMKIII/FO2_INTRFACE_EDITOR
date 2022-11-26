@@ -18,9 +18,9 @@ package rs.alexanderstojanovich.fo2ie.util;
 
 import java.util.UUID;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
-import rs.alexanderstojanovich.fo2ie.action.Action;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
-import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
 
 /**
  *
@@ -28,14 +28,40 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
  */
 public class UniqueIdUtils {
 
-    public static String GenerateNewUniqueId(FeatureKey featureKey, Action.Type type, Inheritance inheritance, String description) {
-        UUID guid = UUID.nameUUIDFromBytes(featureKey.toString().concat(type.name()).concat(inheritance.name()).concat(description).getBytes());
+    /**
+     * Generate new UniqueId for Action - Modification to the bindings.
+     *
+     * @param featureKey feature key
+     * @param original original value
+     * @param working working value
+     * @param inheritance BASE or DEREIVED
+     * @param resolution DEFAULT(800x600) or RESOLUTION(width x height)
+     *
+     * @return UniqueId
+     */
+    public static final String GenerateNewUniqueId(FeatureKey featureKey, FeatureValue original, FeatureValue working, GLComponent.Inheritance inheritance, Resolution resolution) {
+        int width = resolution.getWidth();
+        int height = resolution.getHeight();
+        String dim = String.valueOf(width) + "x" + String.valueOf(height);
+        String string = String.valueOf(featureKey) + original.getStringValue() + working.getStringValue() + inheritance + dim;
+        UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
         String guidStr = guid.toString();
         String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);
         return result;
     }
 
-    public static final String GenerateNewUniqueId(FeatureKey featureKey, GLComponent.Type type, Inheritance inheritance, int width, int height) {
+    /**
+     * Generate new UniqueId for Action - Modification to the bindings.
+     *
+     * @param featureKey feature key
+     * @param type GLComponent type
+     * @param inheritance BASE or DERIVED
+     * @param width GLComponent pixel width
+     * @param height GLComponent pixel height
+     *
+     * @return UniqueId
+     */
+    public static String GenerateNewUniqueId(FeatureKey featureKey, GLComponent.Type type, GLComponent.Inheritance inheritance, int width, int height) {
         String dim = String.valueOf(width) + "x" + String.valueOf(height);
         String string = String.valueOf(featureKey) + type + inheritance + dim;
         UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
@@ -43,4 +69,5 @@ public class UniqueIdUtils {
         String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);
         return result;
     }
+
 }

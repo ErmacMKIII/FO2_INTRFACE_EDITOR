@@ -1141,7 +1141,7 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblBaseFeats.getSelectedRow();
         final int scol = tblBaseFeats.getSelectedColumn();
         Object valueAtKey = tblBaseFeats.getValueAt(srow, scol - 4);
-        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 3);
+//        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 3);
 
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
@@ -1157,9 +1157,6 @@ public class GUI extends javax.swing.JFrame {
             updateComponentsPreview();
 
             buildModuleComponents();
-
-            Action action = new FeatureAction.RemoveFeature(intrface, FeatureValue.valueOf((String) valueAtVal), GLComponent.Inheritance.BASE, featKey);
-            GUI.ACTIONS.add(action);
         }
     }
 
@@ -1168,7 +1165,7 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblDerivedFeats.getSelectedRow();
         final int scol = tblDerivedFeats.getSelectedColumn();
         Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 4);
-        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 3);
+//        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 3);
 
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
@@ -1189,9 +1186,6 @@ public class GUI extends javax.swing.JFrame {
             updateComponentsPreview();
 
             buildModuleComponents();
-
-            Action action = new FeatureAction.RemoveFeature(intrface, FeatureValue.valueOf((String) valueAtVal), GLComponent.Inheritance.DERIVED, featKey);
-            GUI.ACTIONS.add(action);
         }
     }
 
@@ -1474,7 +1468,7 @@ public class GUI extends javax.swing.JFrame {
             }
         }
         mdlRenderer.guiResolution = currentResolution;
-        mdlRenderer.guiSectionName = currentSectionName;        
+        mdlRenderer.guiSectionName = currentSectionName;
     }
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
@@ -1603,7 +1597,7 @@ public class GUI extends javax.swing.JFrame {
             initDerivedFeaturePreview();
             initComponentsPreview();
             workOnBuildComponents();
-        }                
+        }
     }//GEN-LAST:event_cmbBoxSectionActionPerformed
 
     private void cmbBoxResolutionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxResolutionActionPerformed
@@ -1970,7 +1964,7 @@ public class GUI extends javax.swing.JFrame {
         final DefaultTableModel actTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return (column == 6);
+                return (column == 5);
             }
         };
 
@@ -2005,10 +1999,9 @@ public class GUI extends javax.swing.JFrame {
 
         actTblMdl.addColumn("Unique Id");
         actTblMdl.addColumn("Inheritance");
-        actTblMdl.addColumn("FeatureKey");
-        actTblMdl.addColumn("Description");
-        actTblMdl.addColumn("Type");
-        actTblMdl.addColumn("Timestamp");
+        actTblMdl.addColumn("Feature Key");
+        actTblMdl.addColumn("Original Value");
+        actTblMdl.addColumn("Working Value");
         actTblMdl.addColumn("Undo");
 
         final ButtonEditor undoEdit = new ButtonEditor(new JButton("Undo", undoIcon));
@@ -2021,8 +2014,12 @@ public class GUI extends javax.swing.JFrame {
         final ButtonRenderer undoRend = new ButtonRenderer(undoEdit.getButton());
 
         for (Action action : GUI.ACTIONS) {
-            Object[] row = {action.getUniqueId(), action.getInheritance(), action.getFeatureKey().getStringValue(),
-                action.getDescription(), action.getType().toString(), DATE_FORMAT.format(action.getTimestamp())};
+            Object[] row = {
+                action.getUniqueId(),
+                action.getInheritance(),
+                action.getFeatureKey().getStringValue(),
+                action.getOriginalValue().getStringValue(),
+                action.getWorkingValue().getStringValue(),};
             actTblMdl.addRow(row);
         }
 
