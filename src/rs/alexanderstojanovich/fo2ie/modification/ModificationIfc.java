@@ -14,21 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package rs.alexanderstojanovich.fo2ie.action;
+package rs.alexanderstojanovich.fo2ie.modification;
 
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
+import rs.alexanderstojanovich.fo2ie.intrface.Dictionary;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public interface Action {
+public interface ModificationIfc {
 
     public String getUniqueId();
 
     public FeatureKey getFeatureKey();
+
+    public Dictionary getOriginalVersion();
+
+    public Dictionary getModifiedVersion();
 
     public FeatureValue getWorkingValue();
 

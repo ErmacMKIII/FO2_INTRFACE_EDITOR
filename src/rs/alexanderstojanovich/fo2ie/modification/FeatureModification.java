@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package rs.alexanderstojanovich.fo2ie.action;
+package rs.alexanderstojanovich.fo2ie.modification;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.Objects;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
+import rs.alexanderstojanovich.fo2ie.intrface.Dictionary;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
@@ -31,29 +30,27 @@ import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class FeatureAction implements Action {
+public class FeatureModification implements ModificationIfc {
 
     protected String uniqueId;
     protected GLComponent.Inheritance inheritance;
-    protected Intrface intrface;
     protected final FeatureKey featureKey;
     protected final Resolution resolution;
+    private final Dictionary original;
+    private final Dictionary modified;
 
-    public FeatureAction(Intrface intrface, FeatureKey featureKey, GLComponent.Inheritance inheritance, Resolution resolution) {
-        this.intrface = intrface;
+    public FeatureModification(Dictionary original, Dictionary modified, FeatureKey featureKey, GLComponent.Inheritance inheritance, Resolution resolution) {
+        this.original = original;
+        this.modified = modified;
         this.featureKey = featureKey;
         this.inheritance = inheritance;
         this.resolution = resolution;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, getOriginalValue(), getWorkingValue(), inheritance, resolution);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, inheritance, resolution);
     }
 
     @Override
     public GLComponent.Inheritance getInheritance() {
         return inheritance;
-    }
-
-    public Intrface getIntrface() {
-        return intrface;
     }
 
     @Override
@@ -66,10 +63,10 @@ public class FeatureAction implements Action {
         FeatureValue result = null;
         switch (inheritance) {
             case BASE:
-                result = intrface.getWorkingBinds().commonFeatMap.get(featureKey);
+                result = modified.commonFeatMap.get(featureKey);
                 break;
             case DERIVED:
-                ResolutionPragma resPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+                ResolutionPragma resPragma = modified.customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 if (resPragma != null) {
                     result = resPragma.getCustomFeatMap().get(featureKey);
                 }
@@ -84,10 +81,10 @@ public class FeatureAction implements Action {
         FeatureValue result = null;
         switch (inheritance) {
             case BASE:
-                result = intrface.getOriginalBinds().commonFeatMap.get(featureKey);
+                result = original.commonFeatMap.get(featureKey);
                 break;
             case DERIVED:
-                ResolutionPragma resPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+                ResolutionPragma resPragma = original.customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 if (resPragma != null) {
                     result = resPragma.getCustomFeatMap().get(featureKey);
                 }
@@ -99,11 +96,13 @@ public class FeatureAction implements Action {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 29 * hash + Objects.hashCode(this.uniqueId);
-        hash = 29 * hash + Objects.hashCode(this.inheritance);
-        hash = 29 * hash + Objects.hashCode(this.intrface);
-        hash = 29 * hash + Objects.hashCode(this.featureKey);
+        int hash = 7;
+        hash = 23 * hash + Objects.hashCode(this.uniqueId);
+        hash = 23 * hash + Objects.hashCode(this.inheritance);
+        hash = 23 * hash + Objects.hashCode(this.featureKey);
+        hash = 23 * hash + Objects.hashCode(this.resolution);
+        hash = 23 * hash + Objects.hashCode(this.original);
+        hash = 23 * hash + Objects.hashCode(this.modified);
         return hash;
     }
 
@@ -118,18 +117,23 @@ public class FeatureAction implements Action {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final FeatureAction other = (FeatureAction) obj;
+        final FeatureModification other = (FeatureModification) obj;
         if (!Objects.equals(this.uniqueId, other.uniqueId)) {
             return false;
         }
         if (this.inheritance != other.inheritance) {
             return false;
         }
-        if (!Objects.equals(this.intrface, other.intrface)) {
+        if (!Objects.equals(this.featureKey, other.featureKey)) {
             return false;
         }
-
-        return Objects.equals(this.featureKey, other.featureKey);
+        if (!Objects.equals(this.resolution, other.resolution)) {
+            return false;
+        }
+        if (!Objects.equals(this.original, other.original)) {
+            return false;
+        }
+        return Objects.equals(this.modified, other.modified);
     }
 
     @Override
@@ -143,14 +147,14 @@ public class FeatureAction implements Action {
         switch (inheritance) {
             case BASE:
                 if (originalValue == null) {
-                    intrface.getWorkingBinds().commonFeatMap.remove(featureKey);
+                    modified.commonFeatMap.remove(featureKey);
                 } else {
-                    intrface.getWorkingBinds().commonFeatMap.replace(featureKey, getWorkingValue(), originalValue);
+                    modified.commonFeatMap.replace(featureKey, getWorkingValue(), originalValue);
                 }
                 break;
 
             case DERIVED:
-                ResolutionPragma resPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+                ResolutionPragma resPragma = modified.customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 if (originalValue == null) {
                     resPragma.getCustomFeatMap().remove(featureKey);
                 } else {
@@ -158,6 +162,16 @@ public class FeatureAction implements Action {
                 }
                 break;
         }
+    }
+
+    @Override
+    public Dictionary getOriginalVersion() {
+        return original;
+    }
+
+    @Override
+    public Dictionary getModifiedVersion() {
+        return modified;
     }
 
 }

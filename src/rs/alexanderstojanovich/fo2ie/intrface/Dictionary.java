@@ -20,8 +20,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import rs.alexanderstojanovich.fo2ie.modification.FeatureModification;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 
 /**
  *
@@ -50,9 +55,11 @@ public class Dictionary {
         // copy common feat mappings 
         for (FeatureKey fk : this.commonFeatMap.keySet()) {
             if (replace && dest.commonFeatMap.containsKey(fk)) {
-                dest.commonFeatMap.replace(fk, this.commonFeatMap.get(fk));
+                FeatureValue fv = FeatureValue.valueOf(this.commonFeatMap.get(fk).getStringValue());
+                dest.commonFeatMap.replace(fk, fv);
             } else if (!dest.commonFeatMap.containsKey(fk)) {
-                dest.commonFeatMap.putIfAbsent(fk, this.commonFeatMap.get(fk));
+                FeatureValue fv = FeatureValue.valueOf(this.commonFeatMap.get(fk).getStringValue());
+                dest.commonFeatMap.putIfAbsent(fk, fv);
             }
         }
         // copy custom resolutions mapping
@@ -61,14 +68,91 @@ public class Dictionary {
             ResolutionPragma destCustomResolutionPragma = new ResolutionPragma(thisRsPrgm.resolution.getWidth(), thisRsPrgm.resolution.getHeight());
             for (FeatureKey fk : thisRsPrgm.customFeatMap.keySet()) {
                 if (replace && destCustomResolutionPragma.customFeatMap.containsKey(fk)) {
-                    destCustomResolutionPragma.customFeatMap.replace(fk, thisRsPrgm.customFeatMap.get((fk)));
+                    FeatureValue fv = FeatureValue.valueOf(thisRsPrgm.customFeatMap.get(fk).getStringValue());
+                    destCustomResolutionPragma.customFeatMap.replace(fk, fv);
                 } else if (!destCustomResolutionPragma.customFeatMap.containsKey(fk)) {
-                    destCustomResolutionPragma.customFeatMap.putIfAbsent(fk, thisRsPrgm.customFeatMap.get((fk)));
+                    FeatureValue fv = FeatureValue.valueOf(thisRsPrgm.customFeatMap.get(fk).getStringValue());
+                    destCustomResolutionPragma.customFeatMap.putIfAbsent(fk, fv);
                 }
             }
             dest.customResolutions.add(destCustomResolutionPragma);
         }
 
+    }
+
+    /**
+     * Get List of Modifications when dictionary modified is compared to
+     * original.
+     *
+     * @param original original dictionary
+     * @param modified modified dictionary
+     * @return list of modifications (possible to undo)
+     */
+    public static List<ModificationIfc> difference(Dictionary original, Dictionary modified) {
+        List<ModificationIfc> result = new ArrayList<>();
+
+        Set<FeatureKey> oCommonKeyset = original.commonFeatMap.keySet();
+        Set<FeatureKey> mCommonKeyset = modified.commonFeatMap.keySet();
+
+        List<FeatureKey> moCommonDifference = mCommonKeyset.stream().filter(m -> !oCommonKeyset.contains(m) || !modified.commonFeatMap.get(m).equals(original.commonFeatMap.get(m))).collect(Collectors.toList());
+
+        for (FeatureKey featureKey : moCommonDifference) {
+            ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.BASE, Resolution.DEFAULT);
+            result.add(modification);
+        }
+
+        for (ResolutionPragma mCustResolutionPragma : modified.customResolutions) {
+            ResolutionPragma oCustResolutionPragma = original.customResolutions.stream().filter(x -> x.resolution.equals(mCustResolutionPragma.resolution)).findFirst().orElse(null);
+            if (oCustResolutionPragma != null) {
+                Set<FeatureKey> oCustomKeyset = oCustResolutionPragma.customFeatMap.keySet();
+                Set<FeatureKey> mCustomKeyset = mCustResolutionPragma.customFeatMap.keySet();
+                List<FeatureKey> moCustomDifference = mCustomKeyset.stream().filter(m -> !oCustomKeyset.contains(m) || !mCustResolutionPragma.customFeatMap.get(m).equals(oCustResolutionPragma.customFeatMap.get(m))).collect(Collectors.toList());
+                for (FeatureKey featureKey : moCustomDifference) {
+                    ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.DERIVED, mCustResolutionPragma.resolution);
+                    result.add(modification);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Get List of Modifications when dictionary modified is compared to
+     * original.
+     *
+     * @param original original dictionary
+     * @param modified modified dictionary
+     * @param outResult out result list of modifications (possible to undo)
+     * @return is there any difference (true - if they differ, false - equal)
+     */
+    public static boolean difference(Dictionary original, Dictionary modified, List<ModificationIfc> outResult) {
+        outResult.clear();
+
+        Set<FeatureKey> oCommonKeyset = original.commonFeatMap.keySet();
+        Set<FeatureKey> mCommonKeyset = modified.commonFeatMap.keySet();
+
+        List<FeatureKey> moCommonDifference = mCommonKeyset.stream().filter(m -> !oCommonKeyset.contains(m) || !modified.commonFeatMap.get(m).equals(original.commonFeatMap.get(m))).collect(Collectors.toList());
+
+        for (FeatureKey featureKey : moCommonDifference) {
+            ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.BASE, Resolution.DEFAULT);
+            outResult.add(modification);
+        }
+
+        for (ResolutionPragma mCustResolutionPragma : modified.customResolutions) {
+            ResolutionPragma oCustResolutionPragma = original.customResolutions.stream().filter(x -> x.resolution.equals(mCustResolutionPragma.resolution)).findFirst().orElse(null);
+            if (oCustResolutionPragma != null) {
+                Set<FeatureKey> oCustomKeyset = oCustResolutionPragma.customFeatMap.keySet();
+                Set<FeatureKey> mCustomKeyset = mCustResolutionPragma.customFeatMap.keySet();
+                List<FeatureKey> moCustomDifference = mCustomKeyset.stream().filter(m -> !oCustomKeyset.contains(m) || !mCustResolutionPragma.customFeatMap.get(m).equals(oCustResolutionPragma.customFeatMap.get(m))).collect(Collectors.toList());
+                for (FeatureKey featureKey : moCustomDifference) {
+                    ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.DERIVED, mCustResolutionPragma.resolution);
+                    outResult.add(modification);
+                }
+            }
+        }
+
+        return !outResult.isEmpty();
     }
 
     public Map<FeatureKey, FeatureValue> getCommonFeatMap() {

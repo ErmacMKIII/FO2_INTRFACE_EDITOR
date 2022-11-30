@@ -171,7 +171,7 @@ public class ImageWrapper implements FeatureValue {
         hash = 83 * hash + this.offsetX;
         hash = 83 * hash + this.offsetY;
         hash = 83 * hash + Objects.hashCode(this.value);
-        hash = 83 * hash + Arrays.deepHashCode(this.images);
+//        hash = 83 * hash + Arrays.deepHashCode(this.images);
         return hash;
     }
 
@@ -199,9 +199,9 @@ public class ImageWrapper implements FeatureValue {
         if (!Objects.equals(this.value, other.value)) {
             return false;
         }
-        if (!Arrays.deepEquals(this.images, other.images)) {
-            return false;
-        }
+//        if (!Arrays.deepEquals(this.images, other.images)) {
+//            return false;
+//        }
         return true;
     }
 

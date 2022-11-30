@@ -457,19 +457,38 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         outline = null;
     }
 
-    protected FeatureValue getSelectedFeatureValue() {
+    protected FeatureValue getSelectedOriginalFeatureValue() {
         if (selected == null) {
             return null;
         }
 
         FeatureValue featureValue = null;
         if (buildMode == BuildMode.ALL_RES) {
-            featureValue = intrface.getWorkingBinds().commonFeatMap.get(selected.getFeatureKey());
+            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
         } else if (buildMode == BuildMode.TARGET_RES) {
-            ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+            ResolutionPragma resolutionPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
             featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
             if (featureValue == null) {
-                featureValue = intrface.getWorkingBinds().commonFeatMap.get(selected.getFeatureKey());
+                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+            }
+        }
+
+        return featureValue;
+    }
+
+    protected FeatureValue getSelectedModifiedFeatureValue() {
+        if (selected == null) {
+            return null;
+        }
+
+        FeatureValue featureValue = null;
+        if (buildMode == BuildMode.ALL_RES) {
+            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+        } else if (buildMode == BuildMode.TARGET_RES) {
+            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+            if (featureValue == null) {
+                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
             }
         }
 
@@ -481,9 +500,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         // process mouse release
         if (selected != null) {
             // try to find corrseponding feature value
-            FeatureValue featureValue = null;
-            // based on module build mode do something..            
-            featureValue = getSelectedFeatureValue();
+            FeatureValue featureValue = getSelectedModifiedFeatureValue();
+            // based on module build mode do something.. 
             // try to set feature value with corresponding glMouseCoords
             if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
                 MyRectangle mr = (MyRectangle) featureValue;

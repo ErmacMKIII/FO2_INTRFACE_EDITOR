@@ -32,18 +32,16 @@ public class UniqueIdUtils {
      * Generate new UniqueId for Action - Modification to the bindings.
      *
      * @param featureKey feature key
-     * @param original original value
-     * @param working working value
      * @param inheritance BASE or DEREIVED
      * @param resolution DEFAULT(800x600) or RESOLUTION(width x height)
      *
      * @return UniqueId
      */
-    public static final String GenerateNewUniqueId(FeatureKey featureKey, FeatureValue original, FeatureValue working, GLComponent.Inheritance inheritance, Resolution resolution) {
+    public static final String GenerateNewUniqueId(FeatureKey featureKey, GLComponent.Inheritance inheritance, Resolution resolution) {
         int width = resolution.getWidth();
         int height = resolution.getHeight();
         String dim = String.valueOf(width) + "x" + String.valueOf(height);
-        String string = String.valueOf(featureKey) + original.getStringValue() + working.getStringValue() + inheritance + dim;
+        String string = String.valueOf(featureKey) + inheritance + dim;
         UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
         String guidStr = guid.toString();
         String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);

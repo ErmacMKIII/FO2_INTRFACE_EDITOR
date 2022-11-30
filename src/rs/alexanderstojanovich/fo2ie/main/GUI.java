@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -54,8 +56,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
-import rs.alexanderstojanovich.fo2ie.action.Action;
-import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.frm.Palette;
@@ -69,6 +69,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
+import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
@@ -108,7 +109,7 @@ public class GUI extends javax.swing.JFrame {
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
-            displayActionLog();
+            updateDisplayActionLog();
         }
 
         @Override
@@ -121,7 +122,7 @@ public class GUI extends javax.swing.JFrame {
             initBaseFeaturePreview();
             initDerivedFeaturePreview();
             initComponentsPreview();
-            displayActionLog();
+            initDisplayActionLog();
         }
     };
 
@@ -132,7 +133,7 @@ public class GUI extends javax.swing.JFrame {
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
-            displayActionLog();
+            updateDisplayActionLog();
         }
     };
 
@@ -196,7 +197,8 @@ public class GUI extends javax.swing.JFrame {
 
     private static final int STACK_LIMIT = 1000;
 
-    protected static final List<Action> ACTIONS = new ArrayList<>();
+    protected List<ModificationIfc> Actions = new ArrayList<>();
+    protected final Timer actionUpdateTimer = new Timer("ActionUpdateTimerUtils");
 
     protected Section.SectionName currentSectionName = Section.SectionName.Aim;
     protected Resolution currentResolution = Resolution.DEFAULT;
@@ -219,7 +221,6 @@ public class GUI extends javax.swing.JFrame {
         initMenuDialogs(); // init menu dialogs
         initTabPaneIcons(); // init tab icons
         initIconsForFeatTables();
-        this.cmbBoxSection.getSelectedItem();
         progress += 25.0f;
     }
 
@@ -470,7 +471,6 @@ public class GUI extends javax.swing.JFrame {
         fileMenuSep1 = new javax.swing.JPopupMenu.Separator();
         fileMenuExit = new javax.swing.JMenuItem();
         mainMenuTools = new javax.swing.JMenu();
-        toolsActionTable = new javax.swing.JMenuItem();
         toolsScreenshot = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
         infoMenuAbout = new javax.swing.JMenuItem();
@@ -485,9 +485,9 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("FOnline2 S3 Interface Editor - LATVIA");
-        setMinimumSize(new java.awt.Dimension(1024, 768));
-        setPreferredSize(new java.awt.Dimension(1024, 768));
-        setSize(new java.awt.Dimension(1024, 768));
+        setMinimumSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new java.awt.Dimension(800, 600));
+        setSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         pnlFilePaths.setBorder(javax.swing.BorderFactory.createTitledBorder("Directory Paths"));
@@ -498,8 +498,10 @@ public class GUI extends javax.swing.JFrame {
 
         txtFldInPath.setEditable(false);
         txtFldInPath.setColumns(15);
+        txtFldInPath.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         pnlFilePaths.add(txtFldInPath);
 
+        btnChooseInPath.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnChooseInPath.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChooseInPath.setText("Input dir...");
         btnChooseInPath.setToolTipText("Choose input directory (intrface)");
@@ -516,8 +518,10 @@ public class GUI extends javax.swing.JFrame {
 
         txtFldOutPath.setEditable(false);
         txtFldOutPath.setColumns(15);
+        txtFldOutPath.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         pnlFilePaths.add(txtFldOutPath);
 
+        btnChoosePathOut.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnChoosePathOut.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/dir_icon.png"))); // NOI18N
         btnChoosePathOut.setText("Output dir...");
         btnChoosePathOut.setToolTipText("Choose output directory (for .ini store)");
@@ -529,6 +533,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnChoosePathOut);
 
+        btnLoad.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/load_icon.png"))); // NOI18N
         btnLoad.setText("Load");
         btnLoad.setToolTipText("Load interface from input directory");
@@ -541,6 +546,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnLoad);
 
+        btnSave.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/diskette_icon.png"))); // NOI18N
         btnSave.setText("Save");
         btnSave.setToolTipText("Save interface to the output directory");
@@ -553,6 +559,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlFilePaths.add(btnSave);
 
+        btnCheck.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnCheck.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/hashtag.png"))); // NOI18N
         btnCheck.setText("Check");
         btnCheck.setToolTipText("Check interface status");
@@ -572,6 +579,7 @@ public class GUI extends javax.swing.JFrame {
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
 
+        cmbBoxSection.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         cmbBoxSection.setMaximumRowCount(5);
         cmbBoxSection.setModel(DCBM);
         cmbBoxSection.addActionListener(new java.awt.event.ActionListener() {
@@ -584,6 +592,7 @@ public class GUI extends javax.swing.JFrame {
         lblResolution.setText("Resolution:");
         pnlIntrface.add(lblResolution);
 
+        cmbBoxResolution.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         cmbBoxResolution.setMaximumRowCount(5);
         cmbBoxResolution.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -592,6 +601,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlIntrface.add(cmbBoxResolution);
 
+        btnTogAllRes.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnTogAllRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"))); // NOI18N
         btnTogAllRes.setText("All Resolutions");
         btnTogAllRes.setToolTipText("Toggle All Resolutions");
@@ -603,6 +613,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlIntrface.add(btnTogAllRes);
 
+        btnMdlePreview.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnMdlePreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/window_preview_icon.png"))); // NOI18N
         btnMdlePreview.setText("Preview Module");
         btnMdlePreview.setToolTipText("Preview module in window");
@@ -621,6 +632,7 @@ public class GUI extends javax.swing.JFrame {
 
         pnlButtons.setLayout(new java.awt.GridLayout(1, 2));
 
+        btnAddFeat.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         btnAddFeat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/feat_plus.png"))); // NOI18N
         btnAddFeat.setText("Add Feature");
         btnAddFeat.setToolTipText("Add new feature for this section");
@@ -632,6 +644,7 @@ public class GUI extends javax.swing.JFrame {
         });
         pnlButtons.add(btnAddFeat);
 
+        btnDeselect.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         btnDeselect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/deselect_arrow.png"))); // NOI18N
         btnDeselect.setText("Deselect");
         btnDeselect.setToolTipText("Deselect all components");
@@ -645,7 +658,9 @@ public class GUI extends javax.swing.JFrame {
 
         pnlTable.add(pnlButtons, java.awt.BorderLayout.NORTH);
 
+        tabPaneBrowser.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPaneBrowser.setEnabled(false);
+        tabPaneBrowser.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tabPaneBrowser.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 tabPaneBrowserStateChanged(evt);
@@ -734,7 +749,7 @@ public class GUI extends javax.swing.JFrame {
         tblActions.getTableHeader().setReorderingAllowed(false);
         sbActions.setViewportView(tblActions);
 
-        tabPaneBrowser.addTab("Action Log", sbActions);
+        tabPaneBrowser.addTab("Modifications", sbActions);
 
         pnlTable.add(tabPaneBrowser, java.awt.BorderLayout.CENTER);
 
@@ -756,6 +771,8 @@ public class GUI extends javax.swing.JFrame {
         panelModule.setBorder(javax.swing.BorderFactory.createTitledBorder("Module"));
         panelModule.setLayout(new java.awt.BorderLayout());
         getContentPane().add(panelModule);
+
+        mainMenu.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
 
         mainMenuFile.setText("File");
 
@@ -796,14 +813,6 @@ public class GUI extends javax.swing.JFrame {
         mainMenu.add(mainMenuFile);
 
         mainMenuTools.setText("Tools");
-
-        toolsActionTable.setText("Action Table");
-        toolsActionTable.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                toolsActionTableActionPerformed(evt);
-            }
-        });
-        mainMenuTools.add(toolsActionTable);
 
         toolsScreenshot.setText("Take Screenshot");
         toolsScreenshot.addActionListener(new java.awt.event.ActionListener() {
@@ -856,7 +865,6 @@ public class GUI extends javax.swing.JFrame {
         initBaseFeaturePreview();
         initComponentsPreview();
         initDerivedFeaturePreview();
-        displayActionLog();
         workOnBuildComponents();
     }//GEN-LAST:event_btnLoadActionPerformed
 
@@ -893,7 +901,7 @@ public class GUI extends javax.swing.JFrame {
             if (intrface.getErrorNum() == 0) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
                 final List<String> resStrs = new ArrayList<>();
-                List<ResolutionPragma> customResolutions = intrface.getWorkingBinds().customResolutions;
+                List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
                 for (ResolutionPragma resPrag : customResolutions) {
                     String resStr = String.valueOf(resPrag.getResolution().getWidth()) + "x" + String.valueOf(resPrag.getResolution().getHeight());
                     resStrs.add(resStr);
@@ -923,7 +931,7 @@ public class GUI extends javax.swing.JFrame {
             if (intrface.getErrorNum() == 0) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
                 final List<String> resStrs = new ArrayList<>();
-                List<ResolutionPragma> customResolutions = intrface.getWorkingBinds().customResolutions;
+                List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
                 for (ResolutionPragma resPrag : customResolutions) {
                     String resStr = String.valueOf(resPrag.getResolution().getWidth()) + "x" + String.valueOf(resPrag.getResolution().getHeight());
                     resStrs.add(resStr);
@@ -1146,7 +1154,7 @@ public class GUI extends javax.swing.JFrame {
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
         int val = JOptionPane.showConfirmDialog(this, "Are you sure you wanna remove feature " + featKey.getStringValue() + "?", "Remove feature", JOptionPane.YES_NO_OPTION);
         if (val == JOptionPane.YES_OPTION) {
-            intrface.getWorkingBinds().getCommonFeatMap().remove(featKey);
+            intrface.getModifiedBinds().getCommonFeatMap().remove(featKey);
             DefaultTableModel model = (DefaultTableModel) tblBaseFeats.getModel();
             model.removeRow(srow);
 
@@ -1155,7 +1163,7 @@ public class GUI extends javax.swing.JFrame {
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
-
+            updateDisplayActionLog();
             buildModuleComponents();
         }
     }
@@ -1172,7 +1180,7 @@ public class GUI extends javax.swing.JFrame {
         if (val == JOptionPane.YES_OPTION) {
             Resolution resolution = currentResolution;
             if (resolution != null) {
-                ResolutionPragma resPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+                ResolutionPragma resPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 resPragma.getCustomFeatMap().remove(featKey);
             }
 
@@ -1184,7 +1192,7 @@ public class GUI extends javax.swing.JFrame {
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
-
+            updateDisplayActionLog();
             buildModuleComponents();
         }
     }
@@ -1266,9 +1274,9 @@ public class GUI extends javax.swing.JFrame {
         SectionName sectionName = (SectionName) cmbBoxSection.getSelectedItem();
         Section section = intrface.getNameToSectionMap().get(sectionName);
         for (FeatureKey featKey : section.getKeys()) {
-            FeatureValue featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
+            FeatureValue featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
             int overrides = 0;
-            for (ResolutionPragma resPragma : intrface.getWorkingBinds().getCustomResolutions()) {
+            for (ResolutionPragma resPragma : intrface.getModifiedBinds().getCustomResolutions()) {
                 if (resPragma.getCustomFeatMap().containsKey(featKey)) {
                     overrides++;
                 }
@@ -1297,7 +1305,7 @@ public class GUI extends javax.swing.JFrame {
             String[] things = resStr.trim().split("x");
             int width = Integer.parseInt(things[0]);
             int height = Integer.parseInt(things[1]);
-            for (ResolutionPragma resolution : intrface.getWorkingBinds().getCustomResolutions()) {
+            for (ResolutionPragma resolution : intrface.getModifiedBinds().getCustomResolutions()) {
                 if (resolution.getResolution().getWidth() == width && resolution.getResolution().getHeight() == height) {
                     resolutionPragma = resolution;
                     break;
@@ -1371,7 +1379,7 @@ public class GUI extends javax.swing.JFrame {
             for (FeatureKey featKey : section.getKeys()) {
                 FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
 
-                boolean overrides = intrface.getWorkingBinds().getCommonFeatMap().containsKey(featKey);
+                boolean overrides = intrface.getModifiedBinds().getCommonFeatMap().containsKey(featKey);
 
                 if (featVal != null) {
                     Object[] row = {featKey.getStringValue(), featVal.getStringValue(), overrides};
@@ -1396,9 +1404,9 @@ public class GUI extends javax.swing.JFrame {
 
         for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
             FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
-            FeatureValue featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
+            FeatureValue featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
             int overrides = 0;
-            for (ResolutionPragma resPragma : intrface.getWorkingBinds().getCustomResolutions()) {
+            for (ResolutionPragma resPragma : intrface.getModifiedBinds().getCustomResolutions()) {
                 if (resPragma.getCustomFeatMap().containsKey(featKey)) {
                     overrides++;
                 }
@@ -1422,7 +1430,7 @@ public class GUI extends javax.swing.JFrame {
             String[] things = resStr.trim().split("x");
             int width = Integer.parseInt(things[0]);
             int height = Integer.parseInt(things[1]);
-            for (ResolutionPragma resPragma : intrface.getWorkingBinds().getCustomResolutions()) {
+            for (ResolutionPragma resPragma : intrface.getModifiedBinds().getCustomResolutions()) {
                 if (resPragma.getResolution().getWidth() == width && resPragma.getResolution().getHeight() == height) {
                     resolutionPragma = resPragma;
                     break;
@@ -1437,7 +1445,7 @@ public class GUI extends javax.swing.JFrame {
                 FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
                 FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
 
-                boolean overrides = intrface.getWorkingBinds().getCommonFeatMap().containsKey(featKey);
+                boolean overrides = intrface.getModifiedBinds().getCommonFeatMap().containsKey(featKey);
 
                 if (featVal != null) {
                     Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
@@ -1477,6 +1485,7 @@ public class GUI extends javax.swing.JFrame {
         updateBaseFeaturePreview();
         updateDerivedFeaturePreview();
         updateComponentsPreview();
+        updateDisplayActionLog();
         workOnBuildComponents();
         if (currentResolution != null) {
             GL_WINDOW.setSize(currentResolution.getWidth(), currentResolution.getHeight());
@@ -1516,7 +1525,6 @@ public class GUI extends javax.swing.JFrame {
         initBaseFeaturePreview();
         initDerivedFeaturePreview();
         initComponentsPreview();
-        displayActionLog();
         workOnBuildComponents(); // important!
     }//GEN-LAST:event_btnTogAllResActionPerformed
 
@@ -1627,15 +1635,6 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
 
     }//GEN-LAST:event_tabPaneBrowserStateChanged
-
-    private void toolsActionTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsActionTableActionPerformed
-        // TODO add your handling code here:
-//        ActionTable instance = ActionTable.getInstance(this);
-//        instance.popUp();
-//        instance.setVisible(true);
-//        instance.setResizable(false);
-//        instance.pack();
-    }//GEN-LAST:event_toolsActionTableActionPerformed
 
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
@@ -1776,7 +1775,7 @@ public class GUI extends javax.swing.JFrame {
         if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.BASE) {
             tblComps.getSelectionModel().clearSelection();
             final ComponentEditor compEditor = ComponentEditor.getInstance(this);
-            featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
+            featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
             compEditor.popUp(featKey, featVal, intrface, glcKey);
             compEditor.setVisible(true);
             compEditor.setResizable(false);
@@ -1785,7 +1784,7 @@ public class GUI extends javax.swing.JFrame {
             if (currentResolution != null) {
                 tblComps.getSelectionModel().clearSelection();
                 final ComponentEditor compEditor = ComponentEditor.getInstance(this);
-                featVal = intrface.getWorkingBinds().getCommonFeatMap().get(featKey);
+                featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
                 compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
                 compEditor.setVisible(true);
                 compEditor.setResizable(false);
@@ -1932,14 +1931,18 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblActions.getSelectedRow();
         final int scol = tblActions.getSelectedColumn();
 
-        if (srow <= 0 || srow >= tblActions.getModel().getRowCount()) {
+        if (scol < 0 || scol >= tblActions.getModel().getColumnCount()) {
             return;
         }
 
-        Object uuid = tblActions.getValueAt(srow, scol - 6);
+        if (srow < 0 || srow >= tblActions.getModel().getRowCount()) {
+            return;
+        }
 
-        Action actKey = null;
-        for (Action action : GUI.ACTIONS) {
+        Object uuid = tblActions.getValueAt(srow, scol - 5);
+
+        ModificationIfc actKey = null;
+        for (ModificationIfc action : Actions) {
             if (action.getUniqueId().equals(uuid)) {
                 actKey = action;
                 break;
@@ -1948,19 +1951,60 @@ public class GUI extends javax.swing.JFrame {
 
         if (actKey != null) {
             actKey.undo();
-            GUI.ACTIONS.remove(actKey);
+            Actions.remove(actKey);
             DefaultTableModel model = (DefaultTableModel) tblActions.getModel();
             model.removeRow(srow);
 
             updateBaseFeaturePreview();
             updateDerivedFeaturePreview();
             updateComponentsPreview();
+            updateDisplayActionLog();
             buildModuleComponents();
         }
 
     }
 
-    private void displayActionLog() {
+    public synchronized void updateDisplayActionLog() {
+        DefaultTableModel defTblActMdl = (DefaultTableModel) tblActions.getModel();
+        for (ModificationIfc action : Actions) {
+            ModificationIfc actionTarg = null;
+            int rowTarg = -1;
+            for (int row = 0; row < tblActions.getRowCount(); row++) {
+                Object uuid = defTblActMdl.getValueAt(row, 0);
+                if (action.getUniqueId().equals(uuid)) {
+                    actionTarg = action;
+                    rowTarg = row;
+                    break;
+                }
+            }
+
+            if (actionTarg != null && rowTarg != -1) {
+                Object[] objs = {
+                    actionTarg.getUniqueId(),
+                    actionTarg.getInheritance(),
+                    actionTarg.getFeatureKey().getStringValue(),
+                    actionTarg.getOriginalValue().getStringValue(),
+                    actionTarg.getWorkingValue().getStringValue(),};
+
+                int col = 0;
+                for (Object obj : objs) {
+                    defTblActMdl.setValueAt(obj, rowTarg, col);
+                    col++;
+                }
+            } else {
+                Object[] objs = {
+                    action.getUniqueId(),
+                    action.getInheritance(),
+                    action.getFeatureKey().getStringValue(),
+                    action.getOriginalValue().getStringValue(),
+                    action.getWorkingValue().getStringValue(),};
+
+                defTblActMdl.addRow(objs);
+            }
+        }
+    }
+
+    protected synchronized void initDisplayActionLog() {
         final DefaultTableModel actTblMdl = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -2013,7 +2057,7 @@ public class GUI extends javax.swing.JFrame {
         });
         final ButtonRenderer undoRend = new ButtonRenderer(undoEdit.getButton());
 
-        for (Action action : GUI.ACTIONS) {
+        for (ModificationIfc action : Actions) {
             Object[] row = {
                 action.getUniqueId(),
                 action.getInheritance(),
@@ -2070,9 +2114,18 @@ public class GUI extends javax.swing.JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                GUI gui = new GUI();
+                final GUI gui = new GUI();
                 gui.setVisible(true);
                 gui.pack();
+                gui.initDisplayActionLog();
+                gui.actionUpdateTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        synchronized (gui) {
+                            gui.intrface.getChanges(gui.Actions);
+                        }
+                    }
+                }, 125L, 125L);
             }
         });
 
@@ -2138,7 +2191,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTable tblBaseFeats;
     private javax.swing.JTable tblComps;
     private javax.swing.JTable tblDerivedFeats;
-    private javax.swing.JMenuItem toolsActionTable;
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;

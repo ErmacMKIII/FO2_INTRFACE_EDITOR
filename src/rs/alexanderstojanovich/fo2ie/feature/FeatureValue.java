@@ -87,4 +87,5 @@ public interface FeatureValue {
     public enum Type {
         IMAGE, RECT4, SINGLE_VALUE, ARRAY, UNKNOWN
     }
+
 }

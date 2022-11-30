@@ -16,8 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
-import rs.alexanderstojanovich.fo2ie.action.Action;
-import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -57,6 +55,7 @@ public abstract class ComponentEditor extends JFrame {
                     gui.updateBaseFeaturePreview();
                     gui.updateDerivedFeaturePreview();
                     gui.updateComponentsPreview();
+                    gui.updateDisplayActionLog();
                 }
             };
         }
@@ -79,13 +78,13 @@ public abstract class ComponentEditor extends JFrame {
     }
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface) {
-        intrface.getWorkingBinds().getCommonFeatMap().replace(featureKey, featureValue);
+        intrface.getModifiedBinds().getCommonFeatMap().replace(featureKey, featureValue);
     }
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution) {
-        ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+        ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
         if (resolutionPragma != null) {
-            FeatureValue oldFeatureValue = intrface.getWorkingBinds().getCommonFeatMap().get(featureKey);
+            FeatureValue oldFeatureValue = intrface.getModifiedBinds().getCommonFeatMap().get(featureKey);
             resolutionPragma.getCustomFeatMap().replace(featureKey, oldFeatureValue, featureValue);
         }
 

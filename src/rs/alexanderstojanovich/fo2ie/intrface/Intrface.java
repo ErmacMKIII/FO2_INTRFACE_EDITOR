@@ -25,15 +25,21 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.joml.Vector4f;
+import rs.alexanderstojanovich.fo2ie.modification.FeatureModification;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
+import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 
 /**
  *
@@ -98,7 +104,7 @@ public class Intrface {
     protected final Map<Section, String> sectionToPrefixMap = new HashMap<>();
 
     protected final Dictionary originalBinds = new Dictionary();
-    protected final Dictionary workingBinds = new Dictionary();
+    protected final Dictionary modifiedBinds = new Dictionary();
 
     public Intrface() {
         initMap();
@@ -153,7 +159,7 @@ public class Intrface {
 
         // clear common and resolution sections
         originalBinds.clear();
-        workingBinds.clear();
+        modifiedBinds.clear();
 
         BufferedReader br = null;
 
@@ -247,7 +253,7 @@ public class Intrface {
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
         if (ok && errorNum == 0) {
-            originalBinds.copyTo(workingBinds, false);
+            originalBinds.copyTo(modifiedBinds, false);
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
@@ -378,7 +384,7 @@ public class Intrface {
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
         if (ok && errorNum == 0) {
-            originalBinds.copyTo(workingBinds, false);
+            originalBinds.copyTo(modifiedBinds, false);
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
@@ -394,8 +400,8 @@ public class Intrface {
      * ini.)
      */
     public void applyChanges() {
-        workingBinds.copyTo(originalBinds, true);
-        workingBinds.clear();
+        modifiedBinds.copyTo(originalBinds, true);
+        modifiedBinds.clear();
     }
 
     /**
@@ -493,7 +499,7 @@ public class Intrface {
     public FeatureKey[] getMappedKeys(Section section) {
         final List<FeatureKey> result = new ArrayList<>();
         for (FeatureKey key : section.keys) {
-            if (workingBinds.commonFeatMap.containsKey(key) || originalBinds.commonFeatMap.containsKey(key)) {
+            if (modifiedBinds.commonFeatMap.containsKey(key) || originalBinds.commonFeatMap.containsKey(key)) {
                 result.add(key);
             }
         }
@@ -521,8 +527,8 @@ public class Intrface {
             }
             boolean originalHasMapped = originalPval != null && !originalPval.equals(originalCval);
 
-            FeatureValue modifiedCval = workingBinds.commonFeatMap.get(key);
-            ResolutionPragma modifiedRP = workingBinds.customResolutions.stream().filter(x -> x.resolution.equals(resolution)).findAny().orElse(null);
+            FeatureValue modifiedCval = modifiedBinds.commonFeatMap.get(key);
+            ResolutionPragma modifiedRP = modifiedBinds.customResolutions.stream().filter(x -> x.resolution.equals(resolution)).findAny().orElse(null);
             FeatureValue modifiedPval = null;
             if (modifiedRP != null) {
                 modifiedPval = modifiedRP.getCustomFeatMap().get(key);
@@ -605,6 +611,14 @@ public class Intrface {
         }
 
         return result;
+    }
+
+    public List<ModificationIfc> getChanges() {
+        return Dictionary.difference(originalBinds, modifiedBinds);
+    }
+
+    public boolean getChanges(List<ModificationIfc> outResult) {
+        return Dictionary.difference(originalBinds, modifiedBinds, outResult);
     }
 
     public Section getFaction() {
@@ -743,8 +757,8 @@ public class Intrface {
         return originalBinds;
     }
 
-    public Dictionary getWorkingBinds() {
-        return workingBinds;
+    public Dictionary getModifiedBinds() {
+        return modifiedBinds;
     }
 
     public boolean isInitialized() {

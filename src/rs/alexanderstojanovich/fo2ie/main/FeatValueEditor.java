@@ -16,8 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
-import rs.alexanderstojanovich.fo2ie.action.Action;
-import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -36,7 +34,6 @@ import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
-import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
 /**
  *
@@ -55,6 +52,7 @@ public abstract class FeatValueEditor extends JFrame {
                     gui.updateBaseFeaturePreview();
                     gui.updateComponentsPreview();
                     gui.updateDerivedFeaturePreview();
+                    gui.updateDisplayActionLog();
                 }
             };
         }
@@ -78,13 +76,13 @@ public abstract class FeatValueEditor extends JFrame {
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface) {
         FeatureValue oldFeatureValue = null;
-        oldFeatureValue = intrface.getWorkingBinds().getCommonFeatMap().get(featureKey);
-        intrface.getWorkingBinds().commonFeatMap.replace(featureKey, featureValue);
+        oldFeatureValue = intrface.getModifiedBinds().getCommonFeatMap().get(featureKey);
+        intrface.getModifiedBinds().commonFeatMap.replace(featureKey, featureValue);
     }
 
     private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution) {
         FeatureValue oldFeatureValue = null;
-        ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+        ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
         if (resolutionPragma != null) {
             oldFeatureValue = resolutionPragma.getCustomFeatMap().get(featureKey);
             resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);

@@ -110,8 +110,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
 
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null && intrface.getWorkingBinds().commonFeatMap.containsKey(mainPicKey)) {
-                ImageWrapper mainPicVal = (ImageWrapper) intrface.getWorkingBinds().commonFeatMap.get(mainPicKey);
+            if (mainPicKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicKey)) {
+                ImageWrapper mainPicVal = (ImageWrapper) intrface.getModifiedBinds().commonFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
 
                 // texture for main picture
@@ -128,8 +128,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                 scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
-                if (mainPicPosKey != null && intrface.getWorkingBinds().commonFeatMap.containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyRectangle) intrface.getWorkingBinds().commonFeatMap.get(mainPicPosKey);
+                if (mainPicPosKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
+                    mainPicPosVal = (MyRectangle) intrface.getModifiedBinds().commonFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
                     mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, this.buildResolution.getWidth(), this.buildResolution.getHeight(), vtemp);
                 }
@@ -147,7 +147,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             if (picPosValues != null) {
                 for (FeatureKey picPosKey : picPosValues) {
                     if (picPosKey != section.getRoot().getMainPicPos()) {
-                        FeatureValue picPosVal = intrface.getWorkingBinds().commonFeatMap.get(picPosKey);
+                        FeatureValue picPosVal = intrface.getModifiedBinds().commonFeatMap.get(picPosKey);
                         if (picPosVal instanceof MyRectangle) {
                             MyRectangle picPosRect = (MyRectangle) picPosVal;
                             MyRectangle temp = new MyRectangle();
@@ -160,14 +160,14 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             if (splitValues != null) {
                                 FeatureKey keyW = splitValues.getKey();
                                 if (keyW != null) {
-                                    FeatureValue valW = intrface.getWorkingBinds().commonFeatMap.get(keyW);
+                                    FeatureValue valW = intrface.getModifiedBinds().commonFeatMap.get(keyW);
                                     if (valW instanceof SingleValue) {
                                         splitW = ((SingleValue) valW).getNumber();
                                     }
                                 }
                                 FeatureKey keyH = splitValues.getValue();
                                 if (keyH != null) {
-                                    FeatureValue valH = intrface.getWorkingBinds().commonFeatMap.get(keyH);
+                                    FeatureValue valH = intrface.getModifiedBinds().commonFeatMap.get(keyH);
                                     if (valH instanceof SingleValue) {
                                         splitH = ((SingleValue) valH).getNumber();
                                     }
@@ -176,7 +176,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                             List<FeatureKey> pics = picPosKey.getPics();
                             for (FeatureKey picKey : pics) {
-                                FeatureValue picVal = intrface.getWorkingBinds().commonFeatMap.get(picKey);
+                                FeatureValue picVal = intrface.getModifiedBinds().commonFeatMap.get(picKey);
                                 if (picVal instanceof ImageWrapper) {
                                     ImageWrapper iw = (ImageWrapper) picVal;
                                     iw.loadImages();
@@ -317,7 +317,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             FeatureKey[] textValues = section.getRoot().getTextValues();
             if (textValues != null) {
                 for (FeatureKey txtKey : textValues) {
-                    FeatureValue txtVal = intrface.getWorkingBinds().commonFeatMap.get(txtKey);
+                    FeatureValue txtVal = intrface.getModifiedBinds().commonFeatMap.get(txtKey);
                     if (txtVal instanceof MyRectangle) {
                         MyRectangle textRect = (MyRectangle) txtVal;
                         MyRectangle temp = new MyRectangle();
@@ -400,9 +400,9 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         module.components.clear();
 
-        final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(intrface.getWorkingBinds().commonFeatMap);
+        final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(intrface.getModifiedBinds().commonFeatMap);
 
-        ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+        ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
         if (resolutionPragma != null) {
             for (FeatureKey custKey : resolutionPragma.getCustomFeatMap().keySet()) {
                 FeatureValue custVal = resolutionPragma.getCustomFeatMap().get(custKey);
@@ -455,7 +455,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 GLComponent.Inheritance inheritance = null;
                 if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.DERIVED;
-                } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(mainPicPosKey)) {
+                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.BASE;
                 }
                 Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
@@ -530,7 +530,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 GLComponent.Inheritance inheritance = null;
                                                 if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
                                                     inheritance = GLComponent.Inheritance.DERIVED;
-                                                } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(picPosKey)) {
+                                                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
                                                     inheritance = GLComponent.Inheritance.BASE;
                                                 }
                                                 Quad imgComp = new Quad(picPosKey, inheritance, width, height, tex, pos);
@@ -554,7 +554,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 GLComponent.Inheritance inheritance = null;
                                                 if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
                                                     inheritance = GLComponent.Inheritance.DERIVED;
-                                                } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(picPosKey)) {
+                                                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
                                                     inheritance = GLComponent.Inheritance.BASE;
                                                 }
                                                 AddressableQuad aq = new AddressableQuad(picPosKey, inheritance, width, height, aqtex, pos, splitW, splitH, posMax);
@@ -586,7 +586,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 GLComponent.Inheritance inheritance = null;
                                                 if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
                                                     inheritance = GLComponent.Inheritance.DERIVED;
-                                                } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(picPosKey)) {
+                                                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
                                                     inheritance = GLComponent.Inheritance.BASE;
                                                 }
                                                 Animation anim = new Animation(picPosKey, inheritance, iw.getFps(), width, height, texas, pos);
@@ -623,7 +623,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                     GLComponent.Inheritance inheritance = null;
                                     if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
                                         inheritance = GLComponent.Inheritance.DERIVED;
-                                    } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(picPosKey)) {
+                                    } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
                                         inheritance = GLComponent.Inheritance.BASE;
                                     }
                                     AddressableQuad aq = new AddressableQuad(picPosKey, inheritance, width, height, aqtex, pos, splitW, splitH, posMax);
@@ -643,7 +643,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                     GLComponent.Inheritance inheritance = null;
                                     if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
                                         inheritance = GLComponent.Inheritance.DERIVED;
-                                    } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(picPosKey)) {
+                                    } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
                                         inheritance = GLComponent.Inheritance.BASE;
                                     }
                                     Quad qmark = new Quad(
@@ -713,7 +713,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             GLComponent.Inheritance inheritance = null;
                             if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(txtKey)) {
                                 inheritance = GLComponent.Inheritance.DERIVED;
-                            } else if (intrface.getWorkingBinds().commonFeatMap.containsKey(txtKey)) {
+                            } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(txtKey)) {
                                 inheritance = GLComponent.Inheritance.BASE;
                             }
                             Text txt = new Text(txtKey, inheritance, fntTexture, content, pos, fntWidth, fntHeight);

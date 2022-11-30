@@ -16,8 +16,6 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
-import rs.alexanderstojanovich.fo2ie.action.Action;
-import rs.alexanderstojanovich.fo2ie.action.FeatureAction;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -72,6 +70,7 @@ public abstract class FeatValueAdder extends JFrame {
                     gui.updateBaseFeaturePreview();
                     gui.updateComponentsPreview();
                     gui.updateDerivedFeaturePreview();
+                    gui.updateDisplayActionLog();
                 }
             };
         }
@@ -133,7 +132,7 @@ public abstract class FeatValueAdder extends JFrame {
             if (featVal == null) {
                 JOptionPane.showMessageDialog(this, "Feature value type does not match its key!", "Feature Value Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                intrface.getWorkingBinds().commonFeatMap.put(featKey, featVal);
+                intrface.getModifiedBinds().commonFeatMap.put(featKey, featVal);
                 ok = true;
             }
         }
@@ -175,7 +174,7 @@ public abstract class FeatValueAdder extends JFrame {
             if (featVal == null) {
                 JOptionPane.showMessageDialog(this, "Feature value type does not match its key!", "Feature Value Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                ResolutionPragma resolutionPragma = intrface.getWorkingBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+                ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 if (resolutionPragma != null) {
                     resolutionPragma.getCustomFeatMap().put(featKey, featVal);
                     ok = true;
