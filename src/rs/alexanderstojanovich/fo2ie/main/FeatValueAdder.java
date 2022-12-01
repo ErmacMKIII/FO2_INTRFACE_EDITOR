@@ -227,7 +227,7 @@ public abstract class FeatValueAdder extends JFrame {
         txtFldFtValType.setText(featValType.name());
     }
 
-    public void popUp(Section section, Intrface intrface) {
+    public void popUp(Section section, Intrface intrface, Resolution resolution) {
         this.setTitle("Add feature");
         this.getContentPane().removeAll(); // removes all the components
 
@@ -250,11 +250,20 @@ public abstract class FeatValueAdder extends JFrame {
         this.cmbInheritance.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setInitCmbInheritance(section, intrface);
+                GLComponent.Inheritance inheritance = (GLComponent.Inheritance) cmbInheritance.getSelectedItem();
+                switch (inheritance) {
+                    case BASE:
+                        setInitCmbInheritance(section, intrface);
+                        break;
+                    case DERIVED:
+                        setInitCmbInheritance(section, intrface, resolution);
+                        break;
+                }
                 setInitTxtFld();
             }
         });
         setInitCmbInheritance(section, intrface);
+        setInitTxtFld();
 
         this.cmbFtKeys.addActionListener(new ActionListener() {
             @Override
@@ -267,66 +276,17 @@ public abstract class FeatValueAdder extends JFrame {
         this.btnOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean ok = addFeature(intrface);
-                if (ok) {
-                    execute();
-                    dispose();
+                GLComponent.Inheritance inheritance = (GLComponent.Inheritance) cmbInheritance.getSelectedItem();
+                boolean ok = false;
+                switch (inheritance) {
+                    case BASE:
+                        ok = addFeature(intrface);
+                        break;
+                    case DERIVED:
+                        ok = addFeature(intrface, resolution);
+                        break;
                 }
-            }
-        });
 
-        this.btnCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
-
-        this.getContentPane().add(btnOK);
-        this.getContentPane().add(btnCancel);
-    }
-
-    public void popUp(Section section, Intrface intrface, Resolution resolution) {
-        this.setTitle("Add feature");
-        this.getContentPane().removeAll(); // removes all the components
-
-        cmbInheritance = new JComboBox<>(GLComponent.Inheritance.values());
-        FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section, resolution);
-        cmbFtKeys = new JComboBox<>(unmappedKeys);
-
-        this.setLayout(new GridLayout(4, 3));
-        this.getContentPane().add(lblInheritance);
-        this.getContentPane().add(cmbInheritance);
-
-        this.getContentPane().add(lblFeatName);
-        this.getContentPane().add(cmbFtKeys);
-
-        this.getContentPane().add(lblFtValType);
-        this.getContentPane().add(txtFldFtValType);
-
-        this.txtFldFtValType.setEditable(false);
-
-        this.cmbInheritance.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setInitCmbInheritance(section, intrface, resolution);
-                setInitTxtFld();
-            }
-        });
-        setInitCmbInheritance(section, intrface, resolution);
-
-        this.cmbFtKeys.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setInitTxtFld();
-            }
-        });
-        setInitTxtFld();
-
-        this.btnOK.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean ok = addFeature(intrface);
                 if (ok) {
                     execute();
                     dispose();

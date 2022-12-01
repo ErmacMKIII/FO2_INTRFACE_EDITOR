@@ -1202,7 +1202,7 @@ public class GUI extends javax.swing.JFrame {
         Section section = intrface.getNameToSectionMap().get(sectionName);
 
         FeatValueAdder fva = FeatValueAdder.getInstance(this);
-        fva.popUp(section, intrface);
+        fva.popUp(section, intrface, currentResolution);
 
         fva.setVisible(true);
         fva.setResizable(false);

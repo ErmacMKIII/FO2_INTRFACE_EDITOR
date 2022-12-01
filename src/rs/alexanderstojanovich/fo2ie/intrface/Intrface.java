@@ -499,7 +499,7 @@ public class Intrface {
     public FeatureKey[] getMappedKeys(Section section) {
         final List<FeatureKey> result = new ArrayList<>();
         for (FeatureKey key : section.keys) {
-            if (modifiedBinds.commonFeatMap.containsKey(key) || originalBinds.commonFeatMap.containsKey(key)) {
+            if (modifiedBinds.commonFeatMap.containsKey(key)) {
                 result.add(key);
             }
         }
@@ -519,14 +519,6 @@ public class Intrface {
     public FeatureKey[] getMappedKeys(Section section, Resolution resolution) {
         final List<FeatureKey> result = new ArrayList<>();
         for (FeatureKey key : section.keys) {
-            FeatureValue originalCval = originalBinds.commonFeatMap.get(key);
-            ResolutionPragma originalRP = originalBinds.customResolutions.stream().filter(x -> x.resolution.equals(resolution)).findAny().orElse(null);
-            FeatureValue originalPval = null;
-            if (originalRP != null) {
-                originalPval = originalRP.getCustomFeatMap().get(key);
-            }
-            boolean originalHasMapped = originalPval != null && !originalPval.equals(originalCval);
-
             FeatureValue modifiedCval = modifiedBinds.commonFeatMap.get(key);
             ResolutionPragma modifiedRP = modifiedBinds.customResolutions.stream().filter(x -> x.resolution.equals(resolution)).findAny().orElse(null);
             FeatureValue modifiedPval = null;
@@ -537,7 +529,7 @@ public class Intrface {
             boolean modifiedHasMapped = modifiedPval != null && !modifiedPval.equals(modifiedCval);
 
             // if it's unique (provides overriden mapping)
-            if (originalHasMapped || modifiedHasMapped) {
+            if (modifiedHasMapped) {
                 result.add(key);
             }
         }
