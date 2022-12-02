@@ -20,7 +20,6 @@ import java.util.Objects;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Dictionary;
-import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
@@ -59,7 +58,7 @@ public class FeatureModification implements ModificationIfc {
     }
 
     @Override
-    public FeatureValue getWorkingValue() {
+    public FeatureValue getModifiedValue() {
         FeatureValue result = null;
         switch (inheritance) {
             case BASE:
@@ -74,6 +73,26 @@ public class FeatureModification implements ModificationIfc {
         }
 
         return result;
+    }
+
+    @Override
+    public String getOriginalValueFormatted() {
+        FeatureValue fv = getOriginalValue();
+        if (fv == null) {
+            return "";
+        } else {
+            return fv.getStringValue();
+        }
+    }
+
+    @Override
+    public String getModifiedValueFormatted() {
+        FeatureValue fv = getModifiedValue();
+        if (fv == null) {
+            return "";
+        } else {
+            return fv.getStringValue();
+        }
     }
 
     @Override
@@ -144,12 +163,15 @@ public class FeatureModification implements ModificationIfc {
     @Override
     public void undo() {
         FeatureValue originalValue = getOriginalValue();
+        FeatureValue modifiedValue = getModifiedValue();
         switch (inheritance) {
             case BASE:
                 if (originalValue == null) {
                     modified.commonFeatMap.remove(featureKey);
+                } else if (modifiedValue != null) {
+                    modified.commonFeatMap.replace(featureKey, modifiedValue, originalValue);
                 } else {
-                    modified.commonFeatMap.replace(featureKey, getWorkingValue(), originalValue);
+                    modified.commonFeatMap.put(featureKey, originalValue);
                 }
                 break;
 
@@ -157,8 +179,10 @@ public class FeatureModification implements ModificationIfc {
                 ResolutionPragma resPragma = modified.customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
                 if (originalValue == null) {
                     resPragma.getCustomFeatMap().remove(featureKey);
+                } else if (modifiedValue != null) {
+                    resPragma.getCustomFeatMap().replace(featureKey, modifiedValue, originalValue);
                 } else {
-                    resPragma.getCustomFeatMap().replace(featureKey, getWorkingValue(), getOriginalValue());
+                    resPragma.getCustomFeatMap().put(featureKey, originalValue);
                 }
                 break;
         }

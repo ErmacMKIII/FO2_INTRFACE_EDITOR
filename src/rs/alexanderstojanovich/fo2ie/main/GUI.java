@@ -1927,7 +1927,7 @@ public class GUI extends javax.swing.JFrame {
         }
     }
 
-    private void undoAction() {
+    private synchronized void undoAction() {
         final int srow = tblActions.getSelectedRow();
         final int scol = tblActions.getSelectedColumn();
 
@@ -1983,8 +1983,9 @@ public class GUI extends javax.swing.JFrame {
                     actionTarg.getUniqueId(),
                     actionTarg.getInheritance(),
                     actionTarg.getFeatureKey().getStringValue(),
-                    actionTarg.getOriginalValue().getStringValue(),
-                    actionTarg.getWorkingValue().getStringValue(),};
+                    actionTarg.getOriginalValueFormatted(),
+                    actionTarg.getModifiedValueFormatted()
+                };
 
                 int col = 0;
                 for (Object obj : objs) {
@@ -1996,8 +1997,9 @@ public class GUI extends javax.swing.JFrame {
                     action.getUniqueId(),
                     action.getInheritance(),
                     action.getFeatureKey().getStringValue(),
-                    action.getOriginalValue().getStringValue(),
-                    action.getWorkingValue().getStringValue(),};
+                    action.getOriginalValueFormatted(),
+                    action.getModifiedValueFormatted()
+                };
 
                 defTblActMdl.addRow(objs);
             }
@@ -2045,7 +2047,7 @@ public class GUI extends javax.swing.JFrame {
         actTblMdl.addColumn("Inheritance");
         actTblMdl.addColumn("Feature Key");
         actTblMdl.addColumn("Original Value");
-        actTblMdl.addColumn("Working Value");
+        actTblMdl.addColumn("Modified Value");
         actTblMdl.addColumn("Undo");
 
         final ButtonEditor undoEdit = new ButtonEditor(new JButton("Undo", undoIcon));
@@ -2062,8 +2064,9 @@ public class GUI extends javax.swing.JFrame {
                 action.getUniqueId(),
                 action.getInheritance(),
                 action.getFeatureKey().getStringValue(),
-                action.getOriginalValue().getStringValue(),
-                action.getWorkingValue().getStringValue(),};
+                action.getOriginalValueFormatted(),
+                action.getModifiedValueFormatted()
+            };
             actTblMdl.addRow(row);
         }
 
@@ -2117,12 +2120,13 @@ public class GUI extends javax.swing.JFrame {
                 final GUI gui = new GUI();
                 gui.setVisible(true);
                 gui.pack();
-                gui.initDisplayActionLog();
                 gui.actionUpdateTimer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        synchronized (gui) {
-                            gui.intrface.getChanges(gui.Actions);
+                        if (gui.intrface.isInitialized()) {
+                            synchronized (gui) {
+                                gui.intrface.getChanges(gui.Actions);
+                            }
                         }
                     }
                 }, 125L, 125L);

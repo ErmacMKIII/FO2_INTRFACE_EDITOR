@@ -35,7 +35,7 @@ public interface ModificationIfc {
 
     public Dictionary getModifiedVersion();
 
-    public FeatureValue getWorkingValue();
+    public FeatureValue getModifiedValue();
 
     public FeatureValue getOriginalValue();
 
@@ -43,4 +43,7 @@ public interface ModificationIfc {
 
     public void undo();
 
+    public String getOriginalValueFormatted();
+
+    public String getModifiedValueFormatted();
 }

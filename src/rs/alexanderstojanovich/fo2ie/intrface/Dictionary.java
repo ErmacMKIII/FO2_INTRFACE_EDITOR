@@ -17,11 +17,16 @@
 package rs.alexanderstojanovich.fo2ie.intrface;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import rs.alexanderstojanovich.fo2ie.modification.FeatureModification;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
@@ -93,8 +98,11 @@ public class Dictionary {
 
         Set<FeatureKey> oCommonKeyset = original.commonFeatMap.keySet();
         Set<FeatureKey> mCommonKeyset = modified.commonFeatMap.keySet();
+        Set<FeatureKey> uCommonKeyset = new LinkedHashSet<>();
+        uCommonKeyset.addAll(oCommonKeyset);
+        uCommonKeyset.addAll(mCommonKeyset);
 
-        List<FeatureKey> moCommonDifference = mCommonKeyset.stream().filter(m -> !oCommonKeyset.contains(m) || !modified.commonFeatMap.get(m).equals(original.commonFeatMap.get(m))).collect(Collectors.toList());
+        List<FeatureKey> moCommonDifference = uCommonKeyset.stream().filter(u -> !oCommonKeyset.contains(u) ^ !mCommonKeyset.contains(u) || !modified.commonFeatMap.get(u).equals(original.commonFeatMap.get(u))).collect(Collectors.toList());
 
         for (FeatureKey featureKey : moCommonDifference) {
             ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.BASE, Resolution.DEFAULT);
@@ -106,7 +114,11 @@ public class Dictionary {
             if (oCustResolutionPragma != null) {
                 Set<FeatureKey> oCustomKeyset = oCustResolutionPragma.customFeatMap.keySet();
                 Set<FeatureKey> mCustomKeyset = mCustResolutionPragma.customFeatMap.keySet();
-                List<FeatureKey> moCustomDifference = mCustomKeyset.stream().filter(m -> !oCustomKeyset.contains(m) || !mCustResolutionPragma.customFeatMap.get(m).equals(oCustResolutionPragma.customFeatMap.get(m))).collect(Collectors.toList());
+                Set<FeatureKey> uCustomKeyset = new LinkedHashSet<>();
+                uCustomKeyset.addAll(oCustomKeyset);
+                uCustomKeyset.addAll(mCustomKeyset);
+
+                List<FeatureKey> moCustomDifference = uCustomKeyset.stream().filter(u -> !oCustomKeyset.contains(u) ^ !mCustomKeyset.contains(u) || !mCustResolutionPragma.customFeatMap.get(u).equals(oCustResolutionPragma.customFeatMap.get(u))).collect(Collectors.toList());
                 for (FeatureKey featureKey : moCustomDifference) {
                     ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.DERIVED, mCustResolutionPragma.resolution);
                     result.add(modification);
@@ -131,8 +143,11 @@ public class Dictionary {
 
         Set<FeatureKey> oCommonKeyset = original.commonFeatMap.keySet();
         Set<FeatureKey> mCommonKeyset = modified.commonFeatMap.keySet();
+        Set<FeatureKey> uCommonKeyset = new LinkedHashSet<>();
+        uCommonKeyset.addAll(oCommonKeyset);
+        uCommonKeyset.addAll(mCommonKeyset);
 
-        List<FeatureKey> moCommonDifference = mCommonKeyset.stream().filter(m -> !oCommonKeyset.contains(m) || !modified.commonFeatMap.get(m).equals(original.commonFeatMap.get(m))).collect(Collectors.toList());
+        List<FeatureKey> moCommonDifference = uCommonKeyset.stream().filter(u -> !oCommonKeyset.contains(u) ^ !mCommonKeyset.contains(u) || !Objects.equals(modified.commonFeatMap.get(u), original.commonFeatMap.get(u))).collect(Collectors.toList());
 
         for (FeatureKey featureKey : moCommonDifference) {
             ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.BASE, Resolution.DEFAULT);
@@ -144,7 +159,11 @@ public class Dictionary {
             if (oCustResolutionPragma != null) {
                 Set<FeatureKey> oCustomKeyset = oCustResolutionPragma.customFeatMap.keySet();
                 Set<FeatureKey> mCustomKeyset = mCustResolutionPragma.customFeatMap.keySet();
-                List<FeatureKey> moCustomDifference = mCustomKeyset.stream().filter(m -> !oCustomKeyset.contains(m) || !mCustResolutionPragma.customFeatMap.get(m).equals(oCustResolutionPragma.customFeatMap.get(m))).collect(Collectors.toList());
+                Set<FeatureKey> uCustomKeyset = new LinkedHashSet<>();
+                uCustomKeyset.addAll(oCustomKeyset);
+                uCustomKeyset.addAll(mCustomKeyset);
+
+                List<FeatureKey> moCustomDifference = uCustomKeyset.stream().filter(u -> !oCustomKeyset.contains(u) ^ !mCustomKeyset.contains(u) || !Objects.equals(mCustResolutionPragma.customFeatMap.get(u), oCustResolutionPragma.customFeatMap.get(u))).collect(Collectors.toList());
                 for (FeatureKey featureKey : moCustomDifference) {
                     ModificationIfc modification = new FeatureModification(original, modified, featureKey, GLComponent.Inheritance.DERIVED, mCustResolutionPragma.resolution);
                     outResult.add(modification);
