@@ -27,8 +27,20 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
  */
 public interface ModificationIfc {
 
+    /**
+     * Get Unique Id of this modification.
+     *
+     * @return Unique Id
+     */
     public String getUniqueId();
 
+    /**
+     * *
+     * Get Feature Key of this modification. That Feature Key has different
+     * original mapping and modified mapping.
+     *
+     * @return Feature Key
+     */
     public FeatureKey getFeatureKey();
 
     /**

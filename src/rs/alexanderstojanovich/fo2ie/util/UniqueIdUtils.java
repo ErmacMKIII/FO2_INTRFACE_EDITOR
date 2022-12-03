@@ -18,7 +18,6 @@ package rs.alexanderstojanovich.fo2ie.util;
 
 import java.util.UUID;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
-import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
@@ -49,7 +48,7 @@ public class UniqueIdUtils {
     }
 
     /**
-     * Generate new UniqueId for Action - Modification to the bindings.
+     * Generate new UniqueId for GLComponent.
      *
      * @param featureKey feature key
      * @param type GLComponent type
