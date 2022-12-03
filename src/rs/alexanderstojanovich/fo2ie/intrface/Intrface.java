@@ -25,7 +25,6 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.joml.Vector4f;
@@ -34,6 +33,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
+import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 
 /**
  *
@@ -97,17 +97,8 @@ public class Intrface {
     protected final Map<SectionName, Section> nameToSectionMap = new HashMap<>();
     protected final Map<Section, String> sectionToPrefixMap = new HashMap<>();
 
-    protected final Map<FeatureKey, FeatureValue> commonFeatMap = new LinkedHashMap<>();
-    protected final List<ResolutionPragma> customResolutions = new ArrayList<>();
-
-    protected SectionName sectionName;
-    protected ResolutionPragma resolutionPragma;
-
-    public int modeWidth = 800;
-    public int modeHeight = 600;
-
-    public int mainPicWidth = 800;
-    public int mainPicHeight = 600;
+    protected final Dictionary originalBinds = new Dictionary();
+    protected final Dictionary modifiedBinds = new Dictionary();
 
     public Intrface() {
         initMap();
@@ -161,8 +152,8 @@ public class Intrface {
         errStrMsg.setLength(0);
 
         // clear common and resolution sections
-        commonFeatMap.clear();
-        customResolutions.clear();
+        originalBinds.clear();
+        modifiedBinds.clear();
 
         BufferedReader br = null;
 
@@ -196,7 +187,7 @@ public class Intrface {
                                 width,
                                 height
                         );
-                        customResolutions.add(rs);
+                        originalBinds.customResolutions.add(rs);
                         // in other case if line starts with =
                     } else if (line.contains("=")) {
                         String[] words = line.split("=");
@@ -219,7 +210,7 @@ public class Intrface {
                         if (fk != null && fv != null) {
                             switch (readMode) {
                                 case STD:
-                                    commonFeatMap.put(fk, fv);
+                                    originalBinds.commonFeatMap.put(fk, fv);
                                     break;
                                 case RES:
                                     if (rs != null) {
@@ -234,8 +225,8 @@ public class Intrface {
 
             }
 
-            FO2IELogger.reportInfo("Loaded total common key/vals: " + commonFeatMap.size(), null);
-            FO2IELogger.reportInfo("Total custom resolutions: " + customResolutions.size(), null);
+            FO2IELogger.reportInfo("Loaded total common key/vals: " + originalBinds.commonFeatMap.size(), null);
+            FO2IELogger.reportInfo("Total custom resolutions: " + originalBinds.customResolutions.size(), null);
             FO2IELogger.reportInfo("Total lines: " + lineNum, null);
             FO2IELogger.reportInfo("Total errors: " + errorNum, null);
 
@@ -256,6 +247,7 @@ public class Intrface {
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
         if (ok && errorNum == 0) {
+            originalBinds.copyTo(modifiedBinds, false);
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
@@ -289,8 +281,8 @@ public class Intrface {
         errStrMsg.setLength(0);
 
         // clear common and resolution sections
-        commonFeatMap.clear();
-        customResolutions.clear();
+        originalBinds.commonFeatMap.clear();
+        originalBinds.customResolutions.clear();
 
         FO2IELogger.reportInfo("Loading ini..", null);
 
@@ -326,7 +318,7 @@ public class Intrface {
                                 width,
                                 height
                         );
-                        customResolutions.add(rs);
+                        originalBinds.customResolutions.add(rs);
                         // in other case if line starts with =
                     } else if (line.contains("=")) {
                         String[] words = line.split("=");
@@ -349,7 +341,7 @@ public class Intrface {
                         if (fk != null && fv != null) {
                             switch (readMode) {
                                 case STD:
-                                    commonFeatMap.put(fk, fv);
+                                    originalBinds.commonFeatMap.put(fk, fv);
                                     break;
                                 case RES:
                                     if (rs != null) {
@@ -364,8 +356,8 @@ public class Intrface {
 
             }
 
-            FO2IELogger.reportInfo("Loaded total common key/vals: " + commonFeatMap.size(), null);
-            FO2IELogger.reportInfo("Total custom resolutions: " + customResolutions.size(), null);
+            FO2IELogger.reportInfo("Loaded total common key/vals: " + originalBinds.commonFeatMap.size(), null);
+            FO2IELogger.reportInfo("Total custom resolutions: " + originalBinds.customResolutions.size(), null);
             FO2IELogger.reportInfo("Total lines: " + lineNum, null);
             FO2IELogger.reportInfo("Total errors: " + errorNum, null);
 
@@ -386,6 +378,7 @@ public class Intrface {
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
         if (ok && errorNum == 0) {
+            originalBinds.copyTo(modifiedBinds, false);
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
@@ -394,6 +387,23 @@ public class Intrface {
         initialized = ok;
 
         return ok;
+    }
+
+    /**
+     * Apply changes from modified to original. (Usually Before saving to the
+     * ini.)
+     */
+    public void undoChanges() {
+        modifiedBinds.clear();
+        originalBinds.copyTo(modifiedBinds, false);
+    }
+
+    /**
+     * Apply changes from modified to original. (Usually Before saving to the
+     * ini.)
+     */
+    public void applyChanges() {
+        modifiedBinds.copyTo(originalBinds, true);
     }
 
     /**
@@ -428,14 +438,14 @@ public class Intrface {
             String currClass = null;
             String prevClass = null;
             // iterating through the feature keys of the common mappings
-            for (FeatureKey fk : commonFeatMap.keySet()) {
+            for (FeatureKey fk : modifiedBinds.commonFeatMap.keySet()) {
                 currClass = fk.getClass().getSimpleName();
                 if (!currClass.equals(prevClass)) {
                     pw.println();
                     pw.println("# " + currClass);
                     pw.println();
                 }
-                FeatureValue fv = commonFeatMap.get(fk);
+                FeatureValue fv = modifiedBinds.commonFeatMap.get(fk);
                 if (fv != null) {
                     // writing each of the common key/values to the ini file
                     pw.println(fk.getStringValue() + " = " + fv.getStringValue());
@@ -445,10 +455,10 @@ public class Intrface {
             pw.println();
             pw.println("# Resolution pragmas");
             // iterating through the custom resolution pragmas
-            for (ResolutionPragma pragma : customResolutions) {
+            for (ResolutionPragma pragma : modifiedBinds.customResolutions) {
                 pw.println();
-                pw.println("# Resolution pragma: " + pragma.getWidth() + "x" + pragma.getHeight());
-                pw.println("resolution " + pragma.getWidth() + " " + pragma.getHeight());
+                pw.println("# Resolution pragma: " + pragma.resolution.getWidth() + "x" + pragma.resolution.getHeight());
+                pw.println("resolution " + pragma.resolution.getWidth() + " " + pragma.resolution.getHeight());
                 pw.println();
                 for (FeatureKey fkx : pragma.customFeatMap.keySet()) {
                     // value from the pragma
@@ -485,26 +495,43 @@ public class Intrface {
      * map)
      *
      * @param section current observed section
-     * @param allRes use common mappings (true) or use custom resolution pragma
-     * (false)
      * @return list of mapped keys
      */
-    public FeatureKey[] getMappedKeys(Section section, boolean allRes) {
+    public FeatureKey[] getMappedKeys(Section section) {
         final List<FeatureKey> result = new ArrayList<>();
-        if (allRes) {
-            for (FeatureKey key : section.keys) {
-                if (commonFeatMap.containsKey(key)) {
-                    result.add(key);
-                }
+        for (FeatureKey key : section.keys) {
+            if (modifiedBinds.commonFeatMap.containsKey(key)) {
+                result.add(key);
             }
-        } else if (resolutionPragma != null) {
-            for (FeatureKey key : section.keys) {
-                FeatureValue cval = commonFeatMap.get(key);
-                FeatureValue pval = resolutionPragma.getCustomFeatMap().get(key);
-                // if it's unique (provides overriden mapping)
-                if (pval != null && !pval.equals(cval)) {
-                    result.add(key);
-                }
+        }
+        FeatureKey[] toArray = result.toArray(new FeatureKey[result.size()]);
+
+        return toArray;
+    }
+
+    /**
+     * Gets mapped keys (in either common mappings or custom resolution pragma
+     * map)
+     *
+     * @param section current observed section
+     * @param resolution desired resolution
+     * @return list of mapped keys
+     */
+    public FeatureKey[] getMappedKeys(Section section, Resolution resolution) {
+        final List<FeatureKey> result = new ArrayList<>();
+        for (FeatureKey key : section.keys) {
+            FeatureValue modifiedCval = modifiedBinds.commonFeatMap.get(key);
+            ResolutionPragma modifiedRP = modifiedBinds.customResolutions.stream().filter(x -> x.resolution.equals(resolution)).findAny().orElse(null);
+            FeatureValue modifiedPval = null;
+            if (modifiedRP != null) {
+                modifiedPval = modifiedRP.getCustomFeatMap().get(key);
+            }
+
+            boolean modifiedHasMapped = modifiedPval != null && !modifiedPval.equals(modifiedCval);
+
+            // if it's unique (provides overriden mapping)
+            if (modifiedHasMapped) {
+                result.add(key);
             }
         }
         FeatureKey[] toArray = result.toArray(new FeatureKey[result.size()]);
@@ -517,13 +544,11 @@ public class Intrface {
      * map)
      *
      * @param section current observed section
-     * @param allRes use common mappings (true) or use custom resolution pragma
-     * (false)
-     * @return list of mapped keys
+     * @return list of unmapped keys
      */
-    public FeatureKey[] getUnmappedKeys(Section section, boolean allRes) {
+    public FeatureKey[] getUnmappedKeys(Section section) {
         FeatureKey[] allKeys = section.keys;
-        FeatureKey[] mappedKeys = getMappedKeys(section, allRes);
+        FeatureKey[] mappedKeys = getMappedKeys(section);
         FeatureKey[] result = new FeatureKey[allKeys.length - mappedKeys.length];
 
         if (result.length > 0) {
@@ -545,6 +570,48 @@ public class Intrface {
         }
 
         return result;
+    }
+
+    /**
+     * Gets unmapped keys (in either common mappings or custom resolution pragma
+     * map)
+     *
+     * @param section current observed section
+     * @param resolution Resolution with mappings.
+     * @return list of unmapped keys
+     */
+    public FeatureKey[] getUnmappedKeys(Section section, Resolution resolution) {
+        FeatureKey[] allKeys = section.keys;
+        FeatureKey[] mappedKeys = getMappedKeys(section, resolution);
+        FeatureKey[] result = new FeatureKey[allKeys.length - mappedKeys.length];
+
+        if (result.length > 0) {
+            int index = 0;
+            for (FeatureKey keyI : allKeys) {
+                boolean isMapped = false;
+                for (FeatureKey keyJ : mappedKeys) {
+                    if (keyJ == keyI) {
+                        isMapped = true;
+                        break;
+                    }
+                }
+
+                if (!isMapped) {
+                    result[index++] = keyI;
+                }
+
+            }
+        }
+
+        return result;
+    }
+
+    public List<ModificationIfc> getChanges() {
+        return Dictionary.difference(originalBinds, modifiedBinds);
+    }
+
+    public boolean getChanges(List<ModificationIfc> outResult) {
+        return Dictionary.difference(originalBinds, modifiedBinds, outResult);
     }
 
     public Section getFaction() {
@@ -679,12 +746,12 @@ public class Intrface {
         return sectionToPrefixMap;
     }
 
-    public Map<FeatureKey, FeatureValue> getCommonFeatMap() {
-        return commonFeatMap;
+    public Dictionary getOriginalBinds() {
+        return originalBinds;
     }
 
-    public List<ResolutionPragma> getCustomResolutions() {
-        return customResolutions;
+    public Dictionary getModifiedBinds() {
+        return modifiedBinds;
     }
 
     public boolean isInitialized() {
@@ -693,22 +760,6 @@ public class Intrface {
 
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
-    }
-
-    public SectionName getSectionName() {
-        return sectionName;
-    }
-
-    public void setSectionName(SectionName sectionName) {
-        this.sectionName = sectionName;
-    }
-
-    public ResolutionPragma getResolutionPragma() {
-        return resolutionPragma;
-    }
-
-    public void setResolutionPragma(ResolutionPragma resolutionPragma) {
-        this.resolutionPragma = resolutionPragma;
     }
 
     public Configuration getConfig() {
@@ -737,38 +788,6 @@ public class Intrface {
 
     public Vector4f getQmarkColor() {
         return qmarkColor;
-    }
-
-    public int getModeWidth() {
-        return modeWidth;
-    }
-
-    public int getModeHeight() {
-        return modeHeight;
-    }
-
-    public int getMainPicWidth() {
-        return mainPicWidth;
-    }
-
-    public int getMainPicHeight() {
-        return mainPicHeight;
-    }
-
-    public void setModeWidth(int modeWidth) {
-        this.modeWidth = modeWidth;
-    }
-
-    public void setModeHeight(int modeHeight) {
-        this.modeHeight = modeHeight;
-    }
-
-    public void setMainPicWidth(int mainPicWidth) {
-        this.mainPicWidth = mainPicWidth;
-    }
-
-    public void setMainPicHeight(int mainPicHeight) {
-        this.mainPicHeight = mainPicHeight;
     }
 
 }

@@ -31,31 +31,6 @@ public interface FeatureValue {
     public static final String NUMBER_REGEX = "-?\\d+(\\.\\d+)?";
     public static final String NUMBER_ARRAY_REGEX = "^(\\s*-?\\d+(\\.\\d+)?)(\\s*\\s\\s*-?\\d+(\\.\\d+)?)*$";
 
-    public enum Type {
-        IMAGE, RECT4, SINGLE_VALUE, ARRAY, UNKNOWN
-    };
-
-    /**
-     * Set value of this feature
-     *
-     * @param value string value to set
-     */
-    public void setStringValue(String value);
-
-    /**
-     * Gets value of this feature
-     *
-     * @return value of this feature as a string
-     */
-    public String getStringValue();
-
-    /**
-     * Type of the this feature (image, vector, single value or array)
-     *
-     * @return feature type
-     */
-    public Type getType();
-
     /**
      * Gets the value based on string
      *
@@ -87,4 +62,30 @@ public interface FeatureValue {
         }
         return result;
     }
+
+    /**
+     * Set value of this feature
+     *
+     * @param value string value to set
+     */
+    public void setStringValue(String value);
+
+    /**
+     * Gets value of this feature
+     *
+     * @return value of this feature as a string
+     */
+    public String getStringValue();
+
+    /**
+     * Type of the this feature (image, vector, single value or array)
+     *
+     * @return feature type
+     */
+    public Type getType();
+
+    public enum Type {
+        IMAGE, RECT4, SINGLE_VALUE, ARRAY, UNKNOWN
+    }
+
 }

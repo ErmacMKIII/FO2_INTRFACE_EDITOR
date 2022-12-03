@@ -36,6 +36,10 @@ public interface GLComponent {
         PIC, ANIM, TXT, ADDR
     }
 
+    public enum Inheritance {
+        BASE, DERIVED
+    }
+
     /**
      * Gets UniqueId bound to this component.
      *
@@ -184,4 +188,10 @@ public interface GLComponent {
      */
     public Rectanglef getGLArea();
 
+    /**
+     * Gets Inheritance of the GLComponent
+     *
+     * @return GLComponent Inheritance {BASE, DERIVED}
+     */
+    public Inheritance getInheritance();
 }

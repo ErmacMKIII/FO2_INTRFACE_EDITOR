@@ -32,6 +32,7 @@ import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.main.GameTime;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
+import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
 
 /**
  *
@@ -40,6 +41,7 @@ import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 public class Animation implements GLComponent {
 
     private final FeatureKey featureKey;
+    private final Inheritance inheritance;
 
     private final GameTime gameTime = GameTime.getInstance();
 
@@ -76,7 +78,7 @@ public class Animation implements GLComponent {
 
     private boolean buffered = false;
 
-    private final String uniqueId = UUID.randomUUID().toString();
+    private final String uniqueId;
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -94,13 +96,16 @@ public class Animation implements GLComponent {
      * Create new quad with resize factor
      *
      * @param featureKey bound feature key
+     * @param inheritance {BASE = ALL_RES, DERIVED = TARGET_RES}
      * @param fps frames per second
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
      */
-    public Animation(FeatureKey featureKey, int fps, int width, int height, Texture[] texture) {
+    public Animation(FeatureKey featureKey, Inheritance inheritance, int fps, int width, int height, Texture[] texture) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
         this.fps = fps;
         this.width = width;
         this.height = height;
@@ -112,14 +117,17 @@ public class Animation implements GLComponent {
      * Create new quad with resize factor
      *
      * @param featureKey bound feature key
+     * @param inheritance {BASE = ALL_RES, DERIVED = TARGET_RES}
      * @param fps frames per second
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
      * @param pos position of the quad center
      */
-    public Animation(FeatureKey featureKey, int fps, int width, int height, Texture[] texture, Vector2f pos) {
+    public Animation(FeatureKey featureKey, Inheritance inheritance, int fps, int width, int height, Texture[] texture, Vector2f pos) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
         this.fps = fps;
         this.width = width;
         this.height = height;
@@ -510,6 +518,11 @@ public class Animation implements GLComponent {
     @Override
     public String getUniqueId() {
         return uniqueId;
+    }
+
+    @Override
+    public Inheritance getInheritance() {
+        return inheritance;
     }
 
 }

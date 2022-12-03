@@ -27,9 +27,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
  */
 public class ResolutionPragma {
 
-    private final int width;
-    private final int height;
-
+    protected final Resolution resolution;
     protected Map<FeatureKey, FeatureValue> customFeatMap = new LinkedHashMap<>();
 
     /**
@@ -40,16 +38,21 @@ public class ResolutionPragma {
      * @param height resolution height
      */
     public ResolutionPragma(int width, int height) {
-        this.width = width;
-        this.height = height;
+        this.resolution = new Resolution(width, height);
     }
 
-    public int getWidth() {
-        return width;
+    /**
+     * Create new resolution pragma (which override common mappings for
+     * specified resolution)
+     *
+     * @param resolution width x height resolution mappings
+     */
+    public ResolutionPragma(Resolution resolution) {
+        this.resolution = resolution;
     }
 
-    public int getHeight() {
-        return height;
+    public Resolution getResolution() {
+        return resolution;
     }
 
     public Map<FeatureKey, FeatureValue> getCustomFeatMap() {

@@ -43,7 +43,9 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
+import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
@@ -116,6 +118,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         ALL_RES, TARGET_RES;
     };
 
+    protected Resolution guiResolution = Resolution.DEFAULT;
+    protected SectionName guiSectionName = SectionName.Aim;
+
     protected BuildMode buildMode = BuildMode.TARGET_RES;
 
     /**
@@ -124,22 +129,25 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
      * @param animator parsed FPS animator
      * @param module GL module with components
      * @param intrface FOnline interface
+     * @param guiResolution GUI resolution field
+     * @param guiSectionName GUI section name
      */
-    public ModuleRenderer(FPSAnimator animator, Module module, Intrface intrface) {
+    public ModuleRenderer(FPSAnimator animator, Module module, Intrface intrface, Resolution guiResolution, SectionName guiSectionName) {
         this.animator = animator;
         this.module = module;
         this.intrface = intrface;
+        this.guiResolution = guiResolution;
+        this.guiSectionName = guiSectionName;
     }
 
     /**
      * Sets the prespective according to the Interface pragma. Call this if
      * resizing occured
+     *
+     * @param resolution Resolution
      */
-    protected void setPerspective() {
-        ResolutionPragma pragma = intrface.getResolutionPragma();
-        final float width = (pragma == null) ? DEF_WIDTH : pragma.getWidth();
-        final float height = (pragma == null) ? DEF_HEIGHT : pragma.getHeight();
-        final float aspect = (float) width / (float) height;
+    protected void setPerspective(Resolution resolution) {
+        final float aspect = (float) resolution.getWidth() / (float) resolution.getHeight();
         projMat4.identity().setOrtho2D(-aspect, aspect, -1.0f, 1.0f);
     }
 
@@ -182,10 +190,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         qmarkTexture = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
 
         if (config.isKeepAspectRatio()) {
-            setPerspective();
+            setPerspective(guiResolution);
         }
 
-        textHint = new Text(null, fntTexture, "", GLColor.awtColorToVec4(config.getHintCol()), null);
+        textHint = new Text(null, null, fntTexture, "", GLColor.awtColorToVec4(config.getHintCol()), null);
 
         this.animator.start();
         state = State.INIT;
@@ -215,7 +223,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         GL2 gl20 = glad.getGL().getGL2();
         //gl20.glViewport(0, 0, i2, i3);
         if (config.isKeepAspectRatio()) {
-            setPerspective();
+            setPerspective(guiResolution);
         }
     }
 
@@ -270,7 +278,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     //--------------------------------------------------------------------------
     private void buildComponents(GL2 gl20) {
         final ProgressWindow window = new ProgressWindow();
-        ModuleBuildTask task = new ModuleBuildTask(intrface.getSectionName(), intrface, module, buildMode, gl20, fntTexture, qmarkTexture) {
+        ModuleBuildTask task = new ModuleBuildTask(guiSectionName, intrface, module, buildMode, gl20, fntTexture, qmarkTexture) {
             @Override
             protected void done() {
                 afterModuleBuild();
@@ -290,6 +298,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 }
             }
         });
+        task.buildResolution = guiResolution;
         task.execute();
     }
 
@@ -433,7 +442,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             deselect();
             GLComponent glc = module.components.get(Math.min(++selectedIndex, size - 1));
             selected = glc;
-//            savedColor = glc.getColor();
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
         }
 
@@ -442,14 +450,49 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     // deselects all (CTRL + D)
     public void deselect() {
-        // same as deselect from the GUI
-//        if (selected != null) {
-//            selected.setOutlineColor(savedColor);
-//        }
+        endMovingSelected();
+        afterSelection();
+
         selected = null;
         outline = null;
+    }
 
-        afterSelection();
+    protected FeatureValue getSelectedOriginalFeatureValue() {
+        if (selected == null) {
+            return null;
+        }
+
+        FeatureValue featureValue = null;
+        if (buildMode == BuildMode.ALL_RES) {
+            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+        } else if (buildMode == BuildMode.TARGET_RES) {
+            ResolutionPragma resolutionPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+            if (featureValue == null) {
+                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+            }
+        }
+
+        return featureValue;
+    }
+
+    protected FeatureValue getSelectedModifiedFeatureValue() {
+        if (selected == null) {
+            return null;
+        }
+
+        FeatureValue featureValue = null;
+        if (buildMode == BuildMode.ALL_RES) {
+            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+        } else if (buildMode == BuildMode.TARGET_RES) {
+            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+            if (featureValue == null) {
+                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+            }
+        }
+
+        return featureValue;
     }
 
     // finalize moving selected
@@ -457,19 +500,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         // process mouse release
         if (selected != null) {
             // try to find corrseponding feature value
-            FeatureValue featureValue = null;
-            // based on module build mode do something..
-            if (buildMode == BuildMode.ALL_RES) {
-                featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-            } else if (buildMode == BuildMode.TARGET_RES) {
-                ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(selected.getFeatureKey())) {
-                    featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-                } else {
-                    featureValue = intrface.getCommonFeatMap().get(selected.getFeatureKey());
-                }
-            }
-
+            FeatureValue featureValue = getSelectedModifiedFeatureValue();
+            // based on module build mode do something.. 
             // try to set feature value with corresponding glMouseCoords
             if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
                 MyRectangle mr = (MyRectangle) featureValue;
@@ -482,7 +514,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                     xr = selected.getPixelArea();
                 }
 
-                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(intrface.getModeWidth(), intrface.getModeHeight(), intrface.getMainPicWidth(), intrface.getMainPicHeight());
+                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(guiResolution.getWidth(), guiResolution.getHeight(), ModuleBuildTask.mainPicWidth, ModuleBuildTask.mainPicHeight);
 
                 mr.minX = Math.round(xr.minX / skvp.getKey());
                 mr.maxX = Math.round(xr.maxX / skvp.getKey());
@@ -780,6 +812,18 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     public GLComponent getOutline() {
         return outline;
+    }
+
+    public boolean isHasFocus() {
+        return hasFocus;
+    }
+
+    public Resolution getGuiResolution() {
+        return guiResolution;
+    }
+
+    public SectionName getGuiSectionName() {
+        return guiSectionName;
     }
 
 }

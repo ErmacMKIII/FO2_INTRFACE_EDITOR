@@ -30,6 +30,7 @@ import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
@@ -51,8 +52,10 @@ public abstract class ComponentEditor extends JFrame {
                 @Override
                 public void execute() {
                     gui.buildModuleComponents();
-                    gui.updateFeaturePreview();
+                    gui.updateBaseFeaturePreview();
+                    gui.updateDerivedFeaturePreview();
                     gui.updateComponentsPreview();
+                    gui.updateDisplayActionLog();
                 }
             };
         }
@@ -74,18 +77,20 @@ public abstract class ComponentEditor extends JFrame {
         this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
     }
 
-    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes) {
-        if (allRes) {
-            intrface.getCommonFeatMap().replace(featureKey, featureValue);
-        } else {
-            ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
-            if (resolutionPragma != null) {
-                resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
-            }
-        }
+    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface) {
+        intrface.getModifiedBinds().getCommonFeatMap().replace(featureKey, featureValue);
     }
 
-    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, boolean allRes, GLComponent glComponent) {
+    private void apply(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution) {
+        ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+        if (resolutionPragma != null) {
+            FeatureValue oldFeatureValue = intrface.getModifiedBinds().getCommonFeatMap().get(featureKey);
+            resolutionPragma.getCustomFeatMap().replace(featureKey, oldFeatureValue, featureValue);
+        }
+
+    }
+
+    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, GLComponent glComponent) {
         this.setTitle(featureKey.getStringValue());
         this.getContentPane().removeAll(); // removes all the components
 
@@ -127,7 +132,7 @@ public abstract class ComponentEditor extends JFrame {
                         primitive.getPos().y += (int) spinPosY.getValue() - posY;
                     }
 
-                    Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(intrface.getModeWidth(), intrface.getModeHeight(), intrface.getMainPicWidth(), intrface.getMainPicHeight());
+                    Pair<Float, Float> skvp = new Pair<>(1.0f, 1.0f);
 
                     myChngdRect.minX += Math.round(((int) spinPosX.getValue() - posX) / skvp.getKey());
                     myChngdRect.minY += Math.round(((int) spinPosY.getValue() - posY) / skvp.getValue());
@@ -138,7 +143,85 @@ public abstract class ComponentEditor extends JFrame {
                 }
 
                 execute();
-                apply(featureKey, featureValue, intrface, allRes);
+                apply(featureKey, featureValue, intrface);
+
+                ComponentEditor.this.dispose();
+            }
+        });
+        this.getContentPane().add(btnSet);
+        btnReset.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                spinPosX.setValue(posX);
+                spinPosY.setValue(posY);
+                featureValue.setStringValue(strFVal);
+            }
+        });
+        this.getContentPane().add(btnReset);
+
+        btnCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ComponentEditor.this.dispose();
+            }
+        });
+        this.getContentPane().add(btnCancel);
+    }
+
+    public void popUp(FeatureKey featureKey, FeatureValue featureValue, Intrface intrface, Resolution resolution, GLComponent glComponent) {
+        this.setTitle(featureKey.getStringValue());
+        this.getContentPane().removeAll(); // removes all the components
+
+        final JLabel lblPosition = new JLabel("Position:");
+
+        final JButton btnSet = new JButton("Set");
+        final JButton btnReset = new JButton("Reset");
+        final JButton btnCancel = new JButton("Cancel");
+
+        // this value is kept for         
+        final int posX = Math.round(glComponent.getPos().x - glComponent.getWidth() / 2.0f);
+        final int posY = Math.round(glComponent.getPos().y - glComponent.getHeight() / 2.0f);
+
+        final JSpinner spinPosX = new JSpinner(new SpinnerNumberModel(posX, -5000, 5000, 1));
+        final JSpinner spinPosY = new JSpinner(new SpinnerNumberModel(posY, -5000, 5000, 1));
+
+        final String strFVal = featureValue.getStringValue();
+
+        this.setLayout(new GridLayout(2, 3));
+
+        this.getContentPane().add(lblPosition);
+        this.getContentPane().add(spinPosX);
+        this.getContentPane().add(spinPosY);
+
+        btnSet.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (featureValue instanceof MyRectangle) {
+                    MyRectangle myChngdRect = (MyRectangle) featureValue;
+
+                    glComponent.getPos().x += (int) spinPosX.getValue() - posX;
+                    glComponent.getPos().y += (int) spinPosY.getValue() - posY;
+
+                    if (glComponent instanceof Text) {
+                        Text textKey = (Text) glComponent;
+                        PrimitiveQuad primitive = textKey.getOverlay();
+
+                        primitive.getPos().x += (int) spinPosX.getValue() - posX;
+                        primitive.getPos().y += (int) spinPosY.getValue() - posY;
+                    }
+
+                    Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(resolution.getWidth(), resolution.getHeight(), ModuleBuildTask.mainPicWidth, ModuleBuildTask.mainPicHeight);
+
+                    myChngdRect.minX += Math.round(((int) spinPosX.getValue() - posX) / skvp.getKey());
+                    myChngdRect.minY += Math.round(((int) spinPosY.getValue() - posY) / skvp.getValue());
+                    myChngdRect.maxX += Math.round(((int) spinPosX.getValue() - posX) / skvp.getKey());
+                    myChngdRect.maxY += Math.round(((int) spinPosY.getValue() - posY) / skvp.getValue());
+
+                    featureValue.setStringValue(myChngdRect.getStringValue());
+                }
+
+                execute();
+                apply(featureKey, featureValue, intrface);
 
                 ComponentEditor.this.dispose();
             }

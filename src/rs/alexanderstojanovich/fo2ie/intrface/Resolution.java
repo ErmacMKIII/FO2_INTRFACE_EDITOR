@@ -1,5 +1,5 @@
-/* 
- * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+/*
+ * Copyright (C) 2022 coas9
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,64 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package rs.alexanderstojanovich.fo2ie.feature;
+package rs.alexanderstojanovich.fo2ie.intrface;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class SingleValue implements FeatureValue {
+public class Resolution {
 
-    private int number;
+    protected final int width;
+    protected final int height;
 
-    /**
-     * Returns int value
-     *
-     * @return int value
-     */
-    public int getNumber() {
-        return number;
-    }
+    public static Resolution DEFAULT = new Resolution(800, 600);
 
     /**
-     * Gets single value (int)
+     * Create new resolution width x height.This class is used for Resolution
+     * pragma which stores derived bindings for that resolution.
      *
-     * @return single value (int)
+     * @param width width
+     * @param height height
      */
-    @Override
-    public String getStringValue() {
-        return String.valueOf(number);
+    public Resolution(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
-    /**
-     * Type is always single value
-     *
-     * @return single value type
-     */
-    @Override
-    public Type getType() {
-        return Type.SINGLE_VALUE;
+    public int getWidth() {
+        return width;
     }
 
-    /**
-     * Set value of this from parsed string
-     *
-     * @param value
-     */
-    @Override
-    public void setStringValue(String value) {
-        this.number = Integer.parseInt(value);
-    }
-
-    @Override
-    public String toString() {
-        return getStringValue();
+    public int getHeight() {
+        return height;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + this.number;
+        hash = 71 * hash + this.width;
+        hash = 71 * hash + this.height;
         return hash;
     }
 
@@ -86,11 +66,16 @@ public class SingleValue implements FeatureValue {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SingleValue other = (SingleValue) obj;
-        if (this.number != other.number) {
+        final Resolution other = (Resolution) obj;
+        if (this.width != other.width) {
             return false;
         }
-        return true;
+        return this.height == other.height;
+    }
+
+    @Override
+    public String toString() {
+        return "Resolution{" + "width=" + width + ", height=" + height + '}';
     }
 
 }

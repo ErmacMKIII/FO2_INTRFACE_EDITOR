@@ -31,6 +31,7 @@ import rs.alexanderstojanovich.fo2ie.feature.ImageWrapper;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.feature.SingleValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
+import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
@@ -59,6 +60,10 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     protected final GL2 gl20;
     protected final SectionName sectionName;
     protected final ModuleRenderer.BuildMode buildMode;
+
+    protected Resolution buildResolution = Resolution.DEFAULT;
+    protected static int mainPicWidth = 800;
+    protected static int mainPicHeight = 600;
 
     /**
      * Create new task to build the module
@@ -92,11 +97,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         module.components.clear();
 
-        intrface.modeWidth = 800;
-        intrface.modeHeight = 600;
-
-        intrface.mainPicWidth = 800;
-        intrface.mainPicHeight = 600;
+        mainPicWidth = 800;
+        mainPicHeight = 600;
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -105,35 +107,35 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(intrface.modeWidth, intrface.modeHeight, intrface.mainPicWidth, intrface.mainPicHeight);
+            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
 
-            // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
-            if (mainPicKey != null && intrface.getCommonFeatMap().containsKey(mainPicKey)) {
-                ImageWrapper mainPicVal = (ImageWrapper) intrface.getCommonFeatMap().get(mainPicKey);
+            // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
+            if (mainPicKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicKey)) {
+                ImageWrapper mainPicVal = (ImageWrapper) intrface.getModifiedBinds().commonFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
 
                 // texture for main picture
                 Texture rootTex;
                 // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    intrface.mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    intrface.mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
                     // otherwise load missing question mark texture
                 } else {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
-                scaleXYFactor = ScalingUtils.scaleXYFactor(intrface.modeWidth, intrface.modeHeight, intrface.mainPicWidth, intrface.mainPicHeight);
+                scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
-                if (mainPicPosKey != null && intrface.getCommonFeatMap().containsKey(mainPicPosKey)) {
-                    mainPicPosVal = (MyRectangle) intrface.getCommonFeatMap().get(mainPicPosKey);
+                if (mainPicPosKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
+                    mainPicPosVal = (MyRectangle) intrface.getModifiedBinds().commonFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(intrface.mainPicWidth, intrface.mainPicHeight, intrface.modeWidth, intrface.modeHeight, vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, this.buildResolution.getWidth(), this.buildResolution.getHeight(), vtemp);
                 }
 
-                Vector2f rootPos = new Vector2f(intrface.mainPicWidth * scaleXYFactor.getKey() / 2.0f, intrface.mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -145,7 +147,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             if (picPosValues != null) {
                 for (FeatureKey picPosKey : picPosValues) {
                     if (picPosKey != section.getRoot().getMainPicPos()) {
-                        FeatureValue picPosVal = intrface.getCommonFeatMap().get(picPosKey);
+                        FeatureValue picPosVal = intrface.getModifiedBinds().commonFeatMap.get(picPosKey);
                         if (picPosVal instanceof MyRectangle) {
                             MyRectangle picPosRect = (MyRectangle) picPosVal;
                             MyRectangle temp = new MyRectangle();
@@ -158,14 +160,14 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             if (splitValues != null) {
                                 FeatureKey keyW = splitValues.getKey();
                                 if (keyW != null) {
-                                    FeatureValue valW = intrface.getCommonFeatMap().get(keyW);
+                                    FeatureValue valW = intrface.getModifiedBinds().commonFeatMap.get(keyW);
                                     if (valW instanceof SingleValue) {
                                         splitW = ((SingleValue) valW).getNumber();
                                     }
                                 }
                                 FeatureKey keyH = splitValues.getValue();
                                 if (keyH != null) {
-                                    FeatureValue valH = intrface.getCommonFeatMap().get(keyH);
+                                    FeatureValue valH = intrface.getModifiedBinds().commonFeatMap.get(keyH);
                                     if (valH instanceof SingleValue) {
                                         splitH = ((SingleValue) valH).getNumber();
                                     }
@@ -174,7 +176,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                             List<FeatureKey> pics = picPosKey.getPics();
                             for (FeatureKey picKey : pics) {
-                                FeatureValue picVal = intrface.getCommonFeatMap().get(picKey);
+                                FeatureValue picVal = intrface.getModifiedBinds().commonFeatMap.get(picKey);
                                 if (picVal instanceof ImageWrapper) {
                                     ImageWrapper iw = (ImageWrapper) picVal;
                                     iw.loadImages();
@@ -202,7 +204,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                                 // texture from loaded image
                                                 Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                                Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
+                                                Quad imgComp = new Quad(picPosKey, GLComponent.Inheritance.BASE, width, height, tex, pos);
                                                 picComps.add(imgComp);
                                             }
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
@@ -220,7 +222,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                             // texture from loaded image
                                             Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                            AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                            AddressableQuad aq = new AddressableQuad(picPosKey, GLComponent.Inheritance.BASE, width, height, aqtex, pos, splitW, splitH, posMax);
                                             picComps.add(aq);
                                         } else {
                                             // pixel dimension                                            
@@ -244,7 +246,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                     texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
                                                     index++;
                                                 }
-                                                Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
+                                                Animation anim = new Animation(picPosKey, GLComponent.Inheritance.BASE, iw.getFps(), width, height, texas, pos);
                                                 picComps.add(anim);
                                             }
                                         }
@@ -275,7 +277,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                     // texture is missing texture
                                     Texture aqtex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
-                                    AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                    AddressableQuad aq = new AddressableQuad(picPosKey, GLComponent.Inheritance.BASE, width, height, aqtex, pos, splitW, splitH, posMax);
                                     aq.setColor(intrface.getQmarkColor());
                                     picComps.add(aq);
                                 } else {
@@ -290,7 +292,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                         pos.y += mainPicPosVal.minY;
                                     }
                                     Quad qmark = new Quad(
-                                            picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
+                                            picPosKey, GLComponent.Inheritance.BASE, picPosRect.lengthX(), picPosRect.lengthY(),
                                             Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
                                     );
                                     qmark.setColor(intrface.getQmarkColor());
@@ -315,7 +317,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             FeatureKey[] textValues = section.getRoot().getTextValues();
             if (textValues != null) {
                 for (FeatureKey txtKey : textValues) {
-                    FeatureValue txtVal = intrface.getCommonFeatMap().get(txtKey);
+                    FeatureValue txtVal = intrface.getModifiedBinds().commonFeatMap.get(txtKey);
                     if (txtVal instanceof MyRectangle) {
                         MyRectangle textRect = (MyRectangle) txtVal;
                         MyRectangle temp = new MyRectangle();
@@ -353,7 +355,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
 
                             // this is text component                    
-                            Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
+                            Text txt = new Text(txtKey, GLComponent.Inheritance.BASE, fntTexture, content, pos, fntWidth, fntHeight);
                             txt.setColor(intrface.getTextColor());
                             txt.setAlignment(Text.ALIGNMENT_CENTER);
                             txt.getOverlay().setColor(intrface.getTextOverlayColor());
@@ -389,17 +391,18 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     /**
      * Builds components list from current section based on resolution
      *
+     * @param resolution target resolution
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public void buildTargetRes() throws IOException {
+    public void buildTargetRes(Resolution resolution) throws IOException {
         float oldProgress = 0.0f, progress = 0.0f;
 
         module.components.clear();
 
-        final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(intrface.getCommonFeatMap());
+        final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(intrface.getModifiedBinds().commonFeatMap);
 
-        ResolutionPragma resolutionPragma = intrface.getResolutionPragma();
+        ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
         if (resolutionPragma != null) {
             for (FeatureKey custKey : resolutionPragma.getCustomFeatMap().keySet()) {
                 FeatureValue custVal = resolutionPragma.getCustomFeatMap().get(custKey);
@@ -411,11 +414,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             }
         }
 
-        intrface.modeWidth = (resolutionPragma == null) ? 800 : resolutionPragma.getWidth();
-        intrface.modeHeight = (resolutionPragma == null) ? 600 : resolutionPragma.getHeight();
-
-        intrface.mainPicWidth = 800;
-        intrface.mainPicHeight = 600;
+        mainPicWidth = 800;
+        mainPicHeight = 600;
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -424,9 +424,9 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(intrface.modeWidth, intrface.modeHeight, intrface.mainPicWidth, intrface.mainPicHeight);
+            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
 
-            // if main picute exists (and in most cases it does apart from LMenu (known as pop-up menu)
+            // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
@@ -435,24 +435,30 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 Texture rootTex;
                 // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    intrface.mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    intrface.mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
                     // otherwise load missing question mark texture
                 } else {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
-                scaleXYFactor = ScalingUtils.scaleXYFactor(intrface.modeWidth, intrface.modeHeight, intrface.mainPicWidth, intrface.mainPicHeight);
+                scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(intrface.mainPicWidth, intrface.mainPicHeight, intrface.modeWidth, intrface.modeHeight, vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, this.buildResolution.getWidth(), this.buildResolution.getHeight(), vtemp);
                 }
 
-                Vector2f rootPos = new Vector2f(intrface.mainPicWidth * scaleXYFactor.getKey() / 2.0f, intrface.mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, Math.round(intrface.mainPicWidth * scaleXYFactor.getKey()), Math.round(intrface.mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
+                GLComponent.Inheritance inheritance = null;
+                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(mainPicPosKey)) {
+                    inheritance = GLComponent.Inheritance.DERIVED;
+                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
+                    inheritance = GLComponent.Inheritance.BASE;
+                }
+                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -521,7 +527,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                                 // texture from loaded image
                                                 Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                                Quad imgComp = new Quad(picPosKey, width, height, tex, pos);
+                                                GLComponent.Inheritance inheritance = null;
+                                                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
+                                                    inheritance = GLComponent.Inheritance.DERIVED;
+                                                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
+                                                    inheritance = GLComponent.Inheritance.BASE;
+                                                }
+                                                Quad imgComp = new Quad(picPosKey, inheritance, width, height, tex, pos);
                                                 picComps.add(imgComp);
                                             }
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
@@ -539,7 +551,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                                 // texture from loaded image
                                                 Texture aqtex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
-                                                AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                                GLComponent.Inheritance inheritance = null;
+                                                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
+                                                    inheritance = GLComponent.Inheritance.DERIVED;
+                                                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
+                                                    inheritance = GLComponent.Inheritance.BASE;
+                                                }
+                                                AddressableQuad aq = new AddressableQuad(picPosKey, inheritance, width, height, aqtex, pos, splitW, splitH, posMax);
                                                 picComps.add(aq);
                                             }
                                         } else {
@@ -565,7 +583,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                     texas[index] = Texture.loadTexture(iw.getStringValue() + index, gl20, image);
                                                     index++;
                                                 }
-                                                Animation anim = new Animation(picPosKey, iw.getFps(), width, height, texas, pos);
+                                                GLComponent.Inheritance inheritance = null;
+                                                if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
+                                                    inheritance = GLComponent.Inheritance.DERIVED;
+                                                } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
+                                                    inheritance = GLComponent.Inheritance.BASE;
+                                                }
+                                                Animation anim = new Animation(picPosKey, inheritance, iw.getFps(), width, height, texas, pos);
                                                 picComps.add(anim);
                                             }
                                         }
@@ -596,7 +620,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
                                     // texture is missing texture
                                     Texture aqtex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
-                                    AddressableQuad aq = new AddressableQuad(picPosKey, width, height, aqtex, pos, splitW, splitH, posMax);
+                                    GLComponent.Inheritance inheritance = null;
+                                    if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
+                                        inheritance = GLComponent.Inheritance.DERIVED;
+                                    } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
+                                        inheritance = GLComponent.Inheritance.BASE;
+                                    }
+                                    AddressableQuad aq = new AddressableQuad(picPosKey, inheritance, width, height, aqtex, pos, splitW, splitH, posMax);
                                     aq.setColor(intrface.getQmarkColor());
                                     picComps.add(aq);
                                 } else {
@@ -610,8 +640,14 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                         pos.x += mainPicPosVal.minX;
                                         pos.y += mainPicPosVal.minY;
                                     }
+                                    GLComponent.Inheritance inheritance = null;
+                                    if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
+                                        inheritance = GLComponent.Inheritance.DERIVED;
+                                    } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(picPosKey)) {
+                                        inheritance = GLComponent.Inheritance.BASE;
+                                    }
                                     Quad qmark = new Quad(
-                                            picPosKey, picPosRect.lengthX(), picPosRect.lengthY(),
+                                            picPosKey, inheritance, picPosRect.lengthX(), picPosRect.lengthY(),
                                             Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
                                     );
                                     qmark.setColor(intrface.getQmarkColor());
@@ -673,8 +709,14 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
                             int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
 
-                            // this is text component                    
-                            Text txt = new Text(txtKey, fntTexture, content, pos, fntWidth, fntHeight);
+                            // this is text component
+                            GLComponent.Inheritance inheritance = null;
+                            if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(txtKey)) {
+                                inheritance = GLComponent.Inheritance.DERIVED;
+                            } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(txtKey)) {
+                                inheritance = GLComponent.Inheritance.BASE;
+                            }
+                            Text txt = new Text(txtKey, inheritance, fntTexture, content, pos, fntWidth, fntHeight);
                             txt.setColor(intrface.getTextColor());
                             txt.setAlignment(Text.ALIGNMENT_CENTER);
                             txt.getOverlay().setColor(intrface.getTextOverlayColor());
@@ -721,7 +763,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 // take away context from module renderer
                 gl20.getContext().makeCurrent();
                 // build for specific resolutions supported by the interface
-                buildTargetRes();
+                buildTargetRes(buildResolution);
                 // on finish release the context so module renderer can take it
                 gl20.getContext().release();
                 break;
@@ -748,6 +790,26 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
     public SectionName getSectionName() {
         return sectionName;
+    }
+
+    public Intrface getIntrface() {
+        return intrface;
+    }
+
+    public ModuleRenderer.BuildMode getBuildMode() {
+        return buildMode;
+    }
+
+    public Resolution getBuildResolution() {
+        return buildResolution;
+    }
+
+    public int getMainPicWidth() {
+        return mainPicWidth;
+    }
+
+    public int getMainPicHeight() {
+        return mainPicHeight;
     }
 
 }

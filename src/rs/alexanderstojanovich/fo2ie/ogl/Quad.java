@@ -32,6 +32,7 @@ import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.main.GameTime;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.GLCoords;
+import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
 
 /**
  *
@@ -40,6 +41,7 @@ import rs.alexanderstojanovich.fo2ie.util.GLCoords;
 public class Quad implements GLComponent {
 
     private final FeatureKey featureKey;
+    private final Inheritance inheritance;
 
     private final GameTime gameTime = GameTime.getInstance();
     private final Type type = Type.PIC;
@@ -71,7 +73,7 @@ public class Quad implements GLComponent {
 
     private boolean buffered = false;
 
-    private final String uniqueId = UUID.randomUUID().toString();
+    private final String uniqueId;
 
     static {
         VERTICES[0] = new Vector2f(-1.0f, -1.0f);
@@ -90,11 +92,14 @@ public class Quad implements GLComponent {
      * the size of the texture.
      *
      * @param featureKey bound feature key
+     * @param inheritance inheritance
      * @param texture parsed texture
      * @param pos position of the quad center (screen coordinates)
      */
-    public Quad(FeatureKey featureKey, Texture texture, Vector2f pos) {
+    public Quad(FeatureKey featureKey, Inheritance inheritance, Texture texture, Vector2f pos) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
         this.width = texture.getImage().getWidth();
         this.height = texture.getImage().getHeight();
         this.texture = texture;
@@ -106,13 +111,16 @@ public class Quad implements GLComponent {
      * Create new quad with resize factor
      *
      * @param featureKey bound feature key
+     * @param inheritance inheritance
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
      * @param pos position of the quad center (screen coordinates)
      */
-    public Quad(FeatureKey featureKey, int width, int height, Texture texture, Vector2f pos) {
+    public Quad(FeatureKey featureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos) {
         this.featureKey = featureKey;
+        this.inheritance = inheritance;
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
         this.width = width;
         this.height = height;
         this.texture = texture;
@@ -486,6 +494,11 @@ public class Quad implements GLComponent {
     @Override
     public String getUniqueId() {
         return uniqueId;
+    }
+
+    @Override
+    public Inheritance getInheritance() {
+        return inheritance;
     }
 
 }
