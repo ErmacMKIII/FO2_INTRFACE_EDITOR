@@ -1011,13 +1011,15 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.4 - LATVIA (PUBLIC BUILD reviewed on 2022-10-30 at 07:15).\n");
+            sb.append("VERSION v1.4 - LATVIA (PUBLIC BUILD reviewed on 2022-12-03 at 06:15).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v1.4 LATVIA:\n");
-            sb.append("\t- Reworked features and components.\n");
+            sb.append("\t- Reworked features and components in the way that exist Base Feature, Derived Features & Components.\n");
             sb.append("\t- \"Toggle All Resolutions\" affects only module building (and not display of features & components).\n");
+            sb.append("\t- Work with Modification Table. Feature to undo modifications & overwrite unmodified.\n");
+            sb.append("\t- Save As prompts do you want to owerwrite file with warning.\n");
             sb.append("\n");
             sb.append("Changelog since v1.3 KOREANS:\n");
             sb.append("\t- Fixed crashes of Chosen & PopUp Menu. Set to no display.\n");
@@ -1104,7 +1106,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("- Interface in the game is made of many modules.\n");
             sb.append("- By using \"All resolutions\" you're ignoring target resolution when module being built.\n");
             sb.append("- Preview module in the window with \"Preview Module\".\n");
-            sb.append("- Table has two tabs, interface features and rendering components\n");
+            sb.append("- Table has four tabs, interface base & derived features and rendering components and modificaitons\n");
             sb.append("  which can be edited in either of these two mods,\n");
             sb.append("- In order to view Components build the module.\n");
             sb.append("- To include resolution e.g. 1366x768 put \"resolution 1366 768\" as a new line in the .ini\n");
