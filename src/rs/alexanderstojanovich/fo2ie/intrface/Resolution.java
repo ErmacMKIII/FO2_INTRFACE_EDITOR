@@ -27,6 +27,13 @@ public class Resolution {
 
     public static Resolution DEFAULT = new Resolution(800, 600);
 
+    /**
+     * Create new resolution width x height.This class is used for Resolution
+     * pragma which stores derived bindings for that resolution.
+     *
+     * @param width width
+     * @param height height
+     */
     public Resolution(int width, int height) {
         this.width = width;
         this.height = height;

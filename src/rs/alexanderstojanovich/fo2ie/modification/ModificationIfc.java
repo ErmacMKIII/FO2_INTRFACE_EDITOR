@@ -31,19 +31,55 @@ public interface ModificationIfc {
 
     public FeatureKey getFeatureKey();
 
+    /**
+     * Get Original Bindings
+     *
+     * @return dictionary with original bindings
+     */
     public Dictionary getOriginalVersion();
 
+    /**
+     * Get Modified Bindings
+     *
+     * @return dictionary with modified bindings
+     */
     public Dictionary getModifiedVersion();
 
+    /**
+     * Get Modified Feature Value
+     *
+     * @return modified feature value
+     */
     public FeatureValue getModifiedValue();
 
+    /**
+     * Get Original Feature Value
+     *
+     * @return original feature value
+     */
     public FeatureValue getOriginalValue();
 
+    /**
+     * Get Inheritance which either in BASE (all resolutions) or DERIVED
+     * (specific resolution) domain
+     *
+     * @return interitance {BASE, DERIVED}
+     */
     public GLComponent.Inheritance getInheritance();
 
     public void undo();
 
+    /**
+     * Get Original Value Formatted to return string (with safe against null)
+     *
+     * @return safe formatted original value
+     */
     public String getOriginalValueFormatted();
 
+    /**
+     * Get Modified Value Formatted to return string (with safe against null)
+     *
+     * @return safe formatted modified value
+     */
     public String getModifiedValueFormatted();
 }

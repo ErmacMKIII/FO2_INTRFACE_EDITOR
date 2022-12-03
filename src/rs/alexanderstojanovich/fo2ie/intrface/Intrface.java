@@ -27,16 +27,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.joml.Vector4f;
-import rs.alexanderstojanovich.fo2ie.modification.FeatureModification;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
-import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
@@ -399,9 +393,17 @@ public class Intrface {
      * Apply changes from modified to original. (Usually Before saving to the
      * ini.)
      */
+    public void undoChanges() {
+        modifiedBinds.clear();
+        originalBinds.copyTo(modifiedBinds, false);
+    }
+
+    /**
+     * Apply changes from modified to original. (Usually Before saving to the
+     * ini.)
+     */
     public void applyChanges() {
         modifiedBinds.copyTo(originalBinds, true);
-        modifiedBinds.clear();
     }
 
     /**
@@ -411,7 +413,6 @@ public class Intrface {
      * @return write success (false if failed)
      */
     public boolean writeIniFile(File outfile) {
-        applyChanges();
         boolean ok = false;
 
         FO2IELogger.reportInfo("Writing ini..", null);
@@ -437,14 +438,14 @@ public class Intrface {
             String currClass = null;
             String prevClass = null;
             // iterating through the feature keys of the common mappings
-            for (FeatureKey fk : originalBinds.commonFeatMap.keySet()) {
+            for (FeatureKey fk : modifiedBinds.commonFeatMap.keySet()) {
                 currClass = fk.getClass().getSimpleName();
                 if (!currClass.equals(prevClass)) {
                     pw.println();
                     pw.println("# " + currClass);
                     pw.println();
                 }
-                FeatureValue fv = originalBinds.commonFeatMap.get(fk);
+                FeatureValue fv = modifiedBinds.commonFeatMap.get(fk);
                 if (fv != null) {
                     // writing each of the common key/values to the ini file
                     pw.println(fk.getStringValue() + " = " + fv.getStringValue());
@@ -454,7 +455,7 @@ public class Intrface {
             pw.println();
             pw.println("# Resolution pragmas");
             // iterating through the custom resolution pragmas
-            for (ResolutionPragma pragma : originalBinds.customResolutions) {
+            for (ResolutionPragma pragma : modifiedBinds.customResolutions) {
                 pw.println();
                 pw.println("# Resolution pragma: " + pragma.resolution.getWidth() + "x" + pragma.resolution.getHeight());
                 pw.println("resolution " + pragma.resolution.getWidth() + " " + pragma.resolution.getHeight());

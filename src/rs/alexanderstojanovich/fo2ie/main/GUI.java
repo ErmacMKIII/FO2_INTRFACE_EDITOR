@@ -470,6 +470,9 @@ public class GUI extends javax.swing.JFrame {
         fileMenuSaveAs = new javax.swing.JMenuItem();
         fileMenuSep1 = new javax.swing.JPopupMenu.Separator();
         fileMenuExit = new javax.swing.JMenuItem();
+        mainMenuEdit = new javax.swing.JMenu();
+        editUndoAll = new javax.swing.JMenuItem();
+        editOverwriteChanges = new javax.swing.JMenuItem();
         mainMenuTools = new javax.swing.JMenu();
         toolsScreenshot = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
@@ -811,6 +814,28 @@ public class GUI extends javax.swing.JFrame {
         mainMenuFile.add(fileMenuExit);
 
         mainMenu.add(mainMenuFile);
+
+        mainMenuEdit.setText("Edit");
+
+        editUndoAll.setText("Undo All");
+        editUndoAll.setEnabled(false);
+        editUndoAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editUndoAllActionPerformed(evt);
+            }
+        });
+        mainMenuEdit.add(editUndoAll);
+
+        editOverwriteChanges.setText("Overwrite Unmodified");
+        editOverwriteChanges.setEnabled(false);
+        editOverwriteChanges.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editOverwriteChangesActionPerformed(evt);
+            }
+        });
+        mainMenuEdit.add(editOverwriteChanges);
+
+        mainMenu.add(mainMenuEdit);
 
         mainMenuTools.setText("Tools");
 
@@ -1580,10 +1605,20 @@ public class GUI extends javax.swing.JFrame {
             int returnVal = fileChooserIniSave.showSaveDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 targetIniFile = fileChooserIniSave.getSelectedFile();
-                cfg.setOutDir(fileChooserIniSave.getSelectedFile().getParentFile());
-                txtFldInPath.setText(cfg.getInDir().getPath());
-                txtFldInPath.setToolTipText(cfg.getInDir().getPath());
-                saveFromMenu();
+                if (targetIniFile.exists()) {
+                    int val = JOptionPane.showConfirmDialog(this, "File already exists. Do you want to to overwrite it?", "Overwrite file", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (val == JOptionPane.YES_OPTION) {
+                        cfg.setOutDir(fileChooserIniSave.getSelectedFile().getParentFile());
+                        txtFldInPath.setText(cfg.getInDir().getPath());
+                        txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+                        saveFromMenu();
+                    }
+                } else {
+                    cfg.setOutDir(fileChooserIniSave.getSelectedFile().getParentFile());
+                    txtFldInPath.setText(cfg.getInDir().getPath());
+                    txtFldInPath.setToolTipText(cfg.getInDir().getPath());
+                    saveFromMenu();
+                }
             }
 
             if (!cfg.getInDir().getPath().isEmpty()) {
@@ -1635,6 +1670,30 @@ public class GUI extends javax.swing.JFrame {
         // TODO add your handling code here:
 
     }//GEN-LAST:event_tabPaneBrowserStateChanged
+
+    private void editUndoAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editUndoAllActionPerformed
+        // TODO add your handling code here:
+        int val = JOptionPane.showConfirmDialog(this, "Do you want to undo all modifications?", "Undo all", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        if (val == JOptionPane.YES_OPTION) {
+            intrface.undoChanges();
+            initBaseFeaturePreview();
+            initDerivedFeaturePreview();
+            initComponentsPreview();
+            workOnBuildComponents();
+        }
+    }//GEN-LAST:event_editUndoAllActionPerformed
+
+    private void editOverwriteChangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editOverwriteChangesActionPerformed
+        // TODO add your handling code here:
+        int val = JOptionPane.showConfirmDialog(this, "Original binds will be dropped. Do you really want to to overwrite unmodified?", "Overwrite unmodified", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (val == JOptionPane.YES_OPTION) {
+            intrface.applyChanges();
+            initBaseFeaturePreview();
+            initDerivedFeaturePreview();
+            initComponentsPreview();
+            workOnBuildComponents();
+        }
+    }//GEN-LAST:event_editOverwriteChangesActionPerformed
 
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
@@ -2124,9 +2183,12 @@ public class GUI extends javax.swing.JFrame {
                     @Override
                     public void run() {
                         if (gui.intrface.isInitialized()) {
+                            boolean changes = false;
                             synchronized (gui) {
-                                gui.intrface.getChanges(gui.Actions);
+                                changes = gui.intrface.getChanges(gui.Actions);
                             }
+                            gui.editUndoAll.setEnabled(changes);
+                            gui.editOverwriteChanges.setEnabled(changes);
                         }
                     }
                 }, 125L, 125L);
@@ -2158,6 +2220,8 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JToggleButton btnTogAllRes;
     private javax.swing.JComboBox<Object> cmbBoxResolution;
     private javax.swing.JComboBox<Section.SectionName> cmbBoxSection;
+    private javax.swing.JMenuItem editOverwriteChanges;
+    private javax.swing.JMenuItem editUndoAll;
     private javax.swing.JFileChooser fileChooserDirInput;
     private javax.swing.JFileChooser fileChooserDirOutput;
     private javax.swing.JFileChooser fileChooserIniLoad;
@@ -2177,6 +2241,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel lblSection;
     private javax.swing.JLabel lblSelected;
     private javax.swing.JMenuBar mainMenu;
+    private javax.swing.JMenu mainMenuEdit;
     private javax.swing.JMenu mainMenuFile;
     private javax.swing.JMenu mainMenuInfo;
     private javax.swing.JMenu mainMenuTools;
