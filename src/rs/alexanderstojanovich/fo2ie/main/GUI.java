@@ -160,6 +160,7 @@ public class GUI extends javax.swing.JFrame {
 
     public static final String FNT_PIC = "font.png";
     public static final String QMARK_PIC = "qmark.png";
+    public static final String CHKBOARD_PIC = "chkboard.png";
 
     public static final String BUILD_ICON = "build_icon.png";
 
@@ -871,6 +872,8 @@ public class GUI extends javax.swing.JFrame {
 
         setJMenuBar(mainMenu);
 
+        getAccessibleContext().setAccessibleName("FOnline2 S3 Interface Editor - MONGOLS");
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1504,6 +1507,7 @@ public class GUI extends javax.swing.JFrame {
         }
         mdlRenderer.guiResolution = currentResolution;
         mdlRenderer.guiSectionName = currentSectionName;
+        mdlRenderer.deselect();
     }
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
@@ -1812,7 +1816,6 @@ public class GUI extends javax.swing.JFrame {
 
         // select from module renderer
         mdlRenderer.select((String) uuid);
-
     }
 
     private void editComponent() {
@@ -1827,7 +1830,7 @@ public class GUI extends javax.swing.JFrame {
 
         GLComponent glcKey = null;
         for (GLComponent glc : mdlRenderer.module.components) {
-            if (glc.getUniqueId().equals(uuid) && glc.isEnabled()) {
+            if (glc.getUniqueId().equals(uuid) && glc.isEnabled() && glc.getInheritance() != GLComponent.Inheritance.CANVAS) {
                 glcKey = glc;
                 break;
             }

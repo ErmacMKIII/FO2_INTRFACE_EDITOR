@@ -62,8 +62,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     protected final ModuleRenderer.BuildMode buildMode;
 
     protected Resolution buildResolution = Resolution.DEFAULT;
-    protected static int mainPicWidth = 800;
-    protected static int mainPicHeight = 600;
+    protected static int modeWidth = 800;
+    protected static int modeHeight = 600;
 
     /**
      * Create new task to build the module
@@ -97,8 +97,19 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         module.components.clear();
 
-        mainPicWidth = 800;
-        mainPicHeight = 600;
+        modeWidth = 800;
+        modeHeight = 600;
+
+        final Quad canvas = new Quad(
+                FeatureKey.Reserved.CANVAS,
+                GLComponent.Inheritance.CANVAS,
+                GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight(),
+                Texture.loadLocalTexture(gl20, GUI.CHKBOARD_PIC),
+                new Vector2f(GUI.GL_CANVAS.getWidth() / 2.0f, GUI.GL_CANVAS.getHeight() / 2.0f)
+        );
+
+        canvas.setColor(intrface.getCanvasColor());
+        module.components.add(canvas);
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -107,31 +118,31 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
+            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
 
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) intrface.getModifiedBinds().commonFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
+                int mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                int mainPicHeight = mainPicVal.getImages()[0].getHeight();
 
                 // texture for main picture
                 Texture rootTex;
                 // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
                     // otherwise load missing question mark texture
                 } else {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
-                scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
+                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) intrface.getModifiedBinds().commonFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, this.buildResolution.getWidth(), this.buildResolution.getHeight(), vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
                 }
 
                 Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
@@ -414,9 +425,19 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             }
         }
 
-        mainPicWidth = 800;
-        mainPicHeight = 600;
+        modeWidth = resolution.getWidth();
+        modeHeight = resolution.getHeight();
 
+        final Quad canvas = new Quad(
+                FeatureKey.Reserved.CANVAS,
+                GLComponent.Inheritance.CANVAS,
+                GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight(),
+                Texture.loadLocalTexture(gl20, GUI.CHKBOARD_PIC),
+                new Vector2f(GUI.GL_CANVAS.getWidth() / 2.0f, GUI.GL_CANVAS.getHeight() / 2.0f)
+        );
+
+        canvas.setColor(intrface.getCanvasColor());
+        module.components.add(canvas);
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
         if (section != null) {
@@ -424,31 +445,31 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
+            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
 
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
+                int mainPicWidth = mainPicVal.getImages()[0].getWidth();
+                int mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
 
                 // texture for main picture
                 Texture rootTex;
                 // if main picture holds the image load the texture
                 if (mainPicVal.getImages() != null && mainPicVal.getImages().length == 1) {
-                    mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                    mainPicHeight = mainPicVal.getImages()[0].getHeight();
                     rootTex = Texture.loadTexture(mainPicVal.getStringValue(), gl20, mainPicVal.getImages()[0]);
                     // otherwise load missing question mark texture
                 } else {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
-                scaleXYFactor = ScalingUtils.scaleXYFactor(this.buildResolution.getWidth(), this.buildResolution.getHeight(), mainPicWidth, mainPicHeight);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, this.buildResolution.getWidth(), this.buildResolution.getHeight(), vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
                 }
 
                 Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
@@ -804,12 +825,12 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
         return buildResolution;
     }
 
-    public int getMainPicWidth() {
-        return mainPicWidth;
+    public int getModeWidth() {
+        return modeWidth;
     }
 
-    public int getMainPicHeight() {
-        return mainPicHeight;
+    public int getModeHeight() {
+        return modeHeight;
     }
 
 }

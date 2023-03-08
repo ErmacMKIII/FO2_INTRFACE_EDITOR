@@ -36,8 +36,12 @@ public interface GLComponent {
         PIC, ANIM, TXT, ADDR
     }
 
+    /**
+     * Inheritance {CANVAS - cannot be changed, BASE - for base components,
+     * DERIVED - for derived components }
+     */
     public enum Inheritance {
-        BASE, DERIVED
+        CANVAS, BASE, DERIVED
     }
 
     /**

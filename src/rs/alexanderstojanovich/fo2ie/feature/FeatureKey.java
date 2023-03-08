@@ -76,9 +76,10 @@ public interface FeatureKey {
         autocursor_hex_anim
     }
 
-    // Empty feature key
-    public static enum Empty implements FeatureKey {
-        None;
+    // Reserved feature key
+    public static enum Reserved implements FeatureKey {
+        CANVAS,
+        NONE;
 
         @Override
         public FeatureKey getMainPic() {
@@ -92,12 +93,12 @@ public interface FeatureKey {
 
         @Override
         public String getStringValue() {
-            return null;
+            return this.name();
         }
 
         @Override
         public int getNumericValue() {
-            return 0;
+            return this.ordinal();
         }
 
         @Override

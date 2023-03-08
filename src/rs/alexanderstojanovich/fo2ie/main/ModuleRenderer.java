@@ -380,7 +380,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         deselect();
 
         for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords) && glc.getFeatureKey().getStringValue().equals(textHint.getContent())) {
+            if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)
+                    && glc.getFeatureKey().getStringValue().equals(textHint.getContent()) && glc.getInheritance() != GLComponent.Inheritance.CANVAS) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
                 break;
@@ -411,7 +412,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         deselect();
 
         for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getUniqueId().equals(uniqueId)) {
+            if (glc.isEnabled() && glc.getUniqueId().equals(uniqueId) && glc.getInheritance() != GLComponent.Inheritance.CANVAS) {
                 selected = glc;
                 selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
                 break;
@@ -514,7 +515,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                     xr = selected.getPixelArea();
                 }
 
-                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(guiResolution.getWidth(), guiResolution.getHeight(), ModuleBuildTask.mainPicWidth, ModuleBuildTask.mainPicHeight);
+                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(guiResolution.getWidth(), guiResolution.getHeight(), ModuleBuildTask.modeWidth, ModuleBuildTask.modeHeight);
 
                 mr.minX = Math.round(xr.minX / skvp.getKey());
                 mr.maxX = Math.round(xr.maxX / skvp.getKey());
