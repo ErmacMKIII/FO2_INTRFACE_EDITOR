@@ -62,8 +62,11 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     protected final ModuleRenderer.BuildMode buildMode;
 
     protected Resolution buildResolution = Resolution.DEFAULT;
+    protected static Quad canvas;
+    protected static Quad root;
     protected static int modeWidth = 800;
     protected static int modeHeight = 600;
+    protected static Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
 
     /**
      * Create new task to build the module
@@ -100,7 +103,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
         modeWidth = 800;
         modeHeight = 600;
 
-        final Quad canvas = new Quad(
+        canvas = new Quad(
                 FeatureKey.Reserved.CANVAS,
                 GLComponent.Inheritance.CANVAS,
                 GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight(),
@@ -118,8 +121,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
-
+//            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) intrface.getModifiedBinds().commonFeatMap.get(mainPicKey);
@@ -137,16 +139,16 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
-                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
+                scaleXYFactor = ScalingUtils.scaleXYFactor(mainPicWidth, mainPicHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) intrface.getModifiedBinds().commonFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), vtemp);
                 }
 
                 Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -428,7 +430,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
         modeWidth = resolution.getWidth();
         modeHeight = resolution.getHeight();
 
-        final Quad canvas = new Quad(
+        canvas = new Quad(
                 FeatureKey.Reserved.CANVAS,
                 GLComponent.Inheritance.CANVAS,
                 GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight(),
@@ -445,15 +447,14 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
-
+//            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
                 int mainPicWidth = mainPicVal.getImages()[0].getWidth();
                 int mainPicHeight = mainPicVal.getImages()[0].getHeight();
-                scaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, mainPicWidth, mainPicHeight);
+                scaleXYFactor = ScalingUtils.scaleXYFactor(mainPicWidth, mainPicHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
 
                 // texture for main picture
                 Texture rootTex;
@@ -469,7 +470,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(mainPicWidth, mainPicHeight, modeWidth, modeHeight, vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), vtemp);
                 }
 
                 Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
@@ -479,7 +480,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.BASE;
                 }
-                Quad root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
                 module.components.add(root);
             }
 

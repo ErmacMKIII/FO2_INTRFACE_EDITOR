@@ -488,7 +488,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - LATVIA");
+        setTitle("FOnline2 S3 Interface Editor - MONGOLS");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -1138,6 +1138,11 @@ public class GUI extends javax.swing.JFrame {
     private void editBaseFeatureValue() {
         final int srow = tblBaseFeats.getSelectedRow();
         final int scol = tblBaseFeats.getSelectedColumn();
+
+        if (srow < 0 || (scol - 2) < 0 || (scol - 3) < 0) {
+            return;
+        }
+
         Object valueAtKey = tblBaseFeats.getValueAt(srow, scol - 3);
         Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 2);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
@@ -1158,6 +1163,11 @@ public class GUI extends javax.swing.JFrame {
     private void editDerivedFeatureValue() {
         final int srow = tblDerivedFeats.getSelectedRow();
         final int scol = tblDerivedFeats.getSelectedColumn();
+
+        if (srow < 0 || (scol - 2) < 0 || (scol - 3) < 0) {
+            return;
+        }
+
         Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 3);
         Object valueAtVal = tblDerivedFeats.getValueAt(srow, scol - 2);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
@@ -1202,6 +1212,11 @@ public class GUI extends javax.swing.JFrame {
     private void removeDerivedFeature() {
         final int srow = tblDerivedFeats.getSelectedRow();
         final int scol = tblDerivedFeats.getSelectedColumn();
+
+        if (srow < 0 || (scol - 4) < 0) {
+            return;
+        }
+
         Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 4);
 //        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 3);
 
@@ -1783,6 +1798,11 @@ public class GUI extends javax.swing.JFrame {
     public void toggleEnableComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
+
+        if (srow < 0 || (scol - 6) < 0) {
+            return;
+        }
+
         Object uuid = tblComps.getValueAt(srow, scol - 6);
         //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
@@ -1808,7 +1828,10 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
         Object uuid = tblComps.getValueAt(srow, scol - 8);
-        //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+
+        if (srow < 0 || (scol - 8) < 0) {
+            return;
+        }
 
         tblComps.getSelectionModel().clearSelection();
         // deselect
@@ -1821,6 +1844,10 @@ public class GUI extends javax.swing.JFrame {
     private void editComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
+
+        if (srow < 0 || (scol - 6) < 0 || (scol - 7) < 0) {
+            return;
+        }
 
         Object valueAtKey = tblComps.getValueAt(srow, scol - 6);
         Object uuid = tblComps.getValueAt(srow, scol - 7);

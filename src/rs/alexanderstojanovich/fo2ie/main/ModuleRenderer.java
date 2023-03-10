@@ -36,7 +36,6 @@ import java.time.LocalDateTime;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.joml.Matrix4f;
-import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
@@ -47,6 +46,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
@@ -54,7 +54,6 @@ import rs.alexanderstojanovich.fo2ie.ogl.Texture;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.util.Pair;
-import rs.alexanderstojanovich.fo2ie.util.ScalingUtils;
 
 /**
  *
@@ -241,6 +240,11 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 break;
             case RENDER:
                 gl20.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+                // move across the OpenGL render space
+                if (selected != null && dragging) {
+                    selected.setPos(scrnMouseCoords);
+                    endMovingSelected();
+                }
                 module.render(gl20, projMat4, primSProgram, imgSProgram, fntSProgram);
                 if (selected != null) {
                     selected.render(gl20, projMat4, cntSProgram);
@@ -458,42 +462,52 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         outline = null;
     }
 
-    protected FeatureValue getSelectedOriginalFeatureValue() {
-        if (selected == null) {
-            return null;
-        }
-
-        FeatureValue featureValue = null;
-        if (buildMode == BuildMode.ALL_RES) {
-            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
-        } else if (buildMode == BuildMode.TARGET_RES) {
-            ResolutionPragma resolutionPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-            if (featureValue == null) {
-                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
-            }
-        }
-
-        return featureValue;
-    }
-
-    protected FeatureValue getSelectedModifiedFeatureValue() {
-        if (selected == null) {
-            return null;
-        }
-
-        FeatureValue featureValue = null;
-        if (buildMode == BuildMode.ALL_RES) {
-            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
-        } else if (buildMode == BuildMode.TARGET_RES) {
+//    protected FeatureValue getSelectedOriginalFeatureValue() {
+//        if (selected == null) {
+//            return null;
+//        }
+//
+//        FeatureValue featureValue = null;
+//        if (buildMode == BuildMode.ALL_RES) {
+//            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+//        } else if (buildMode == BuildMode.TARGET_RES) {
+//            ResolutionPragma resolutionPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//            if (featureValue == null) {
+//                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+//            }
+//        }
+//
+//        return featureValue;
+//    }
+//
+//    protected FeatureValue getSelectedModifiedFeatureValue() {
+//        if (selected == null) {
+//            return null;
+//        }
+//
+//        FeatureValue featureValue = null;
+//        if (buildMode == BuildMode.ALL_RES) {
+//            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+//        } else if (buildMode == BuildMode.TARGET_RES) {
+//            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//            if (featureValue == null) {
+//                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+//            }
+//        }
+//
+//        return featureValue;
+//    }
+    protected void updateSelectedModifiedFeatureValue(FeatureValue featureValue) {
+        if (selected.getInheritance() == GLComponent.Inheritance.BASE) {
+            intrface.getModifiedBinds().commonFeatMap.replace(selected.getFeatureKey(), featureValue);
+        } else if (selected.getInheritance() == GLComponent.Inheritance.DERIVED) {
             ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
-            if (featureValue == null) {
-                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+            if (resolutionPragma != null) {
+                resolutionPragma.getCustomFeatMap().replace(selected.getFeatureKey(), featureValue);
             }
         }
-
-        return featureValue;
     }
 
     // finalize moving selected
@@ -501,30 +515,28 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         // process mouse release
         if (selected != null) {
             // try to find corrseponding feature value
-            FeatureValue featureValue = getSelectedModifiedFeatureValue();
             // based on module build mode do something.. 
             // try to set feature value with corresponding glMouseCoords
-            if (featureValue != null && featureValue.getType() == FeatureValue.Type.RECT4) {
-                MyRectangle mr = (MyRectangle) featureValue;
-                Rectanglef xr;
-                if (selected instanceof Text) {
-                    Text selectedText = (Text) selected;
-                    // this is important
-                    xr = selectedText.getOverlay().getPixelArea();
-                } else {
-                    xr = selected.getPixelArea();
-                }
-
-                Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(guiResolution.getWidth(), guiResolution.getHeight(), ModuleBuildTask.modeWidth, ModuleBuildTask.modeHeight);
-
-                mr.minX = Math.round(xr.minX / skvp.getKey());
-                mr.maxX = Math.round(xr.maxX / skvp.getKey());
-                mr.minY = Math.round(xr.minY / skvp.getValue());
-                mr.maxY = Math.round(xr.maxY / skvp.getValue());
-
-                afterSelection();
+            Pair<Float, Float> skvp = ModuleBuildTask.scaleXYFactor;
+            MyRectangle mr = new MyRectangle();
+            if (selected instanceof Text) {
+                Text selectedText = (Text) selected;
+                // this is important
+                PrimitiveQuad overlay = selectedText.getOverlay();
+                mr.minX = Math.round(((overlay.getPos().x - overlay.getWidth() / 2.0f) - (ModuleBuildTask.root.getPos().x - ModuleBuildTask.root.getWidth() / 2.0f)) / skvp.getKey());
+                mr.maxX = Math.round(((overlay.getPos().x + overlay.getWidth() / 2.0f) - (ModuleBuildTask.root.getPos().x - ModuleBuildTask.root.getWidth() / 2.0f)) / skvp.getKey());
+                mr.minY = Math.round(((overlay.getPos().y - overlay.getHeight() / 2.0f) - (ModuleBuildTask.root.getPos().y - ModuleBuildTask.root.getHeight() / 2.0f)) / skvp.getValue());
+                mr.maxY = Math.round(((overlay.getPos().y + overlay.getHeight() / 2.0f) - (ModuleBuildTask.root.getPos().y - ModuleBuildTask.root.getHeight() / 2.0f)) / skvp.getValue());
+            } else {
+                mr.minX = Math.round(((selected.getPos().x - selected.getWidth() / 2.0f) - (ModuleBuildTask.root.getPos().x - ModuleBuildTask.root.getWidth() / 2.0f)) / skvp.getKey());
+                mr.maxX = Math.round(((selected.getPos().x + selected.getWidth() / 2.0f) - (ModuleBuildTask.root.getPos().x - ModuleBuildTask.root.getWidth() / 2.0f)) / skvp.getKey());
+                mr.minY = Math.round(((selected.getPos().y - selected.getHeight() / 2.0f) - (ModuleBuildTask.root.getPos().y - ModuleBuildTask.root.getHeight() / 2.0f)) / skvp.getValue());
+                mr.maxY = Math.round(((selected.getPos().y + selected.getHeight() / 2.0f) - (ModuleBuildTask.root.getPos().y - ModuleBuildTask.root.getHeight() / 2.0f)) / skvp.getValue());
             }
 
+            updateSelectedModifiedFeatureValue(mr);
+
+            afterSelection();
         }
     }
 

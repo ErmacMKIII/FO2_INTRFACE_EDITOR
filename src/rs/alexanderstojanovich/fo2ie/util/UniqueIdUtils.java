@@ -32,6 +32,22 @@ public class UniqueIdUtils {
      *
      * @param featureKey feature key
      * @param inheritance BASE or DEREIVED
+     *
+     * @return UniqueId
+     */
+    public static final String GenerateNewUniqueId(FeatureKey featureKey, GLComponent.Inheritance inheritance) {
+        String string = String.valueOf(featureKey) + inheritance;
+        UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
+        String guidStr = guid.toString();
+        String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);
+        return result;
+    }
+
+    /**
+     * Generate new UniqueId for Action - Modification to the bindings.
+     *
+     * @param featureKey feature key
+     * @param inheritance BASE or DEREIVED
      * @param resolution DEFAULT(800x600) or RESOLUTION(width x height)
      *
      * @return UniqueId
@@ -41,6 +57,23 @@ public class UniqueIdUtils {
         int height = resolution.getHeight();
         String dim = String.valueOf(width) + "x" + String.valueOf(height);
         String string = String.valueOf(featureKey) + inheritance + dim;
+        UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
+        String guidStr = guid.toString();
+        String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);
+        return result;
+    }
+
+    /**
+     * Generate new UniqueId for GLComponent.
+     *
+     * @param featureKey feature key
+     * @param type GLComponent type
+     * @param inheritance BASE or DERIVED
+     *
+     * @return UniqueId
+     */
+    public static String GenerateNewUniqueId(FeatureKey featureKey, GLComponent.Type type, GLComponent.Inheritance inheritance) {
+        String string = String.valueOf(featureKey) + type + inheritance;
         UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
         String guidStr = guid.toString();
         String result = guidStr.substring(0, 8) + guidStr.substring(24, 36);

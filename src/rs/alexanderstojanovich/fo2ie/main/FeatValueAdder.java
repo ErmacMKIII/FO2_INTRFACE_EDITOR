@@ -231,7 +231,8 @@ public abstract class FeatValueAdder extends JFrame {
         this.setTitle("Add feature");
         this.getContentPane().removeAll(); // removes all the components
 
-        cmbInheritance = new JComboBox<>(GLComponent.Inheritance.values());
+        final GLComponent.Inheritance[] values = {GLComponent.Inheritance.BASE, GLComponent.Inheritance.DERIVED};
+        cmbInheritance = new JComboBox<>(values);
         FeatureKey[] unmappedKeys = intrface.getUnmappedKeys(section);
         cmbFtKeys = new JComboBox<>(unmappedKeys);
 
