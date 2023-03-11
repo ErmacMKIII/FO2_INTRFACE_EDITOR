@@ -114,9 +114,11 @@ public class GUI extends javax.swing.JFrame {
 
         @Override
         public void afterModuleBuild() {
-            //btnBuild.setEnabled(true);
+            //btnBuild.setEnabled(true);            
             GUI.this.cmbBoxSection.setEnabled(true);
             GUI.this.cmbBoxResolution.setEnabled(true);
+            GUI.this.toolsRebuild.setEnabled(true);
+            GUI.this.txtFldSearch.setText("");
 
             btnMdlePreview.setEnabled(true);
             initBaseFeaturePreview();
@@ -350,6 +352,7 @@ public class GUI extends javax.swing.JFrame {
     // bulding the module priv method
     private void workOnBuildComponents() {
         // dont build if already build in progress
+        this.toolsRebuild.setEnabled(false);
         this.cmbBoxSection.setEnabled(false);
         this.cmbBoxResolution.setEnabled(false);
         btnMdlePreview.setEnabled(false);
@@ -475,6 +478,7 @@ public class GUI extends javax.swing.JFrame {
         editUndoAll = new javax.swing.JMenuItem();
         editOverwriteChanges = new javax.swing.JMenuItem();
         mainMenuTools = new javax.swing.JMenu();
+        toolsRebuild = new javax.swing.JMenuItem();
         toolsScreenshot = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
         infoMenuAbout = new javax.swing.JMenuItem();
@@ -840,6 +844,14 @@ public class GUI extends javax.swing.JFrame {
 
         mainMenuTools.setText("Tools");
 
+        toolsRebuild.setText("Rebuild Module");
+        toolsRebuild.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolsRebuildActionPerformed(evt);
+            }
+        });
+        mainMenuTools.add(toolsRebuild);
+
         toolsScreenshot.setText("Take Screenshot");
         toolsScreenshot.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -871,8 +883,6 @@ public class GUI extends javax.swing.JFrame {
         mainMenu.add(mainMenuInfo);
 
         setJMenuBar(mainMenu);
-
-        getAccessibleContext().setAccessibleName("FOnline2 S3 Interface Editor - MONGOLS");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -1014,9 +1024,15 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.4 - LATVIA (PUBLIC BUILD reviewed on 2022-12-03 at 20:15).\n");
+            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2022-03-11 at 03:05).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.5 MONGOLS:\n");
+            sb.append("\t- Added Canvas set as Root for each Module (can only be toggle enabled).\n");
+            sb.append("\t- Fixed Editing values for Global Map resulting in \"losing\" component.\n");
+            sb.append("\t- Fixed keyboard selection with mouse selection out of sync.\n");
+            sb.append("\t- Added feature to rebuild the module (from Tools Menu).\n");
             sb.append("\n");
             sb.append("Changelog since v1.4 LATVIA:\n");
             sb.append("\t- Reworked features and components in the way that exist Base Feature, Derived Features & Components.\n");
@@ -1716,6 +1732,20 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_editOverwriteChangesActionPerformed
 
+    private void toolsRebuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsRebuildActionPerformed
+        // TODO add your handling code here:
+        String[] things = cmbBoxResolution.getSelectedItem().toString().split("x");
+        currentResolution = new Resolution(Integer.parseInt(things[0]), Integer.parseInt(things[1]));
+        if (currentResolution != cmbBoxSection.getSelectedItem()) {
+            mdlRenderer.deselect();
+            mdlRenderer.module.components.clear();
+            initBaseFeaturePreview();
+            initDerivedFeaturePreview();
+            initComponentsPreview();
+            workOnBuildComponents();
+        }
+    }//GEN-LAST:event_toolsRebuildActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -2292,6 +2322,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTable tblBaseFeats;
     private javax.swing.JTable tblComps;
     private javax.swing.JTable tblDerivedFeats;
+    private javax.swing.JMenuItem toolsRebuild;
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;

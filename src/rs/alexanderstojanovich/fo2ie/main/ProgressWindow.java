@@ -29,18 +29,18 @@ import javax.swing.JWindow;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public final class ProgressWindow extends JWindow {
-    
+
     protected final JLabel jLabel = new JLabel("Building progress");
     protected final JProgressBar progressBar = new JProgressBar(1, 100);
-    
+
     public ProgressWindow() {
         final URL urlBuild = getClass().getResource(GUI.RESOURCES_DIR + GUI.BUILD_ICON);
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 26);
         jLabel.setFont(font);
-        jLabel.setIcon(new ImageIcon(urlBuild));        
+        jLabel.setIcon(new ImageIcon(urlBuild));
         progressBar.setStringPainted(true);
         progressBar.setForeground(GUISplashScreen.COLOR);
-        
+
         this.setLayout(new BorderLayout());
         this.getContentPane().add(jLabel, BorderLayout.CENTER);
         this.getContentPane().add(progressBar, BorderLayout.SOUTH);
@@ -49,13 +49,13 @@ public final class ProgressWindow extends JWindow {
         this.setLocation(GUI.DIM.width / 2 - this.getSize().width / 2, GUI.DIM.height / 2 - this.getSize().height / 2);
         this.pack();
     }
-    
+
     public JLabel getjLabel() {
         return jLabel;
     }
-    
+
     public JProgressBar getProgressBar() {
         return progressBar;
     }
-    
+
 }

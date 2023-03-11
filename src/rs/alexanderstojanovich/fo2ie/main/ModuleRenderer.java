@@ -517,7 +517,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             // try to find corrseponding feature value
             // based on module build mode do something.. 
             // try to set feature value with corresponding glMouseCoords
-            Pair<Float, Float> skvp = ModuleBuildTask.scaleXYFactor;
+            Pair<Float, Float> skvp = ModuleBuildTask.modeScaleXYFactor;
             MyRectangle mr = new MyRectangle();
             if (selected instanceof Text) {
                 Text selectedText = (Text) selected;
@@ -533,7 +533,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 mr.minY = Math.round(((selected.getPos().y - selected.getHeight() / 2.0f) - (ModuleBuildTask.root.getPos().y - ModuleBuildTask.root.getHeight() / 2.0f)) / skvp.getValue());
                 mr.maxY = Math.round(((selected.getPos().y + selected.getHeight() / 2.0f) - (ModuleBuildTask.root.getPos().y - ModuleBuildTask.root.getHeight() / 2.0f)) / skvp.getValue());
             }
-
+            mr.translate(Math.round(-ModuleBuildTask.xOffset / skvp.getKey()), Math.round(-ModuleBuildTask.yOffset / skvp.getValue()));
             updateSelectedModifiedFeatureValue(mr);
 
             afterSelection();

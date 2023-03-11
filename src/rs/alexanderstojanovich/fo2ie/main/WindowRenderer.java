@@ -37,7 +37,6 @@ import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
-import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import static rs.alexanderstojanovich.fo2ie.main.GUI.GL_WINDOW;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;

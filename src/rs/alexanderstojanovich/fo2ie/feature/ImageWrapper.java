@@ -65,8 +65,8 @@ public class ImageWrapper implements FeatureValue {
 
                 List<ImageData> frames = frm.getFrames();
                 images = new BufferedImage[frames.size()];
-                offsetX = (frames.size() > 0) ? frames.get(0).getOffsetX() : 0;
-                offsetY = (frames.size() > 0) ? frames.get(0).getOffsetY() : 0;
+                offsetX = (!frames.isEmpty()) ? frames.get(0).getOffsetX() : 0;
+                offsetY = (!frames.isEmpty()) ? frames.get(0).getOffsetY() : 0;
                 int index = 0;
                 for (ImageData frame : frames) {
                     images[index++] = frame.toBufferedImage();

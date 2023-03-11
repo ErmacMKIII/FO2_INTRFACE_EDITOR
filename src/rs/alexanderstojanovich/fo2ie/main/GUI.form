@@ -100,6 +100,14 @@
             <Property name="text" type="java.lang.String" value="Tools"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="toolsRebuild">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Rebuild Module"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="toolsRebuildActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="toolsScreenshot">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Take Screenshot"/>
@@ -149,9 +157,6 @@
       <Dimension value="[800, 600]"/>
     </Property>
   </Properties>
-  <AccessibilityProperties>
-    <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="FOnline2 S3 Interface Editor - MONGOLS"/>
-  </AccessibilityProperties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="mainMenu"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>

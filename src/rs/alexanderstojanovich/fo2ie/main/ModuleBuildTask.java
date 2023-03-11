@@ -66,7 +66,9 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     protected static Quad root;
     protected static int modeWidth = 800;
     protected static int modeHeight = 600;
-    protected static Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
+    protected static Pair<Float, Float> modeScaleXYFactor = new Pair<>(1.0f, 1.0f);
+    protected static int xOffset = 0;
+    protected static int yOffset = 0;
 
     /**
      * Create new task to build the module
@@ -98,6 +100,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     public void buildAllRes() throws IOException {
         float oldProgress = 0.0f, progress = 0.0f;
 
+        xOffset = 0;
+        yOffset = 0;
         module.components.clear();
 
         modeWidth = 800;
@@ -111,6 +115,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 new Vector2f(GUI.GL_CANVAS.getWidth() / 2.0f, GUI.GL_CANVAS.getHeight() / 2.0f)
         );
 
+        modeScaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         canvas.setColor(intrface.getCanvasColor());
         module.components.add(canvas);
 
@@ -121,13 +126,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-//            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
+//            Pair<Float, Float> modeScaleXYFactor = new Pair<>(1.0f, 1.0f);
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) intrface.getModifiedBinds().commonFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
-                int mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                int mainPicHeight = mainPicVal.getImages()[0].getHeight();
+                int mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
+                int mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
 
                 // texture for main picture
                 Texture rootTex;
@@ -139,16 +144,17 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
-                scaleXYFactor = ScalingUtils.scaleXYFactor(mainPicWidth, mainPicHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) intrface.getModifiedBinds().commonFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), vtemp);
+                    xOffset = mainPicPosVal.minX;
+                    yOffset = mainPicPosVal.minY;
                 }
 
-                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
-                root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+                Vector2f rootPos = new Vector2f(mainPicWidth / 2.0f, mainPicHeight / 2.0f);
+                root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, mainPicWidth, mainPicHeight, rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -166,7 +172,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             MyRectangle temp = new MyRectangle();
 
                             // scale rectangle to the drawing surface
-                            picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+                            picPosRect = picPosRect.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), temp);
 
                             Pair<FeatureKey, FeatureKey> splitValues = FeatureKey.getSplitValues(picPosKey);
                             float splitW = 0.0f, splitH = 0.0f;
@@ -201,8 +207,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                         Vector2f pos = new Vector2f();
                                         if (images.length == 1 && splitW == 0.0f && splitH == 0.0f) {
                                             // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            width = Math.round(modeScaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(modeScaleXYFactor.getValue() * images[0].getHeight());
 
                                             if (width > 0 && height > 0) {
                                                 // pixel position
@@ -222,8 +228,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             }
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
                                             // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            width = Math.round(modeScaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(modeScaleXYFactor.getValue() * images[0].getHeight());
                                             // pixel position (picPosRect is already scaled)
 
                                             pos.x = picPosRect.minX + width / 2.0f;
@@ -247,10 +253,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
 
                                                 // Global Map special case
-                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                    pos.x += mainPicPosVal.minX;
-                                                    pos.y += mainPicPosVal.minY;
-                                                }
+                                                pos.x += xOffset;
+                                                pos.y += yOffset;
 
                                                 int index = 0;
                                                 // array of textures for an animation
@@ -300,10 +304,9 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             (picPosRect.minY + picPosRect.maxY) / 2.0f
                                     );
                                     // Global Map special case
-                                    if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                        pos.x += mainPicPosVal.minX;
-                                        pos.y += mainPicPosVal.minY;
-                                    }
+                                    pos.x += xOffset;
+                                    pos.y += yOffset;
+
                                     Quad qmark = new Quad(
                                             picPosKey, GLComponent.Inheritance.BASE, picPosRect.lengthX(), picPosRect.lengthY(),
                                             Texture.loadLocalTexture(gl20, GUI.QMARK_PIC), pos
@@ -336,7 +339,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                         MyRectangle temp = new MyRectangle();
 
                         // scale rectangle to the drawing surface
-                        textRect = textRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+                        textRect = textRect.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), temp);
 
                         int width = textRect.lengthX();
                         int height = textRect.lengthY();
@@ -347,10 +350,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             float posy = (textRect.minY + textRect.maxY) / 2.0f;
 
                             // Global Map special case
-                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                posx += mainPicPosVal.minX;
-                                posy += mainPicPosVal.minY;
-                            }
+                            posx += xOffset;
+                            posy += yOffset;
 
                             // calc screen pixel coordinates
                             Vector2f pos = new Vector2f(posx, posy);
@@ -364,8 +365,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             String content = txtKey.getStringValue().replaceFirst(regex, "");
 
                             // font char dimensions
-                            int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
-                            int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
+                            int fntWidth = Math.round(Text.STD_FONT_WIDTH * modeScaleXYFactor.getKey());
+                            int fntHeight = Math.round(Text.STD_FONT_HEIGHT * modeScaleXYFactor.getValue());
 
                             // this is text component                    
                             Text txt = new Text(txtKey, GLComponent.Inheritance.BASE, fntTexture, content, pos, fntWidth, fntHeight);
@@ -411,6 +412,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     public void buildTargetRes(Resolution resolution) throws IOException {
         float oldProgress = 0.0f, progress = 0.0f;
 
+        xOffset = 0;
+        yOffset = 0;
         module.components.clear();
 
         final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(intrface.getModifiedBinds().commonFeatMap);
@@ -429,7 +432,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         modeWidth = resolution.getWidth();
         modeHeight = resolution.getHeight();
-
+        modeScaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         canvas = new Quad(
                 FeatureKey.Reserved.CANVAS,
                 GLComponent.Inheritance.CANVAS,
@@ -447,14 +450,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             MyRectangle mainPicPosVal = null;
 
             // it is displayed on the small panel under some resolution, scaling is required
-//            Pair<Float, Float> scaleXYFactor = new Pair<>(1.0f, 1.0f);
+//            Pair<Float, Float> modeScaleXYFactor = new Pair<>(1.0f, 1.0f);
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
                 mainPicVal.loadImages();
-                int mainPicWidth = mainPicVal.getImages()[0].getWidth();
-                int mainPicHeight = mainPicVal.getImages()[0].getHeight();
-                scaleXYFactor = ScalingUtils.scaleXYFactor(mainPicWidth, mainPicHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+                int mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
+                int mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
 
                 // texture for main picture
                 Texture rootTex;
@@ -470,17 +472,20 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
-                    mainPicPosVal = mainPicPosVal.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), vtemp);
+                    mainPicPosVal = mainPicPosVal.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), vtemp);
+                    xOffset = mainPicPosVal.minX;
+                    yOffset = mainPicPosVal.minY;
                 }
 
-                Vector2f rootPos = new Vector2f(mainPicWidth * scaleXYFactor.getKey() / 2.0f, mainPicHeight * scaleXYFactor.getValue() / 2.0f);
+                Vector2f rootPos = new Vector2f(mainPicWidth / 2.0f, mainPicHeight / 2.0f);
                 GLComponent.Inheritance inheritance = null;
                 if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.DERIVED;
                 } else if (intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.BASE;
                 }
-                root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, Math.round(mainPicWidth * scaleXYFactor.getKey()), Math.round(mainPicHeight * scaleXYFactor.getValue()), rootTex, rootPos);
+
+                root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, inheritance, mainPicWidth, mainPicHeight, rootTex, rootPos);
                 module.components.add(root);
             }
 
@@ -498,7 +503,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             MyRectangle temp = new MyRectangle();
 
                             // scale rectangle to the drawing surface
-                            picPosRect = picPosRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+                            picPosRect = picPosRect.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), temp);
 
                             Pair<FeatureKey, FeatureKey> splitValues = FeatureKey.getSplitValues(picPosKey);
                             float splitW = 0.0f, splitH = 0.0f;
@@ -533,8 +538,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                         Vector2f pos = new Vector2f();
                                         if (images.length == 1 && splitW == 0.0f && splitH == 0.0f) {
                                             // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            width = Math.round(modeScaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(modeScaleXYFactor.getValue() * images[0].getHeight());
 
                                             if (width > 0 && height > 0) {
                                                 // pixel position
@@ -542,10 +547,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 pos.y = picPosRect.minY + height / 2.0f;
 
                                                 // Global Map special case
-                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                    pos.x += mainPicPosVal.minX;
-                                                    pos.y += mainPicPosVal.minY;
-                                                }
+                                                pos.x += xOffset;
+                                                pos.y += yOffset;
 
                                                 // texture from loaded image
                                                 Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
@@ -560,8 +563,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             }
                                         } else if (splitW != 0.0f || splitH != 0.0f) {
                                             // pixel dimension
-                                            width = Math.round(scaleXYFactor.getKey() * images[0].getWidth());
-                                            height = Math.round(scaleXYFactor.getValue() * images[0].getHeight());
+                                            width = Math.round(modeScaleXYFactor.getKey() * images[0].getWidth());
+                                            height = Math.round(modeScaleXYFactor.getValue() * images[0].getHeight());
                                             // pixel position (picPosRect is already scaled)
                                             if (width > 0 && height > 0) {
                                                 pos.x = picPosRect.minX + width / 2.0f;
@@ -593,10 +596,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 pos.y = (picPosRect.minY + picPosRect.maxY) / 2.0f;
 
                                                 // Global Map special case
-                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                    pos.x += mainPicPosVal.minX;
-                                                    pos.y += mainPicPosVal.minY;
-                                                }
+                                                pos.x += xOffset;
+                                                pos.y += yOffset;
 
                                                 int index = 0;
                                                 // array of textures for an animation
@@ -658,10 +659,9 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                             (picPosRect.minY + picPosRect.maxY) / 2.0f
                                     );
                                     // Global Map special case
-                                    if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                        pos.x += mainPicPosVal.minX;
-                                        pos.y += mainPicPosVal.minY;
-                                    }
+                                    pos.x += xOffset;
+                                    pos.y += yOffset;
+
                                     GLComponent.Inheritance inheritance = null;
                                     if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(picPosKey)) {
                                         inheritance = GLComponent.Inheritance.DERIVED;
@@ -700,7 +700,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                         MyRectangle temp = new MyRectangle();
 
                         // scale rectangle to the drawing surface
-                        textRect = textRect.scaleXY(scaleXYFactor.getKey(), scaleXYFactor.getValue(), temp);
+                        textRect = textRect.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), temp);
 
                         int width = textRect.lengthX();
                         int height = textRect.lengthY();
@@ -711,10 +711,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             float posy = (textRect.minY + textRect.maxY) / 2.0f;
 
                             // Global Map special case
-                            if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                posx += mainPicPosVal.minX;
-                                posy += mainPicPosVal.minY;
-                            }
+                            posx += xOffset;
+                            posy += yOffset;
 
                             // calc screen pixel coordinates
                             Vector2f pos = new Vector2f(posx, posy);
@@ -728,8 +726,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                             String content = txtKey.getStringValue().replaceFirst(regex, "");
 
                             // font char dimensions
-                            int fntWidth = Math.round(Text.STD_FONT_WIDTH * scaleXYFactor.getKey());
-                            int fntHeight = Math.round(Text.STD_FONT_HEIGHT * scaleXYFactor.getValue());
+                            int fntWidth = Math.round(Text.STD_FONT_WIDTH * modeScaleXYFactor.getKey());
+                            int fntHeight = Math.round(Text.STD_FONT_HEIGHT * modeScaleXYFactor.getValue());
 
                             // this is text component
                             GLComponent.Inheritance inheritance = null;
@@ -832,6 +830,26 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
     public int getModeHeight() {
         return modeHeight;
+    }
+
+    public static Quad getCanvas() {
+        return canvas;
+    }
+
+    public static Quad getRoot() {
+        return root;
+    }
+
+    public static Pair<Float, Float> getModeScaleXYFactor() {
+        return modeScaleXYFactor;
+    }
+
+    public static int getxOffset() {
+        return xOffset;
+    }
+
+    public static int getyOffset() {
+        return yOffset;
     }
 
 }
