@@ -462,6 +462,12 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         outline = null;
     }
 
+    public void selectToggleEnabled() {
+        if (selected != null) {
+            selected.setEnabled(!selected.isEnabled());
+            afterSelection();
+        }
+    }
 //    protected FeatureValue getSelectedOriginalFeatureValue() {
 //        if (selected == null) {
 //            return null;
@@ -499,6 +505,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 //
 //        return featureValue;
 //    }
+
     protected void updateSelectedModifiedFeatureValue(FeatureValue featureValue) {
         if (selected.getInheritance() == GLComponent.Inheritance.BASE) {
             intrface.getModifiedBinds().commonFeatMap.replace(selected.getFeatureKey(), featureValue);
@@ -675,7 +682,11 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             select();
         }
 
-        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_D) {
+        if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_V) {
+            selectToggleEnabled();
+        }
+
+        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_D && ke.getKeyCode() != KeyEvent.VK_V) {
             showHintText();
         }
 

@@ -1024,7 +1024,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2022-03-11 at 03:05).\n");
+            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2022-03-11 at 03:35).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1033,6 +1033,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Fixed Editing values for Global Map resulting in \"losing\" component.\n");
             sb.append("\t- Fixed keyboard selection with mouse selection out of sync.\n");
             sb.append("\t- Added feature to rebuild the module (from Tools Menu).\n");
+            sb.append("\t- Added TOGGLE ENABLE feature w/ CTRL + V (requires component to be selected).\n");
             sb.append("\n");
             sb.append("Changelog since v1.4 LATVIA:\n");
             sb.append("\t- Reworked features and components in the way that exist Base Feature, Derived Features & Components.\n");
@@ -1130,6 +1131,16 @@ public class GUI extends javax.swing.JFrame {
             sb.append("- In order to view Components build the module.\n");
             sb.append("- To include resolution e.g. 1366x768 put \"resolution 1366 768\" as a new line in the .ini\n");
             sb.append("  and reload your interface.\n");
+            sb.append("\n");
+            sb.append("[*] Hotkeys:\n");
+            sb.append("- CTRL w/ Mouse Hover = Show Hint.\n");
+            sb.append("- CTRL + A = SELECT\n");
+            sb.append("- CTRL + D = DESELECT\n");
+            sb.append("- CTRL + V = TOGGLE ENABLE (when selected)\n");
+            sb.append("- [ - ] = SELECT RANGE\n");
+            sb.append("- UP|DOWN|LEFT|RIGHT = MOVE COMPONENT (when selected)\n");
+            sb.append("- SHIFT + (UP|DOWN|LEFT|RIGHT) = MOVE COMPONENT (FASTER, when selected)\n");
+            sb.append("- F12 = TAKE SCREENSHOT (PREVIEW MODE)\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
