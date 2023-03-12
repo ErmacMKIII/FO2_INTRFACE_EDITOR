@@ -48,6 +48,7 @@ public class Intrface {
 
     public static final String PIC_REGEX = "(Main|Green|Yellow|Red)?(Pic|Anim)(Dn|Dow|Off|Mask|Na)?";
 
+    protected final Vector4f canvasColor = GLColor.awtColorToVec4(config.getCanvasCol());
     protected final Vector4f textColor = GLColor.awtColorToVec4(config.getTxtCol());
     protected final Vector4f textOverlayColor = GLColor.awtColorToVec4(config.getTxtOverlayCol());
     protected final Vector4f qmarkColor = GLColor.awtColorToVec4(config.getQmarkCol());
@@ -66,7 +67,7 @@ public class Intrface {
     protected final Section aim = new Section(Section.SectionName.Aim, FeatureKey.Aim.AimMainPic, FeatureKey.Aim.values());
     protected final Section barter = new Section(Section.SectionName.Barter, FeatureKey.Barter.BarterMainPic, FeatureKey.Barter.values());
     protected final Section character = new Section(Section.SectionName.Character, FeatureKey.Character.ChaMainPic, FeatureKey.Character.values());
-    protected final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Empty.None, FeatureKey.Chosen.values());
+    protected final Section chosen = new Section(Section.SectionName.Chosen, FeatureKey.Reserved.NONE, FeatureKey.Chosen.values());
     protected final Section console = new Section(Section.SectionName.Console, FeatureKey.Console.ConsoleMainPic, FeatureKey.Console.values());
     protected final Section dialogBox = new Section(Section.SectionName.DialogBox, FeatureKey.Dialog.DlgMainPic, FeatureKey.Dialog.values());
     protected final Section faction = new Section(Section.SectionName.Faction, FeatureKey.Faction.FactionMainPic, FeatureKey.Faction.values());
@@ -76,7 +77,7 @@ public class Intrface {
     protected final Section inputBox = new Section(Section.SectionName.InputBox, FeatureKey.InputBox.IboxMainPic, FeatureKey.InputBox.values());
     protected final Section intrface = new Section(Section.SectionName.Intrface, FeatureKey.Interface.IntMainPic, FeatureKey.Interface.values());
     protected final Section inventory = new Section(Section.SectionName.Inventory, FeatureKey.Inventory.InvMainPic, FeatureKey.Inventory.values());
-    protected final Section popUp = new Section(Section.SectionName.PopUp, FeatureKey.Empty.None, FeatureKey.PopUp.values());
+    protected final Section popUp = new Section(Section.SectionName.PopUp, FeatureKey.Reserved.NONE, FeatureKey.PopUp.values());
     protected final Section miniMap = new Section(Section.SectionName.MiniMap, FeatureKey.MiniMap.LmapMainPic, FeatureKey.MiniMap.values());
     protected final Section login = new Section(Section.SectionName.Login, FeatureKey.Login.LogMainPic, FeatureKey.Login.values());
     protected final Section options = new Section(Section.SectionName.Options, FeatureKey.Options.MoptMainPic, FeatureKey.Options.values());
@@ -788,6 +789,10 @@ public class Intrface {
 
     public Vector4f getQmarkColor() {
         return qmarkColor;
+    }
+
+    public Vector4f getCanvasColor() {
+        return canvasColor;
     }
 
 }

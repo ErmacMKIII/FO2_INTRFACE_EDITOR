@@ -21,7 +21,6 @@ import com.jogamp.opengl.util.GLBuffers;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Objects;
-import java.util.UUID;
 import org.joml.Matrix4f;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;

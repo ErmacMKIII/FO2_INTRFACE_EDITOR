@@ -210,7 +210,7 @@ public abstract class ComponentEditor extends JFrame {
                         primitive.getPos().y += (int) spinPosY.getValue() - posY;
                     }
 
-                    Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(resolution.getWidth(), resolution.getHeight(), ModuleBuildTask.mainPicWidth, ModuleBuildTask.mainPicHeight);
+                    Pair<Float, Float> skvp = ScalingUtils.scaleXYFactor(resolution.getWidth(), resolution.getHeight(), ModuleBuildTask.modeWidth, ModuleBuildTask.modeHeight);
 
                     myChngdRect.minX += Math.round(((int) spinPosX.getValue() - posX) / skvp.getKey());
                     myChngdRect.minY += Math.round(((int) spinPosY.getValue() - posY) / skvp.getValue());

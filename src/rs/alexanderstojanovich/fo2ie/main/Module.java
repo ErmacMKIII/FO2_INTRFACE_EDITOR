@@ -17,10 +17,10 @@
 package rs.alexanderstojanovich.fo2ie.main;
 
 import com.jogamp.opengl.GL2;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.joml.Matrix4f;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.ShaderProgram;
@@ -34,7 +34,7 @@ public class Module {
 
     protected static final Object OBJ_MUTEX = new Object();
 
-    protected final List<GLComponent> components = new ArrayList<>();
+    protected final List<GLComponent> components = new CopyOnWriteArrayList<>();
 
     protected final TimerTask unbufTask = new TimerTask() {
         @Override

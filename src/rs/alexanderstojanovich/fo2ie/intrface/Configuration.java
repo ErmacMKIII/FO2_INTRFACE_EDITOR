@@ -43,6 +43,7 @@ public class Configuration {
     private Color selectCol = new Color(0, 255, 255, 128); // half blue translucent
     private Color qmarkCol = Color.MAGENTA;
     private Color hintCol = Color.ORANGE;
+    private Color canvasCol = Color.BLUE;
     private int textureSize = 1024;
 
     private boolean keepAspectRatio = false;
@@ -118,6 +119,9 @@ public class Configuration {
                             case "HintColor":
                                 hintCol = readRGBA(words[1]);
                                 break;
+                            case "CanvasColor":
+                                canvasCol = readRGBA(words[1]);
+                                break;
                             case "TextureSize":
                                 int number = Integer.parseInt(words[1]);
                                 // if tex size is a non-zero power of two
@@ -175,6 +179,7 @@ public class Configuration {
             pw.println("TextOverlayColor = " + writeRGBA(txtOverlayCol));
             pw.println("SelectedColor = " + writeRGBA(selectCol));
             pw.println("HintColor = " + writeRGBA(hintCol));
+            pw.println("CanvasColor = " + writeRGBA(canvasCol));
             pw.println("QMarkColor = " + writeRGBA(qmarkCol));
             pw.println("TextureSize = " + textureSize);
             pw.println("AnimationTicks = " + animationTicks);
@@ -284,6 +289,10 @@ public class Configuration {
 
     public void setHintCol(Color hintCol) {
         this.hintCol = hintCol;
+    }
+
+    public Color getCanvasCol() {
+        return canvasCol;
     }
 
 }

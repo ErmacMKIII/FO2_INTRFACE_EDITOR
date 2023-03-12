@@ -138,10 +138,10 @@ public class MyRectangle extends Rectanglei implements FeatureValue {
     public void setStringValue(String value) {
         String[] split = value.split("\\s+");
         if (split.length == 4) {
-            minX = Integer.valueOf(split[0]);
-            minY = Integer.valueOf(split[1]);
-            maxX = Integer.valueOf(split[2]);
-            maxY = Integer.valueOf(split[3]);
+            minX = Integer.parseInt(split[0]);
+            minY = Integer.parseInt(split[1]);
+            maxX = Integer.parseInt(split[2]);
+            maxY = Integer.parseInt(split[3]);
         }
     }
 

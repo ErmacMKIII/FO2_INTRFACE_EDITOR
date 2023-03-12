@@ -100,6 +100,14 @@
             <Property name="text" type="java.lang.String" value="Tools"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="toolsRebuild">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Rebuild Module"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="toolsRebuildActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="toolsScreenshot">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Take Screenshot"/>
@@ -138,7 +146,7 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
-    <Property name="title" type="java.lang.String" value="FOnline2 S3 Interface Editor - LATVIA"/>
+    <Property name="title" type="java.lang.String" value="FOnline2 S3 Interface Editor - MONGOLS"/>
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[800, 600]"/>
     </Property>

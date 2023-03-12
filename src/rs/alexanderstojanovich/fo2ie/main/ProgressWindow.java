@@ -39,6 +39,7 @@ public final class ProgressWindow extends JWindow {
         jLabel.setFont(font);
         jLabel.setIcon(new ImageIcon(urlBuild));
         progressBar.setStringPainted(true);
+        progressBar.setForeground(GUISplashScreen.COLOR);
 
         this.setLayout(new BorderLayout());
         this.getContentPane().add(jLabel, BorderLayout.CENTER);

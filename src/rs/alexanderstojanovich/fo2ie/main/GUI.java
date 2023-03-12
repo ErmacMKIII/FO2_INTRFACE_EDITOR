@@ -114,9 +114,11 @@ public class GUI extends javax.swing.JFrame {
 
         @Override
         public void afterModuleBuild() {
-            //btnBuild.setEnabled(true);
+            //btnBuild.setEnabled(true);            
             GUI.this.cmbBoxSection.setEnabled(true);
             GUI.this.cmbBoxResolution.setEnabled(true);
+            GUI.this.toolsRebuild.setEnabled(true);
+            GUI.this.txtFldSearch.setText("");
 
             btnMdlePreview.setEnabled(true);
             initBaseFeaturePreview();
@@ -160,6 +162,7 @@ public class GUI extends javax.swing.JFrame {
 
     public static final String FNT_PIC = "font.png";
     public static final String QMARK_PIC = "qmark.png";
+    public static final String CHKBOARD_PIC = "chkboard.png";
 
     public static final String BUILD_ICON = "build_icon.png";
 
@@ -349,6 +352,7 @@ public class GUI extends javax.swing.JFrame {
     // bulding the module priv method
     private void workOnBuildComponents() {
         // dont build if already build in progress
+        this.toolsRebuild.setEnabled(false);
         this.cmbBoxSection.setEnabled(false);
         this.cmbBoxResolution.setEnabled(false);
         btnMdlePreview.setEnabled(false);
@@ -474,6 +478,7 @@ public class GUI extends javax.swing.JFrame {
         editUndoAll = new javax.swing.JMenuItem();
         editOverwriteChanges = new javax.swing.JMenuItem();
         mainMenuTools = new javax.swing.JMenu();
+        toolsRebuild = new javax.swing.JMenuItem();
         toolsScreenshot = new javax.swing.JMenuItem();
         mainMenuInfo = new javax.swing.JMenu();
         infoMenuAbout = new javax.swing.JMenuItem();
@@ -487,7 +492,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - LATVIA");
+        setTitle("FOnline2 S3 Interface Editor - MONGOLS");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -839,6 +844,14 @@ public class GUI extends javax.swing.JFrame {
 
         mainMenuTools.setText("Tools");
 
+        toolsRebuild.setText("Rebuild Module");
+        toolsRebuild.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolsRebuildActionPerformed(evt);
+            }
+        });
+        mainMenuTools.add(toolsRebuild);
+
         toolsScreenshot.setText("Take Screenshot");
         toolsScreenshot.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1011,9 +1024,16 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.4 - LATVIA (PUBLIC BUILD reviewed on 2022-12-03 at 20:15).\n");
+            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2022-03-11 at 03:35).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.5 MONGOLS:\n");
+            sb.append("\t- Added Canvas set as Root for each Module (can only be toggle enabled).\n");
+            sb.append("\t- Fixed Editing values for Global Map resulting in \"losing\" component.\n");
+            sb.append("\t- Fixed keyboard selection with mouse selection out of sync.\n");
+            sb.append("\t- Added feature to rebuild the module (from Tools Menu).\n");
+            sb.append("\t- Added TOGGLE ENABLE feature w/ CTRL + V (requires component to be selected).\n");
             sb.append("\n");
             sb.append("Changelog since v1.4 LATVIA:\n");
             sb.append("\t- Reworked features and components in the way that exist Base Feature, Derived Features & Components.\n");
@@ -1112,6 +1132,16 @@ public class GUI extends javax.swing.JFrame {
             sb.append("- To include resolution e.g. 1366x768 put \"resolution 1366 768\" as a new line in the .ini\n");
             sb.append("  and reload your interface.\n");
             sb.append("\n");
+            sb.append("[*] Hotkeys:\n");
+            sb.append("- CTRL w/ Mouse Hover = Show Hint.\n");
+            sb.append("- CTRL + A = SELECT\n");
+            sb.append("- CTRL + D = DESELECT\n");
+            sb.append("- CTRL + V = TOGGLE ENABLE (when selected)\n");
+            sb.append("- [ - ] = SELECT RANGE\n");
+            sb.append("- UP|DOWN|LEFT|RIGHT = MOVE COMPONENT (when selected)\n");
+            sb.append("- SHIFT + (UP|DOWN|LEFT|RIGHT) = MOVE COMPONENT (FASTER, when selected)\n");
+            sb.append("- F12 = TAKE SCREENSHOT (PREVIEW MODE)\n");
+            sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
             JScrollPane jsp = new JScrollPane(textArea);
@@ -1135,6 +1165,11 @@ public class GUI extends javax.swing.JFrame {
     private void editBaseFeatureValue() {
         final int srow = tblBaseFeats.getSelectedRow();
         final int scol = tblBaseFeats.getSelectedColumn();
+
+        if (srow < 0 || (scol - 2) < 0 || (scol - 3) < 0) {
+            return;
+        }
+
         Object valueAtKey = tblBaseFeats.getValueAt(srow, scol - 3);
         Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 2);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
@@ -1155,6 +1190,11 @@ public class GUI extends javax.swing.JFrame {
     private void editDerivedFeatureValue() {
         final int srow = tblDerivedFeats.getSelectedRow();
         final int scol = tblDerivedFeats.getSelectedColumn();
+
+        if (srow < 0 || (scol - 2) < 0 || (scol - 3) < 0) {
+            return;
+        }
+
         Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 3);
         Object valueAtVal = tblDerivedFeats.getValueAt(srow, scol - 2);
         final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
@@ -1199,6 +1239,11 @@ public class GUI extends javax.swing.JFrame {
     private void removeDerivedFeature() {
         final int srow = tblDerivedFeats.getSelectedRow();
         final int scol = tblDerivedFeats.getSelectedColumn();
+
+        if (srow < 0 || (scol - 4) < 0) {
+            return;
+        }
+
         Object valueAtKey = tblDerivedFeats.getValueAt(srow, scol - 4);
 //        Object valueAtVal = tblBaseFeats.getValueAt(srow, scol - 3);
 
@@ -1504,6 +1549,7 @@ public class GUI extends javax.swing.JFrame {
         }
         mdlRenderer.guiResolution = currentResolution;
         mdlRenderer.guiSectionName = currentSectionName;
+        mdlRenderer.deselect();
     }
 
     private void btnMdlePreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMdlePreviewActionPerformed
@@ -1697,6 +1743,20 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_editOverwriteChangesActionPerformed
 
+    private void toolsRebuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolsRebuildActionPerformed
+        // TODO add your handling code here:
+        String[] things = cmbBoxResolution.getSelectedItem().toString().split("x");
+        currentResolution = new Resolution(Integer.parseInt(things[0]), Integer.parseInt(things[1]));
+        if (currentResolution != cmbBoxSection.getSelectedItem()) {
+            mdlRenderer.deselect();
+            mdlRenderer.module.components.clear();
+            initBaseFeaturePreview();
+            initDerivedFeaturePreview();
+            initComponentsPreview();
+            workOnBuildComponents();
+        }
+    }//GEN-LAST:event_toolsRebuildActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1779,6 +1839,11 @@ public class GUI extends javax.swing.JFrame {
     public void toggleEnableComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
+
+        if (srow < 0 || (scol - 6) < 0) {
+            return;
+        }
+
         Object uuid = tblComps.getValueAt(srow, scol - 6);
         //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
 
@@ -1804,7 +1869,10 @@ public class GUI extends javax.swing.JFrame {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
         Object uuid = tblComps.getValueAt(srow, scol - 8);
-        //final FeatureKey featKey = FeatureKey.valueOf((String) valueAtKey);
+
+        if (srow < 0 || (scol - 8) < 0) {
+            return;
+        }
 
         tblComps.getSelectionModel().clearSelection();
         // deselect
@@ -1812,12 +1880,15 @@ public class GUI extends javax.swing.JFrame {
 
         // select from module renderer
         mdlRenderer.select((String) uuid);
-
     }
 
     private void editComponent() {
         final int srow = tblComps.getSelectedRow();
         final int scol = tblComps.getSelectedColumn();
+
+        if (srow < 0 || (scol - 6) < 0 || (scol - 7) < 0) {
+            return;
+        }
 
         Object valueAtKey = tblComps.getValueAt(srow, scol - 6);
         Object uuid = tblComps.getValueAt(srow, scol - 7);
@@ -1827,7 +1898,7 @@ public class GUI extends javax.swing.JFrame {
 
         GLComponent glcKey = null;
         for (GLComponent glc : mdlRenderer.module.components) {
-            if (glc.getUniqueId().equals(uuid) && glc.isEnabled()) {
+            if (glc.getUniqueId().equals(uuid) && glc.isEnabled() && glc.getInheritance() != GLComponent.Inheritance.CANVAS) {
                 glcKey = glc;
                 break;
             }
@@ -2262,6 +2333,7 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTable tblBaseFeats;
     private javax.swing.JTable tblComps;
     private javax.swing.JTable tblDerivedFeats;
+    private javax.swing.JMenuItem toolsRebuild;
     private javax.swing.JMenuItem toolsScreenshot;
     private javax.swing.JTextField txtFldInPath;
     private javax.swing.JTextField txtFldOutPath;
