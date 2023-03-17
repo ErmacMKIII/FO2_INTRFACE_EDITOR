@@ -67,8 +67,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     protected static int modeWidth = 800;
     protected static int modeHeight = 600;
     protected static Pair<Float, Float> modeScaleXYFactor = new Pair<>(1.0f, 1.0f);
-    protected static int xOffset = 0;
-    protected static int yOffset = 0;
+    protected static float xOffset = 0;
+    protected static float yOffset = 0;
 
     /**
      * Create new task to build the module
@@ -100,13 +100,12 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     public void buildAllRes() throws IOException {
         float oldProgress = 0.0f, progress = 0.0f;
 
-        xOffset = 0;
-        yOffset = 0;
         module.components.clear();
 
         modeWidth = 800;
         modeHeight = 600;
 
+        modeScaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         canvas = new Quad(
                 FeatureKey.Reserved.CANVAS,
                 GLComponent.Inheritance.CANVAS,
@@ -114,10 +113,11 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 Texture.loadLocalTexture(gl20, GUI.CHKBOARD_PIC),
                 new Vector2f(GUI.GL_CANVAS.getWidth() / 2.0f, GUI.GL_CANVAS.getHeight() / 2.0f)
         );
-
-        modeScaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
         canvas.setColor(intrface.getCanvasColor());
         module.components.add(canvas);
+
+        xOffset = canvas.getPos().x;
+        yOffset = canvas.getPos().y;
 
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -133,6 +133,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 mainPicVal.loadImages();
                 int mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
                 int mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
+                xOffset -= mainPicWidth / 2.0f;
+                yOffset -= mainPicHeight / 2.0f;
 
                 // texture for main picture
                 Texture rootTex;
@@ -144,16 +146,22 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
+                Vector2f rootPos = new Vector2f(mainPicWidth / 2.0f + xOffset, mainPicHeight / 2.0f + yOffset);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) intrface.getModifiedBinds().commonFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
                     mainPicPosVal = mainPicPosVal.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), vtemp);
-                    xOffset = mainPicPosVal.minX;
-                    yOffset = mainPicPosVal.minY;
+                    if (sectionName == SectionName.SkillBox) {
+                        rootPos.x += mainPicPosVal.minX;
+                        rootPos.y += mainPicPosVal.minY;
+                    }
+                    if (sectionName == SectionName.GlobalMap) {
+                        xOffset += mainPicPosVal.minX;
+                        yOffset += mainPicPosVal.minY;
+                    }
                 }
 
-                Vector2f rootPos = new Vector2f(mainPicWidth / 2.0f, mainPicHeight / 2.0f);
                 root = new Quad(mainPicPosKey == null ? mainPicKey : mainPicPosKey, GLComponent.Inheritance.BASE, mainPicWidth, mainPicHeight, rootTex, rootPos);
                 module.components.add(root);
             }
@@ -216,10 +224,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 pos.y = picPosRect.minY + height / 2.0f;
 
                                                 // Global Map special case
-                                                if (mainPicPosVal != null && section.getSectionName() == Section.SectionName.GlobalMap) {
-                                                    pos.x += mainPicPosVal.minX;
-                                                    pos.y += mainPicPosVal.minY;
-                                                }
+                                                pos.x += xOffset;
+                                                pos.y += yOffset;
 
                                                 // texture from loaded image
                                                 Texture tex = Texture.loadTexture(iw.getStringValue(), gl20, images[0]);
@@ -283,13 +289,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                     // pixel position (picPosRect is already scaled)
 
                                     Vector2f pos = new Vector2f(
-                                            picPosRect.minX + width / 2.0f,
-                                            picPosRect.minY + height / 2.0f
+                                            xOffset + picPosRect.minX + width / 2.0f,
+                                            yOffset + picPosRect.minY + height / 2.0f
                                     );
 
                                     Vector2f posMax = new Vector2f(
-                                            picPosRect.maxX - width / 2.0f,
-                                            picPosRect.maxY - height / 2.0f
+                                            xOffset + picPosRect.maxX - width / 2.0f,
+                                            yOffset + picPosRect.maxY - height / 2.0f
                                     );
 
                                     // texture is missing texture
@@ -412,8 +418,6 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
     public void buildTargetRes(Resolution resolution) throws IOException {
         float oldProgress = 0.0f, progress = 0.0f;
 
-        xOffset = 0;
-        yOffset = 0;
         module.components.clear();
 
         final Map<FeatureKey, FeatureValue> resFeatMap = new HashMap<>(intrface.getModifiedBinds().commonFeatMap);
@@ -432,7 +436,9 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
 
         modeWidth = resolution.getWidth();
         modeHeight = resolution.getHeight();
+
         modeScaleXYFactor = ScalingUtils.scaleXYFactor(modeWidth, modeHeight, GUI.GL_CANVAS.getWidth(), GUI.GL_CANVAS.getHeight());
+
         canvas = new Quad(
                 FeatureKey.Reserved.CANVAS,
                 GLComponent.Inheritance.CANVAS,
@@ -440,8 +446,11 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 Texture.loadLocalTexture(gl20, GUI.CHKBOARD_PIC),
                 new Vector2f(GUI.GL_CANVAS.getWidth() / 2.0f, GUI.GL_CANVAS.getHeight() / 2.0f)
         );
-
         canvas.setColor(intrface.getCanvasColor());
+
+        xOffset = canvas.getPos().x;
+        yOffset = canvas.getPos().y;
+
         module.components.add(canvas);
         // final result is array list of components
         final Section section = intrface.getNameToSectionMap().get(sectionName);
@@ -457,6 +466,8 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                 mainPicVal.loadImages();
                 int mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
                 int mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
+                xOffset -= mainPicWidth / 2.0f;
+                yOffset -= mainPicHeight / 2.0f;
 
                 // texture for main picture
                 Texture rootTex;
@@ -468,16 +479,22 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                     rootTex = Texture.loadLocalTexture(gl20, GUI.QMARK_PIC);
                 }
 
+                Vector2f rootPos = new Vector2f(mainPicWidth / 2.0f + xOffset, mainPicHeight / 2.0f + yOffset);
                 FeatureKey mainPicPosKey = mainPicKey.getMainPicPos();
                 if (mainPicPosKey != null && resFeatMap.containsKey(mainPicPosKey)) {
                     mainPicPosVal = (MyRectangle) resFeatMap.get(mainPicPosKey);
                     MyRectangle vtemp = new MyRectangle();
                     mainPicPosVal = mainPicPosVal.scaleXY(modeScaleXYFactor.getKey(), modeScaleXYFactor.getValue(), vtemp);
-                    xOffset = mainPicPosVal.minX;
-                    yOffset = mainPicPosVal.minY;
+                    if (sectionName == SectionName.SkillBox) {
+                        rootPos.x += mainPicPosVal.minX;
+                        rootPos.y += mainPicPosVal.minY;
+                    }
+                    if (sectionName == SectionName.GlobalMap) {
+                        xOffset += mainPicPosVal.minX;
+                        yOffset += mainPicPosVal.minY;
+                    }
                 }
 
-                Vector2f rootPos = new Vector2f(mainPicWidth / 2.0f, mainPicHeight / 2.0f);
                 GLComponent.Inheritance inheritance = null;
                 if (resolutionPragma != null && resolutionPragma.getCustomFeatMap().containsKey(mainPicPosKey)) {
                     inheritance = GLComponent.Inheritance.DERIVED;
@@ -571,7 +588,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                                 pos.y = picPosRect.minY + height / 2.0f;
 
                                                 Vector2f posMax = new Vector2f(
-                                                        picPosRect.maxX - width / 2.0f, picPosRect.maxY - height / 2.0f
+                                                        picPosRect.maxX - width / 2.0f + xOffset, picPosRect.maxY - height / 2.0f + yOffset
                                                 );
 
                                                 // texture from loaded image
@@ -632,13 +649,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
                                     // pixel position (picPosRect is already scaled)
 
                                     Vector2f pos = new Vector2f(
-                                            picPosRect.minX + width / 2.0f,
-                                            picPosRect.minY + height / 2.0f
+                                            xOffset + picPosRect.minX + width / 2.0f,
+                                            yOffset + picPosRect.minY + height / 2.0f
                                     );
 
                                     Vector2f posMax = new Vector2f(
-                                            picPosRect.maxX - width / 2.0f,
-                                            picPosRect.maxY - height / 2.0f
+                                            xOffset + picPosRect.maxX - width / 2.0f,
+                                            yOffset + picPosRect.maxY - height / 2.0f
                                     );
 
                                     // texture is missing texture
@@ -844,11 +861,11 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
         return modeScaleXYFactor;
     }
 
-    public static int getxOffset() {
+    public static float getxOffset() {
         return xOffset;
     }
 
-    public static int getyOffset() {
+    public static float getyOffset() {
         return yOffset;
     }
 

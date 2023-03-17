@@ -845,6 +845,7 @@ public class GUI extends javax.swing.JFrame {
         mainMenuTools.setText("Tools");
 
         toolsRebuild.setText("Rebuild Module");
+        toolsRebuild.setEnabled(false);
         toolsRebuild.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 toolsRebuildActionPerformed(evt);
@@ -1024,7 +1025,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2022-03-11 at 03:35).\n");
+            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2022-03-17 at 13:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1093,7 +1094,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("through linking features/components and modifies only the .ini\n");
             sb.append("and is not an image editor itself.\n");
             sb.append("\n");
-            sb.append("Copyright © 2022\n");
+            sb.append("Copyright © 2023\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
