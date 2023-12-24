@@ -108,7 +108,7 @@ public class AddressableQuad implements GLComponent {
         this.inheritance = inheritance;
         this.width = width;
         this.height = height;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.texture = texture;
         this.pos = pos;
         this.stepX = stepX;

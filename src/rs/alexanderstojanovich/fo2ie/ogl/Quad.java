@@ -98,7 +98,7 @@ public class Quad implements GLComponent {
     public Quad(FeatureKey featureKey, Inheritance inheritance, Texture texture, Vector2f pos) {
         this.featureKey = featureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.width = texture.getImage().getWidth();
         this.height = texture.getImage().getHeight();
         this.texture = texture;
@@ -119,7 +119,7 @@ public class Quad implements GLComponent {
     public Quad(FeatureKey featureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos) {
         this.featureKey = featureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.width = width;
         this.height = height;
         this.texture = texture;

@@ -104,7 +104,7 @@ public class Animation implements GLComponent {
     public Animation(FeatureKey featureKey, Inheritance inheritance, int fps, int width, int height, Texture[] texture) {
         this.featureKey = featureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.fps = fps;
         this.width = width;
         this.height = height;
@@ -126,7 +126,7 @@ public class Animation implements GLComponent {
     public Animation(FeatureKey featureKey, Inheritance inheritance, int fps, int width, int height, Texture[] texture, Vector2f pos) {
         this.featureKey = featureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.fps = fps;
         this.width = width;
         this.height = height;

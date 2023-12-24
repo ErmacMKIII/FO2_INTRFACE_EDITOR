@@ -34,6 +34,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 import rs.alexanderstojanovich.fo2ie.util.GLColor;
 import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 
 /**
  *
@@ -605,6 +606,47 @@ public class Intrface {
         }
 
         return result;
+    }
+
+    /**
+     * Get feature value in dictionary.
+     *
+     * @param featureKey feature key (left side)
+     * @param inheritance BASE or DERIVED
+     * @param resolution resolution width x resolution (provided if derived)
+     * @return feature value (right side), null returned if no exist
+     */
+    public FeatureValue selectFeatureValue(FeatureKey featureKey, GLComponent.Inheritance inheritance, Resolution resolution) {
+        FeatureValue featureValue = null;
+        if (inheritance == GLComponent.Inheritance.BASE) {
+            featureValue = modifiedBinds.commonFeatMap.get(featureKey);
+        } else if (inheritance == GLComponent.Inheritance.DERIVED) {
+            ResolutionPragma resolutionPragma = modifiedBinds.customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+            if (resolutionPragma != null) {
+                featureValue = resolutionPragma.getCustomFeatMap().get(featureKey);
+            }
+        }
+
+        return featureValue;
+    }
+
+    /**
+     * Update feature key with feature value in dictionary
+     *
+     * @param featureKey feature key (left side)
+     * @param inheritance BASE or DERIVED
+     * @param featureValue feature value (right side)
+     * @param resolution resolution width x resolution (provided if derived)
+     */
+    public void updateFeatureValue(FeatureKey featureKey, GLComponent.Inheritance inheritance, FeatureValue featureValue, Resolution resolution) {
+        if (inheritance == GLComponent.Inheritance.BASE) {
+            modifiedBinds.commonFeatMap.replace(featureKey, featureValue);
+        } else if (inheritance == GLComponent.Inheritance.DERIVED) {
+            ResolutionPragma resolutionPragma = modifiedBinds.customResolutions.stream().filter(x -> x.getResolution().equals(resolution)).findFirst().orElse(null);
+            if (resolutionPragma != null) {
+                resolutionPragma.getCustomFeatMap().replace(featureKey, featureValue);
+            }
+        }
     }
 
     public List<ModificationIfc> getChanges() {

@@ -69,6 +69,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
+import rs.alexanderstojanovich.fo2ie.main.Module;
 import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
@@ -492,7 +493,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - MONGOLS");
+        setTitle("FOnline2 S3 Interface Editor - NITRO");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -2253,7 +2254,7 @@ public class GUI extends javax.swing.JFrame {
                 final GUI gui = new GUI();
                 gui.setVisible(true);
                 gui.pack();
-                gui.actionUpdateTimer.schedule(new TimerTask() {
+                gui.actionUpdateTimer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
                         if (gui.intrface.isInitialized()) {
