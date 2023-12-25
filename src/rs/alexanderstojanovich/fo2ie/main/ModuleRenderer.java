@@ -37,13 +37,13 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
-import rs.alexanderstojanovich.fo2ie.main.Module;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
 import rs.alexanderstojanovich.fo2ie.ogl.Shader;
@@ -450,6 +450,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             afterSelection();
         }
     }
+
+    public abstract void editFeature(FeatureKey fk, FeatureValue fv, GLComponent.Inheritance inh, Intrface intr);
 //    protected FeatureValue getSelectedOriginalFeatureValue() {
 //        if (selected == null) {
 //            return null;
@@ -680,6 +682,16 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             deselect();
         }
 
+        if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_E) {
+            if (selected != null) {
+                FeatureValue featureValue = intrface.selectFeatureValue(selected.getPosFeatureKey(), selected.getInheritance(), guiResolution);
+                editFeature(selected.getPosFeatureKey(), featureValue, selected.getInheritance(), intrface);
+            } else if (hintComponent != null) {
+                FeatureValue featureValue = intrface.selectFeatureValue(hintComponent.getPosFeatureKey(), hintComponent.getInheritance(), guiResolution);
+                editFeature(hintComponent.getPosFeatureKey(), featureValue, hintComponent.getInheritance(), intrface);
+            }
+        }
+
         if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             select();
         }
@@ -688,7 +700,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             selectToggleEnabled();
         }
 
-        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_D && ke.getKeyCode() != KeyEvent.VK_V) {
+        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_E && ke.getKeyCode() != KeyEvent.VK_D && ke.getKeyCode() != KeyEvent.VK_V) {
             showVerboseHintText();
         }
 
@@ -743,15 +755,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         //..IGNORED
     }
 
-    //--------------------------------------------------------------------------
-//    public Vector4f getSavedColor() {
-//        return savedColor;
-//    }
-//
-//    public void setSavedColor(Vector4f savedColor) {
-//        this.savedColor = savedColor;
-//    }
-    //--------------------------------------------------------------------------
     public Module getModule() {
         return module;
     }

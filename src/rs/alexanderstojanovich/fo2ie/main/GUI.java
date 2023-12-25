@@ -72,6 +72,7 @@ import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.main.Module;
 import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
 
@@ -127,6 +128,24 @@ public class GUI extends javax.swing.JFrame {
             initComponentsPreview();
             initDisplayActionLog();
         }
+
+        @Override
+        public void editFeature(FeatureKey fk, FeatureValue fv, Inheritance inh, Intrface intr) {
+            if (inh == Inheritance.BASE) {
+                final FeatValueEditor fve = FeatValueEditor.getInstance(GUI.this);
+                fve.popUp(fk, fv, intrface);
+                fve.setVisible(true);
+                fve.setResizable(false);
+                fve.pack();
+            } else if (inh == Inheritance.DERIVED) {
+                final FeatValueEditor fve = FeatValueEditor.getInstance(GUI.this);
+                fve.popUp(fk, fv, intrface, currentResolution);
+                fve.setVisible(true);
+                fve.setResizable(false);
+                fve.pack();
+            }
+        }
+
     };
 
     private final WindowRenderer winRenderer = new WindowRenderer(fpsAnim, module, intrface, this.currentResolution, this.currentSectionName) {
@@ -1033,8 +1052,9 @@ public class GUI extends javax.swing.JFrame {
             sb.append("Changelog since v1.6 NITRO:\n");
             sb.append("\t- Fixed (duplicate problem) & shortened component unique ids.\n");
             sb.append("\t- Checkerboard texture changed (8x8, blurred).\n");
-            sb.append("\t- Always showing hint w/ CTRL + V toggle enable.\n");
+            sb.append("\t- Always showing hint w/ CTRL + V toggle enable (on component).\n");
             sb.append("\t- Showing detailed hint text when mouse cursor is hovered over and CTRL is pressed.\n");
+            sb.append("\t- Added edit feature w/ CTRL + E (on component).\n");
             sb.append("\n");
             sb.append("Changelog since v1.5 MONGOLS:\n");
             sb.append("\t- Added Canvas set as Root for each Module (can only be toggle enabled).\n");
@@ -1144,6 +1164,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("- CTRL w/ Mouse Hover = Show Verbose Hint.\n");
             sb.append("- CTRL + A = SELECT\n");
             sb.append("- CTRL + D = DESELECT\n");
+            sb.append("- CTRL + E = EDIT\n");
             sb.append("- CTRL + V = TOGGLE ENABLE\n");
             sb.append("- [ - ] = SELECT RANGE\n");
             sb.append("- UP|DOWN|LEFT|RIGHT = MOVE COMPONENT (when selected)\n");
