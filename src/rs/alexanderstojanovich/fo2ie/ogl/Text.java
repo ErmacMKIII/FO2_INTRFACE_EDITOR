@@ -151,7 +151,7 @@ public class Text implements GLComponent {
                 pairList.add(new Pair<>(xinc, ydec));
 
                 // pass null feat key as it is only used for rendering charactters
-                Quad quad = new Quad(null, null, charWidth, charHeight, texture, pos);
+                Quad quad = new Quad(null, null, null, charWidth, charHeight, texture, pos);
 
                 quad.setColor(color);
                 quad.setScale(scale);
@@ -367,7 +367,7 @@ public class Text implements GLComponent {
     }
 
     @Override
-    public FeatureKey getFeatureKey() {
+    public FeatureKey getPosFeatureKey() {
         return featureKey;
     }
 
@@ -478,6 +478,11 @@ public class Text implements GLComponent {
     @Override
     public Inheritance getInheritance() {
         return inheritance;
+    }
+
+    @Override
+    public FeatureKey getLinkFeatureKey() {
+        return null;
     }
 
 }

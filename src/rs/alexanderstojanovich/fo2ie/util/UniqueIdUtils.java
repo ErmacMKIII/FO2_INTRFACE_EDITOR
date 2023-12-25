@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.fo2ie.util;
 
+import java.util.Arrays;
 import java.util.UUID;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
@@ -81,6 +82,23 @@ public class UniqueIdUtils {
     }
 
     /**
+     * Generate new UniqueId for GLComponent.For multiple feature keys
+     *
+     * @param featureKeys feature key
+     * @param type GLComponent type
+     * @param inheritance BASE or DERIVED
+     *
+     * @return UniqueId
+     */
+    public static String GenerateNewUniqueId(FeatureKey[] featureKeys, GLComponent.Type type, GLComponent.Inheritance inheritance) {
+        String string = String.valueOf(Arrays.toString(featureKeys)) + type + inheritance;
+        UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
+        String guidStr = guid.toString();
+        String result = guidStr.substring(24, 36);
+        return result;
+    }
+
+    /**
      * Generate new UniqueId for GLComponent.
      *
      * @param featureKey feature key
@@ -99,4 +117,22 @@ public class UniqueIdUtils {
         return result;
     }
 
+    /**
+     * Generate new UniqueId for GLComponent.For multiple feature keys
+     *
+     * @param featureKeys feature key
+     * @param type GLComponent type
+     * @param inheritance BASE or DERIVED
+     * @param res resolution (width x height)
+     *
+     * @return UniqueId
+     */
+    public static String GenerateNewUniqueId(FeatureKey[] featureKeys, GLComponent.Type type, GLComponent.Inheritance inheritance, Resolution res) {
+        String dim = String.valueOf(res.getWidth()) + "x" + String.valueOf(res.getHeight());
+        String string = String.valueOf(Arrays.toString(featureKeys)) + type + inheritance + dim;
+        UUID guid = UUID.nameUUIDFromBytes(string.getBytes());
+        String guidStr = guid.toString();
+        String result = guidStr.substring(24, 36);
+        return result;
+    }
 }

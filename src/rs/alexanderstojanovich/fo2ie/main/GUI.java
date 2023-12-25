@@ -1026,15 +1026,14 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-24 at 23:30).\n");
+            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-25 at 07:30).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v1.6 NITRO:\n");
-            sb.append("\t- Fixed & shortened component unique ids.\n");
+            sb.append("\t- Fixed (duplicate problem) & shortened component unique ids.\n");
             sb.append("\t- Checkerboard texture changed (8x8, blurred).\n");
             sb.append("\t- Always showing hint w/ CTRL + V toggle enable.\n");
-            sb.append("\t- Added TOGGLE ENABLE feature w/ CTRL + V (requires component to be selected).\n");
             sb.append("\t- Showing detailed hint text when mouse cursor is hovered over and CTRL is pressed.\n");
             sb.append("\n");
             sb.append("Changelog since v1.5 MONGOLS:\n");
@@ -1142,10 +1141,10 @@ public class GUI extends javax.swing.JFrame {
             sb.append("  and reload your interface.\n");
             sb.append("\n");
             sb.append("[*] Hotkeys:\n");
-            sb.append("- CTRL w/ Mouse Hover = Show Hint.\n");
+            sb.append("- CTRL w/ Mouse Hover = Show Verbose Hint.\n");
             sb.append("- CTRL + A = SELECT\n");
             sb.append("- CTRL + D = DESELECT\n");
-            sb.append("- CTRL + V = TOGGLE ENABLE (when selected)\n");
+            sb.append("- CTRL + V = TOGGLE ENABLE\n");
             sb.append("- [ - ] = SELECT RANGE\n");
             sb.append("- UP|DOWN|LEFT|RIGHT = MOVE COMPONENT (when selected)\n");
             sb.append("- SHIFT + (UP|DOWN|LEFT|RIGHT) = MOVE COMPONENT (FASTER, when selected)\n");
@@ -1733,6 +1732,8 @@ public class GUI extends javax.swing.JFrame {
         int val = JOptionPane.showConfirmDialog(this, "Do you want to undo all modifications?", "Undo all", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
         if (val == JOptionPane.YES_OPTION) {
             intrface.undoChanges();
+            mdlRenderer.deselect();
+
             initBaseFeaturePreview();
             initDerivedFeaturePreview();
             initComponentsPreview();
@@ -2010,7 +2011,7 @@ public class GUI extends javax.swing.JFrame {
         final ButtonRenderer selRend = new ButtonRenderer(selEdit.getButton());
 
         for (GLComponent glc : mdlRenderer.module.components) {
-            FeatureKey fk = glc.getFeatureKey();
+            FeatureKey fk = glc.getPosFeatureKey();
             if (fk != null) {
                 String dim = glc.getWidth() + "x" + glc.getHeight();
                 String pos = Math.round(glc.getPos().x - glc.getWidth() / 2.0f) + ", " + Math.round(glc.getPos().y - glc.getHeight() / 2.0f);
@@ -2049,7 +2050,7 @@ public class GUI extends javax.swing.JFrame {
             if (glcTarg != null) {
                 String dim = glcTarg.getWidth() + "x" + glcTarg.getHeight();
                 String pos = Math.round(glcTarg.getPos().x - glcTarg.getWidth() / 2.0f) + ", " + Math.round(glcTarg.getPos().y - glcTarg.getHeight() / 2.0f);
-                Object[] objs = {glcTarg.getUniqueId(), glcTarg.getFeatureKey().getStringValue(), pos, dim, glcTarg.getType(), glcTarg.getInheritance(), glcTarg.isEnabled()};
+                Object[] objs = {glcTarg.getUniqueId(), glcTarg.getPosFeatureKey().getStringValue(), pos, dim, glcTarg.getType(), glcTarg.getInheritance(), glcTarg.isEnabled()};
 
                 int col = 0;
                 for (Object obj : objs) {
@@ -2062,7 +2063,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void putSelectedOnLabel() {
         if (mdlRenderer.selected != null) {
-            lblSelected.setText(mdlRenderer.selected.getFeatureKey().toString());
+            lblSelected.setText(mdlRenderer.selected.getPosFeatureKey().toString());
         } else {
             lblSelected.setText("None selected");
         }
@@ -2092,6 +2093,8 @@ public class GUI extends javax.swing.JFrame {
 
         if (actKey != null) {
             actKey.undo();
+            mdlRenderer.deselect();
+
             Actions.remove(actKey);
             DefaultTableModel model = (DefaultTableModel) tblActions.getModel();
             model.removeRow(srow);

@@ -40,7 +40,9 @@ import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
  */
 public class AddressableQuad implements GLComponent {
 
-    private final FeatureKey featureKey;
+    private final FeatureKey posFeatureKey;
+    private final FeatureKey linkFeatureKey;
+
     private final Inheritance inheritance;
     private final Type type = Type.ADDR;
 
@@ -93,7 +95,8 @@ public class AddressableQuad implements GLComponent {
     /**
      * Create addressable new quad with resize factor
      *
-     * @param featureKey bound feature key
+     * @param posFeatureKey bound feature key (position)
+     * @param linkFeatureKey linked feature key (Pic/Anim)
      * @param inheritance {BASE = ALL_RES, DERIVED = TARGET_RES}
      * @param width quad width
      * @param height quad height
@@ -103,12 +106,13 @@ public class AddressableQuad implements GLComponent {
      * @param stepY step Y-coord for positon
      * @param posMax coordinates of max position (the furthest)
      */
-    public AddressableQuad(FeatureKey featureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos, float stepX, float stepY, Vector2f posMax) {
-        this.featureKey = featureKey;
+    public AddressableQuad(FeatureKey posFeatureKey, FeatureKey linkFeatureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos, float stepX, float stepY, Vector2f posMax) {
+        this.posFeatureKey = posFeatureKey;
+        this.linkFeatureKey = linkFeatureKey;
         this.inheritance = inheritance;
         this.width = width;
         this.height = height;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(new FeatureKey[]{posFeatureKey, linkFeatureKey}, type, inheritance);
         this.texture = texture;
         this.pos = pos;
         this.stepX = stepX;
@@ -384,8 +388,8 @@ public class AddressableQuad implements GLComponent {
     }
 
     @Override
-    public FeatureKey getFeatureKey() {
-        return featureKey;
+    public FeatureKey getPosFeatureKey() {
+        return posFeatureKey;
     }
 
     @Override
@@ -511,6 +515,11 @@ public class AddressableQuad implements GLComponent {
     @Override
     public Inheritance getInheritance() {
         return inheritance;
+    }
+
+    @Override
+    public FeatureKey getLinkFeatureKey() {
+        return linkFeatureKey;
     }
 
 }

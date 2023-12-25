@@ -52,11 +52,18 @@ public interface GLComponent {
     public String getUniqueId();
 
     /**
-     * Gets Feature Key bound to this component.
+     * Gets Feature Key (Position) bound to this component.
      *
      * @return bound feature key.
      */
-    public FeatureKey getFeatureKey();
+    public FeatureKey getPosFeatureKey();
+
+    /**
+     * Gets Feature Key linked (Picture or Animation) to this component.
+     *
+     * @return bound feature key.
+     */
+    public FeatureKey getLinkFeatureKey();
 
     /**
      * Is component enabled

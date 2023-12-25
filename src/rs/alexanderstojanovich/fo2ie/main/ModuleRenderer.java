@@ -386,7 +386,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         if (hintComponent != null && hintComponent.getInheritance() != GLComponent.Inheritance.CANVAS) {// canvas cannot be selected!
             selected = hintComponent;
             selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-            System.err.println("Selection applied!");
         }
         afterSelection();
     }
@@ -458,12 +457,12 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 //
 //        FeatureValue featureValue = null;
 //        if (buildMode == BuildMode.ALL_RES) {
-//            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+//            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //        } else if (buildMode == BuildMode.TARGET_RES) {
 //            ResolutionPragma resolutionPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getPosFeatureKey());
 //            if (featureValue == null) {
-//                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+//                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //            }
 //        }
 //
@@ -477,12 +476,12 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 //
 //        FeatureValue featureValue = null;
 //        if (buildMode == BuildMode.ALL_RES) {
-//            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+//            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //        } else if (buildMode == BuildMode.TARGET_RES) {
 //            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getPosFeatureKey());
 //            if (featureValue == null) {
-//                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+//                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //            }
 //        }
 //
@@ -491,11 +490,11 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
 //    protected void updateSelectedModifiedFeatureValue(FeatureValue featureValue) {
 //        if (selected.getInheritance() == GLComponent.Inheritance.BASE) {
-//            intrface.getModifiedBinds().commonFeatMap.replace(selected.getFeatureKey(), featureValue);
+//            intrface.getModifiedBinds().commonFeatMap.replace(selected.getPosFeatureKey(), featureValue);
 //        } else if (selected.getInheritance() == GLComponent.Inheritance.DERIVED) {
 //            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
 //            if (resolutionPragma != null) {
-//                resolutionPragma.getCustomFeatMap().replace(selected.getFeatureKey(), featureValue);
+//                resolutionPragma.getCustomFeatMap().replace(selected.getPosFeatureKey(), featureValue);
 //            }
 //        }
 //    }
@@ -527,7 +526,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 mr.translate(Math.round(-ModuleBuildTask.xOffset / skvp.getKey()), Math.round(-ModuleBuildTask.yOffset / skvp.getValue()));
             }
 
-            intrface.updateFeatureValue(selected.getFeatureKey(), selected.getInheritance(), mr, guiResolution);
+            intrface.updateFeatureValue(selected.getPosFeatureKey(), selected.getInheritance(), mr, guiResolution);
 
             afterSelection();
         }
@@ -575,7 +574,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         if (hasFocus) {
             if (textHint != null && hintComponent != null) {
                 textHint.setPos(scrnMouseCoords);
-                textHint.setContent(hintComponent.getFeatureKey().getStringValue());
+                textHint.setContent(String.valueOf(hintComponent.getPosFeatureKey()));
             }
         }
     }
@@ -585,9 +584,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             if (textHint != null && hintComponent != null) {
                 textHint.setPos(scrnMouseCoords);
 
-                FeatureValue featVal = intrface.selectFeatureValue(hintComponent.getFeatureKey(), hintComponent.getInheritance(), guiResolution);
+                FeatureValue featVal = intrface.selectFeatureValue(hintComponent.getPosFeatureKey(), hintComponent.getInheritance(), guiResolution);
                 StringBuilder sb = new StringBuilder();
-                sb.append(hintComponent.getFeatureKey()).append("\n").append(hintComponent.getInheritance()).append("\n").append(featVal == null ? "" : featVal.getStringValue());
+                sb.append(hintComponent.getPosFeatureKey()).append("\n").append(hintComponent.getInheritance()).append("\n").append(featVal == null ? "" : featVal.getStringValue());
                 textHint.setContent(sb.toString());
             }
         }
@@ -682,7 +681,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         }
 
         if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
-            System.err.println("Select triggered!");
             select();
         }
 
