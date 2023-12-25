@@ -1026,9 +1026,16 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.5 - MONGOLS (PUBLIC BUILD reviewed on 2023-03-17 at 13:00).\n");
+            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-24 at 23:30).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v1.6 NITRO:\n");
+            sb.append("\t- Fixed & shortened component unique ids.\n");
+            sb.append("\t- Checkerboard texture changed (8x8, blurred).\n");
+            sb.append("\t- Always showing hint w/ CTRL + V toggle enable.\n");
+            sb.append("\t- Added TOGGLE ENABLE feature w/ CTRL + V (requires component to be selected).\n");
+            sb.append("\t- Showing detailed hint text when mouse cursor is hovered over and CTRL is pressed.\n");
             sb.append("\n");
             sb.append("Changelog since v1.5 MONGOLS:\n");
             sb.append("\t- Added Canvas set as Root for each Module (can only be toggle enabled).\n");
