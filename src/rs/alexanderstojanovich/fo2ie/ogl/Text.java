@@ -93,7 +93,7 @@ public class Text implements GLComponent {
     public Text(FeatureKey featureKey, Inheritance inheritance, Texture texture, String content, Vector4f color, Vector2f pos) {
         this.featureKey = featureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, charWidth, charHeight);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.texture = texture;
         this.content = content;
         this.color = color;
@@ -116,7 +116,7 @@ public class Text implements GLComponent {
     public Text(FeatureKey featureKey, Inheritance inheritance, Texture texture, String content, Vector2f pos, int charWidth, int charHeight) {
         this.featureKey = featureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, charWidth, charHeight);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance);
         this.texture = texture;
         this.content = content;
         this.pos = pos;
@@ -146,12 +146,12 @@ public class Text implements GLComponent {
                 float cellV = (asciiCode / GRID_SIZE) * CELL_SIZE;
 
                 float xinc = (j - content.length() * alignment) * getRelativeCharWidth();
-                float ydec = (k + l * LINE_SPACING) * getRelativeCharHeight();
+                float ydec = (k - l * LINE_SPACING) * getRelativeCharHeight();
 
                 pairList.add(new Pair<>(xinc, ydec));
 
                 // pass null feat key as it is only used for rendering charactters
-                Quad quad = new Quad(null, null, charWidth, charHeight, texture, pos);
+                Quad quad = new Quad(null, null, null, charWidth, charHeight, texture, pos);
 
                 quad.setColor(color);
                 quad.setScale(scale);
@@ -367,7 +367,7 @@ public class Text implements GLComponent {
     }
 
     @Override
-    public FeatureKey getFeatureKey() {
+    public FeatureKey getPosFeatureKey() {
         return featureKey;
     }
 
@@ -385,13 +385,17 @@ public class Text implements GLComponent {
 
     public void setContent(String content) {
         this.content = content;
-        buffered = false;
+        if (!this.content.equals(content)) {
+            buffered = false;
+        }
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -474,6 +478,11 @@ public class Text implements GLComponent {
     @Override
     public Inheritance getInheritance() {
         return inheritance;
+    }
+
+    @Override
+    public FeatureKey getLinkFeatureKey() {
+        return null;
     }
 
 }

@@ -38,7 +38,7 @@ public class GUISplashScreen extends JWindow implements Runnable {
     // progress bar (the progress is dependant on the GUI initialization progress)
     private final JProgressBar progressBar = new JProgressBar(0, 100);
 
-    public static final Color COLOR = new Color(255, 122, 0);
+    public static final Color COLOR = new Color(74, 168, 255);
 
     //--------------------------------------------------------------------------
     // A - CONSTRUCTORS 

@@ -43,7 +43,6 @@ import rs.alexanderstojanovich.fo2ie.feature.MyRectangle;
 import rs.alexanderstojanovich.fo2ie.intrface.Configuration;
 import rs.alexanderstojanovich.fo2ie.intrface.Intrface;
 import rs.alexanderstojanovich.fo2ie.intrface.Resolution;
-import rs.alexanderstojanovich.fo2ie.intrface.ResolutionPragma;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.PrimitiveQuad;
@@ -91,7 +90,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     protected GLComponent selected;
     protected GLComponent outline;
 
-    protected Text textHint;
+    protected GLComponent hintComponent; // key component for showing hint text (default orange)        
+    protected Text textHint; // hint text
 
     protected boolean dragging = false;
 //    protected Vector4f savedColor = new Vector4f();
@@ -383,31 +383,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     public void select() {
         deselect();
 
-        for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)
-                    && glc.getFeatureKey().getStringValue().equals(textHint.getContent()) && glc.getInheritance() != GLComponent.Inheritance.CANVAS) {
-                selected = glc;
-                selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-                break;
-            }
+        if (hintComponent != null && hintComponent.getInheritance() != GLComponent.Inheritance.CANVAS) {// canvas cannot be selected!
+            selected = hintComponent;
+            selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
         }
-        textHint.setEnabled(false);
-        afterSelection();
-    }
-
-    // selects one component by feature key
-    @Deprecated
-    public void select(FeatureKey featureKey) {
-        deselect();
-
-        for (GLComponent glc : module.components) {
-            if (glc.isEnabled() && glc.getFeatureKey() == featureKey) {
-                selected = glc;
-                selected.setOutlineColor(GLColor.awtColorToVec4(config.getSelectCol()));
-                break;
-            }
-        }
-
         afterSelection();
     }
 
@@ -466,8 +445,13 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         if (selected != null) {
             selected.setEnabled(!selected.isEnabled());
             afterSelection();
+        } else if (hintComponent != null) {
+            hintComponent.setEnabled(!hintComponent.isEnabled());
+            afterSelection();
         }
     }
+
+    public abstract void editFeature(FeatureKey fk, FeatureValue fv, GLComponent.Inheritance inh, Intrface intr);
 //    protected FeatureValue getSelectedOriginalFeatureValue() {
 //        if (selected == null) {
 //            return null;
@@ -475,12 +459,12 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 //
 //        FeatureValue featureValue = null;
 //        if (buildMode == BuildMode.ALL_RES) {
-//            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+//            featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //        } else if (buildMode == BuildMode.TARGET_RES) {
 //            ResolutionPragma resolutionPragma = intrface.getOriginalBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getPosFeatureKey());
 //            if (featureValue == null) {
-//                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getFeatureKey());
+//                featureValue = intrface.getOriginalBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //            }
 //        }
 //
@@ -494,29 +478,28 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 //
 //        FeatureValue featureValue = null;
 //        if (buildMode == BuildMode.ALL_RES) {
-//            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+//            featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //        } else if (buildMode == BuildMode.TARGET_RES) {
 //            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getFeatureKey());
+//            featureValue = resolutionPragma.getCustomFeatMap().get(selected.getPosFeatureKey());
 //            if (featureValue == null) {
-//                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getFeatureKey());
+//                featureValue = intrface.getModifiedBinds().commonFeatMap.get(selected.getPosFeatureKey());
 //            }
 //        }
 //
 //        return featureValue;
 //    }
 
-    protected void updateSelectedModifiedFeatureValue(FeatureValue featureValue) {
-        if (selected.getInheritance() == GLComponent.Inheritance.BASE) {
-            intrface.getModifiedBinds().commonFeatMap.replace(selected.getFeatureKey(), featureValue);
-        } else if (selected.getInheritance() == GLComponent.Inheritance.DERIVED) {
-            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
-            if (resolutionPragma != null) {
-                resolutionPragma.getCustomFeatMap().replace(selected.getFeatureKey(), featureValue);
-            }
-        }
-    }
-
+//    protected void updateSelectedModifiedFeatureValue(FeatureValue featureValue) {
+//        if (selected.getInheritance() == GLComponent.Inheritance.BASE) {
+//            intrface.getModifiedBinds().commonFeatMap.replace(selected.getPosFeatureKey(), featureValue);
+//        } else if (selected.getInheritance() == GLComponent.Inheritance.DERIVED) {
+//            ResolutionPragma resolutionPragma = intrface.getModifiedBinds().customResolutions.stream().filter(x -> x.getResolution().equals(guiResolution)).findFirst().orElse(null);
+//            if (resolutionPragma != null) {
+//                resolutionPragma.getCustomFeatMap().replace(selected.getPosFeatureKey(), featureValue);
+//            }
+//        }
+//    }
     // finalize moving selected
     private void endMovingSelected() {
         // process mouse release
@@ -545,7 +528,7 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
                 mr.translate(Math.round(-ModuleBuildTask.xOffset / skvp.getKey()), Math.round(-ModuleBuildTask.yOffset / skvp.getValue()));
             }
 
-            updateSelectedModifiedFeatureValue(mr);
+            intrface.updateFeatureValue(selected.getPosFeatureKey(), selected.getInheritance(), mr, guiResolution);
 
             afterSelection();
         }
@@ -589,15 +572,25 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         moveSelected(x, y - amount);
     }
 
-    private void showHintText() {
-        if (hasFocus && selected == null) {
-            for (GLComponent glc : module.components) {
-                if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)) {
-                    textHint.setPos(scrnMouseCoords);
-                    textHint.setContent(glc.getFeatureKey().getStringValue());
-                }
+    private void showShortHandHintText() {
+        if (hasFocus) {
+            if (textHint != null && hintComponent != null) {
+                textHint.setPos(scrnMouseCoords);
+                textHint.setContent(String.valueOf(hintComponent.getPosFeatureKey()));
             }
-            textHint.setEnabled(true);
+        }
+    }
+
+    private void showVerboseHintText() {
+        if (hasFocus) {
+            if (textHint != null && hintComponent != null) {
+                textHint.setPos(scrnMouseCoords);
+
+                FeatureValue featVal = intrface.selectFeatureValue(hintComponent.getPosFeatureKey(), hintComponent.getInheritance(), guiResolution);
+                StringBuilder sb = new StringBuilder();
+                sb.append(hintComponent.getPosFeatureKey()).append("\n").append(hintComponent.getInheritance()).append("\n").append(featVal == null ? "" : featVal.getStringValue());
+                textHint.setContent(sb.toString());
+            }
         }
     }
 
@@ -642,6 +635,9 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
     @Override
     public void mouseEntered(MouseEvent e) {
         hasFocus = true;
+        if (textHint != null) {
+            textHint.setEnabled(true);
+        }
     }
 
     @Override
@@ -665,10 +661,15 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if (e.getX() != scrnMouseCoords.x && e.getY() != scrnMouseCoords.y && textHint != null) {
-            textHint.setEnabled(false);
+        if (e.getX() != scrnMouseCoords.x && e.getY() != scrnMouseCoords.y) {
+            for (GLComponent glc : module.components) {
+                if (glc.isEnabled() && glc.getPixelArea().containsPoint(scrnMouseCoords)) {
+                    hintComponent = glc;
+                }
+            }
         }
         scrnMouseCoords = new Vector2f(e.getX(), e.getY());
+        showShortHandHintText();
     }
 
     @Override
@@ -678,8 +679,17 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         }
 
         if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_D) {
-            textHint.setEnabled(false);
             deselect();
+        }
+
+        if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_E) {
+            if (selected != null) {
+                FeatureValue featureValue = intrface.selectFeatureValue(selected.getPosFeatureKey(), selected.getInheritance(), guiResolution);
+                editFeature(selected.getPosFeatureKey(), featureValue, selected.getInheritance(), intrface);
+            } else if (hintComponent != null) {
+                FeatureValue featureValue = intrface.selectFeatureValue(hintComponent.getPosFeatureKey(), hintComponent.getInheritance(), guiResolution);
+                editFeature(hintComponent.getPosFeatureKey(), featureValue, hintComponent.getInheritance(), intrface);
+            }
         }
 
         if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
@@ -690,8 +700,8 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
             selectToggleEnabled();
         }
 
-        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_D && ke.getKeyCode() != KeyEvent.VK_V) {
-            showHintText();
+        if (ke.isControlDown() && ke.getKeyCode() != KeyEvent.VK_A && ke.getKeyCode() != KeyEvent.VK_E && ke.getKeyCode() != KeyEvent.VK_D && ke.getKeyCode() != KeyEvent.VK_V) {
+            showVerboseHintText();
         }
 
         if (ke.getKeyCode() == KeyEvent.VK_OPEN_BRACKET) {
@@ -745,15 +755,6 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
         //..IGNORED
     }
 
-    //--------------------------------------------------------------------------
-//    public Vector4f getSavedColor() {
-//        return savedColor;
-//    }
-//
-//    public void setSavedColor(Vector4f savedColor) {
-//        this.savedColor = savedColor;
-//    }
-    //--------------------------------------------------------------------------
     public Module getModule() {
         return module;
     }
@@ -852,6 +853,10 @@ public abstract class ModuleRenderer implements GLEventListener, MouseListener, 
 
     public SectionName getGuiSectionName() {
         return guiSectionName;
+    }
+
+    public Text getTextHint() {
+        return textHint;
     }
 
 }

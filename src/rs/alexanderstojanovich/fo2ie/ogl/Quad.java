@@ -39,7 +39,9 @@ import rs.alexanderstojanovich.fo2ie.util.UniqueIdUtils;
  */
 public class Quad implements GLComponent {
 
-    private final FeatureKey featureKey;
+    private final FeatureKey posFeatureKey;
+    private final FeatureKey linkFeatureKey;
+
     private final Inheritance inheritance;
 
     private final GameTime gameTime = GameTime.getInstance();
@@ -90,15 +92,17 @@ public class Quad implements GLComponent {
      * Create new quad with resize factor with the default size.Default size is
      * the size of the texture.
      *
-     * @param featureKey bound feature key
+     * @param posFeatureKey bound feature key (position)
+     * @param linkFeatureKey linked feature key (Pic/Anim)
      * @param inheritance inheritance
      * @param texture parsed texture
      * @param pos position of the quad center (screen coordinates)
      */
-    public Quad(FeatureKey featureKey, Inheritance inheritance, Texture texture, Vector2f pos) {
-        this.featureKey = featureKey;
+    public Quad(FeatureKey posFeatureKey, FeatureKey linkFeatureKey, Inheritance inheritance, Texture texture, Vector2f pos) {
+        this.posFeatureKey = posFeatureKey;
+        this.linkFeatureKey = linkFeatureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(new FeatureKey[]{posFeatureKey, linkFeatureKey}, type, inheritance);
         this.width = texture.getImage().getWidth();
         this.height = texture.getImage().getHeight();
         this.texture = texture;
@@ -109,17 +113,19 @@ public class Quad implements GLComponent {
     /**
      * Create new quad with resize factor
      *
-     * @param featureKey bound feature key
+     * @param posFeatureKey bound feature key (position)
+     * @param linkFeatureKey linked feature key (Pic/Anim)
      * @param inheritance inheritance
      * @param width quad width
      * @param height quad height
      * @param texture parsed texture
      * @param pos position of the quad center (screen coordinates)
      */
-    public Quad(FeatureKey featureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos) {
-        this.featureKey = featureKey;
+    public Quad(FeatureKey posFeatureKey, FeatureKey linkFeatureKey, Inheritance inheritance, int width, int height, Texture texture, Vector2f pos) {
+        this.posFeatureKey = posFeatureKey;
+        this.linkFeatureKey = linkFeatureKey;
         this.inheritance = inheritance;
-        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(featureKey, type, inheritance, width, height);
+        this.uniqueId = UniqueIdUtils.GenerateNewUniqueId(new FeatureKey[]{posFeatureKey, linkFeatureKey}, type, inheritance);
         this.width = width;
         this.height = height;
         this.texture = texture;
@@ -387,8 +393,8 @@ public class Quad implements GLComponent {
     }
 
     @Override
-    public FeatureKey getFeatureKey() {
-        return featureKey;
+    public FeatureKey getPosFeatureKey() {
+        return posFeatureKey;
     }
 
     @Override
@@ -498,6 +504,11 @@ public class Quad implements GLComponent {
     @Override
     public Inheritance getInheritance() {
         return inheritance;
+    }
+
+    @Override
+    public FeatureKey getLinkFeatureKey() {
+        return linkFeatureKey;
     }
 
 }
