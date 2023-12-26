@@ -1045,11 +1045,12 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-25 at 07:30).\n");
+            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-26 at 13:45).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v1.6 NITRO:\n");
+            sb.append("\t- Fixed not loading interface from the menu (resulting in exception).\n");
             sb.append("\t- Fixed (duplicate problem) & shortened component unique ids.\n");
             sb.append("\t- Checkerboard texture changed (8x8, blurred).\n");
             sb.append("\t- Always showing hint w/ CTRL + V toggle enable (on component).\n");
@@ -1502,23 +1503,24 @@ public class GUI extends javax.swing.JFrame {
     // makes preview for the feature table
     public synchronized void updateBaseFeaturePreview() {
         DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblBaseFeats.getModel();
-
-        for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
-            FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
-            FeatureValue featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
-            int overrides = 0;
-            for (ResolutionPragma resPragma : intrface.getModifiedBinds().getCustomResolutions()) {
-                if (resPragma.getCustomFeatMap().containsKey(featKey)) {
-                    overrides++;
+        if (ftTblMdl.getRowCount() != 0) {
+            for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+                FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+                FeatureValue featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
+                int overrides = 0;
+                for (ResolutionPragma resPragma : intrface.getModifiedBinds().getCustomResolutions()) {
+                    if (resPragma.getCustomFeatMap().containsKey(featKey)) {
+                        overrides++;
+                    }
                 }
-            }
 
-            if (featVal != null) {
-                Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
-                int col = 0;
-                for (Object obj : objs) {
-                    ftTblMdl.setValueAt(obj, row, col);
-                    col++;
+                if (featVal != null) {
+                    Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                    int col = 0;
+                    for (Object obj : objs) {
+                        ftTblMdl.setValueAt(obj, row, col);
+                        col++;
+                    }
                 }
             }
         }
@@ -1542,21 +1544,22 @@ public class GUI extends javax.swing.JFrame {
         if (resolutionPragma != null) {
             DefaultTableModel ftTblMdl = (DefaultTableModel) this.tblDerivedFeats.getModel();
 
-            for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
-                FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
-                FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
+            if (ftTblMdl.getRowCount() != 0) {
+                for (int row = 0; row < ftTblMdl.getRowCount(); row++) {
+                    FeatureKey featKey = FeatureKey.valueOf((String) ftTblMdl.getValueAt(row, 0));
+                    FeatureValue featVal = resolutionPragma.getCustomFeatMap().get(featKey);
 
-                boolean overrides = intrface.getModifiedBinds().getCommonFeatMap().containsKey(featKey);
+                    boolean overrides = intrface.getModifiedBinds().getCommonFeatMap().containsKey(featKey);
 
-                if (featVal != null) {
-                    Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
-                    int col = 0;
-                    for (Object obj : objs) {
-                        ftTblMdl.setValueAt(obj, row, col);
-                        col++;
+                    if (featVal != null) {
+                        Object[] objs = {featKey.getStringValue(), featVal.getStringValue(), overrides};
+                        int col = 0;
+                        for (Object obj : objs) {
+                            ftTblMdl.setValueAt(obj, row, col);
+                            col++;
+                        }
                     }
                 }
-
             }
         }
     }
@@ -1640,6 +1643,7 @@ public class GUI extends javax.swing.JFrame {
             txtFldInPath.setToolTipText(cfg.getInDir().getPath());
             loadFromMenu();
             initBaseFeaturePreview();
+            initDerivedFeaturePreview();
             initComponentsPreview();
             mdlRenderer.getModule().components.clear();
             workOnBuildComponents(); // important!
