@@ -16,6 +16,10 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import com.bulenkov.darcula.DarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
@@ -53,6 +57,7 @@ import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
@@ -1045,7 +1050,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2023-12-26 at 13:45).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-07 at 11:07).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -2265,6 +2270,11 @@ public class GUI extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        // avoid rendering glitches
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.d3d", "false");
+        System.setProperty("sun.java2d.noddraw", "true");
+        
         FO2IELogger.init(args.length > 0 && args[0].equals("-debug"));
         cfg.readConfigFile();
 
@@ -2287,11 +2297,24 @@ public class GUI extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
-            UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            FO2IELogger.reportError(ex.getMessage(), ex);
+        // Set Look and feel for Swing GUI App
+        String guiTheme = cfg.getTheme();
+        switch (guiTheme) {
+            case "light":
+                FlatLightLaf.setup();
+                break;
+            case "dark":
+                FlatDarkLaf.setup();
+                break;
+            case "default":
+            case "metal":
+                FlatDarkLaf.setup(new MetalLookAndFeel());
+                break;
+            case "darcula":
+                FlatLaf.setup(new DarculaLaf());
+                break;
         }
+        
         //</editor-fold>
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
