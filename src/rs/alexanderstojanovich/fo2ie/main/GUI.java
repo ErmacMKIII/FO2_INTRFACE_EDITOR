@@ -512,7 +512,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - NITRO");
+        setTitle("FOnline2 S3 Interface Editor - OXYGEN");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -955,9 +955,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void loadFromButton() {
-        boolean ok = intrface.readIniFile();
-        if (ok) {
-            if (intrface.getErrorNum() == 0) {
+        Intrface.OperationResult result = intrface.readIniFile();
+        if (result != Intrface.OperationResult.INVALID) {
+            if (result != Intrface.OperationResult.ERR) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
                 final List<String> resStrs = new ArrayList<>();
                 List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
@@ -967,7 +967,7 @@ public class GUI extends javax.swing.JFrame {
                 }
                 final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
                 this.cmbBoxResolution.setModel(resModel);
-            } else if (cfg.isIgnoreErrors()) {
+            } else if (result == Intrface.OperationResult.WARN) {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
@@ -985,9 +985,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void loadFromMenu() {
-        boolean ok = intrface.readIniFile(targetIniFile);
-        if (ok) {
-            if (intrface.getErrorNum() == 0) {
+        Intrface.OperationResult result = intrface.readIniFile(targetIniFile);
+        if (result != Intrface.OperationResult.INVALID) {
+            if (result != Intrface.OperationResult.ERR) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
                 final List<String> resStrs = new ArrayList<>();
                 List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
@@ -997,7 +997,7 @@ public class GUI extends javax.swing.JFrame {
                 }
                 final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
                 this.cmbBoxResolution.setModel(resModel);
-            } else if (cfg.isIgnoreErrors()) {
+            } else if (result == Intrface.OperationResult.WARN) {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
@@ -1045,7 +1045,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-26 at 13:45).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2023-12-26 at 13:45).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -2134,16 +2134,29 @@ public class GUI extends javax.swing.JFrame {
     }
 
     public synchronized void updateDisplayActionLog() {
+        if (tblActions == null || !(tblActions.getModel() instanceof DefaultTableModel)) {
+            System.err.println("Table or model is not initialized.");
+            return;
+        }
+
         DefaultTableModel defTblActMdl = (DefaultTableModel) tblActions.getModel();
+
         for (ModificationIfc action : Actions) {
+            if (action == null || action.getUniqueId() == null) {
+                continue;
+            }
+
             ModificationIfc actionTarg = null;
             int rowTarg = -1;
-            for (int row = 0; row < tblActions.getRowCount(); row++) {
-                Object uuid = defTblActMdl.getValueAt(row, 0);
-                if (action.getUniqueId().equals(uuid)) {
-                    actionTarg = action;
-                    rowTarg = row;
-                    break;
+
+            for (int row = 0; row < defTblActMdl.getRowCount(); row++) {
+                if (row >= 0 && defTblActMdl.getColumnCount() > 0) {
+                    Object uuid = defTblActMdl.getValueAt(row, 0);
+                    if (uuid != null && action.getUniqueId().equals(uuid)) {
+                        actionTarg = action;
+                        rowTarg = row;
+                        break;
+                    }
                 }
             }
 
@@ -2156,10 +2169,8 @@ public class GUI extends javax.swing.JFrame {
                     actionTarg.getModifiedValueFormatted()
                 };
 
-                int col = 0;
-                for (Object obj : objs) {
-                    defTblActMdl.setValueAt(obj, rowTarg, col);
-                    col++;
+                for (int col = 0; col < objs.length; col++) {
+                    defTblActMdl.setValueAt(objs[col], rowTarg, col);
                 }
             } else {
                 Object[] objs = {
