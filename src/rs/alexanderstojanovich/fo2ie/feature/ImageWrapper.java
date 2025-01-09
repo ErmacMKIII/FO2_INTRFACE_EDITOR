@@ -47,18 +47,24 @@ public class ImageWrapper implements FeatureValue {
     /**
      * Loads image from the filesystem. Call this after constructor.
      *
+     * @return result (boolean) successful or failure
+     *
      * @throws IOException
      */
-    public void loadImages() throws IOException {
+    public boolean loadImages() throws IOException {
         Configuration instance = Configuration.getInstance();
         File inDir = instance.getInDir();
         final File imgFile = new File(inDir.getPath() + File.separator + value);
+
+        boolean result = false;
 
         if (imgFile.exists()
                 && value.toLowerCase().matches(IMG_EXT_REGEX)) {
             if (value.toLowerCase().matches(IMG_IO_REGEX)) {
                 images = new BufferedImage[1];
                 images[0] = ImageIO.read(imgFile);
+
+                result = true;
             } else if (value.toLowerCase().matches(IMG_FRM_REGEX)) {
                 FRM frm = new FRM(imgFile);
                 fps = frm.getFps();
@@ -71,6 +77,8 @@ public class ImageWrapper implements FeatureValue {
                 for (ImageData frame : frames) {
                     images[index++] = frame.toBufferedImage();
                 }
+
+                result = true;
             } else if (value.toLowerCase().matches(IMG_FOFRM_REGEX)) {
                 FOFRM fofrm = new FOFRM(imgFile);
                 fps = fofrm.getFps();
@@ -78,8 +86,12 @@ public class ImageWrapper implements FeatureValue {
 
                 offsetX = fofrm.getOffsetX();
                 offsetY = fofrm.getOffsetY();
+
+                result = true;
             }
         }
+
+        return result;
     }
 
     /**

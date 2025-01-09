@@ -46,7 +46,7 @@ public class Configuration {
     private Color canvasCol = Color.BLUE;
     private int textureSize = 1024;
     private String theme = "darcula";
-    
+
     private boolean keepAspectRatio = false;
     private String defaultIni = "default.ini";
 
@@ -304,5 +304,5 @@ public class Configuration {
     public String getTheme() {
         return theme;
     }
-    
+
 }

@@ -53,7 +53,6 @@ import javax.swing.JToggleButton;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -713,8 +712,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblBaseFeats.setCellSelectionEnabled(true);
         tblBaseFeats.setRowHeight(28);
-        tblBaseFeats.setRowSelectionAllowed(false);
+        tblBaseFeats.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblBaseFeats.setShowGrid(true);
         tblBaseFeats.getTableHeader().setResizingAllowed(false);
         tblBaseFeats.getTableHeader().setReorderingAllowed(false);
         sbBaseFeatures.setViewportView(tblBaseFeats);
@@ -734,8 +735,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblDerivedFeats.setCellSelectionEnabled(true);
         tblDerivedFeats.setRowHeight(28);
-        tblDerivedFeats.setRowSelectionAllowed(false);
+        tblDerivedFeats.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblDerivedFeats.setShowGrid(true);
         tblDerivedFeats.getTableHeader().setResizingAllowed(false);
         tblDerivedFeats.getTableHeader().setReorderingAllowed(false);
         sbDerivedFeatures.setViewportView(tblDerivedFeats);
@@ -755,8 +758,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblComps.setCellSelectionEnabled(true);
         tblComps.setRowHeight(28);
-        tblComps.setRowSelectionAllowed(false);
+        tblComps.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblComps.setShowGrid(true);
         tblComps.getTableHeader().setResizingAllowed(false);
         tblComps.getTableHeader().setReorderingAllowed(false);
         sbComps.setViewportView(tblComps);
@@ -776,8 +781,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblActions.setCellSelectionEnabled(true);
         tblActions.setRowHeight(28);
-        tblActions.setRowSelectionAllowed(false);
+        tblActions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblActions.setShowGrid(true);
         tblActions.getTableHeader().setResizingAllowed(false);
         tblActions.getTableHeader().setReorderingAllowed(false);
         sbActions.setViewportView(tblActions);
@@ -1050,7 +1057,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-07 at 11:07).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-09 at 03:22).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1948,19 +1955,23 @@ public class GUI extends javax.swing.JFrame {
             tblComps.getSelectionModel().clearSelection();
             final ComponentEditor compEditor = ComponentEditor.getInstance(this);
             featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
-            compEditor.popUp(featKey, featVal, intrface, glcKey);
-            compEditor.setVisible(true);
-            compEditor.setResizable(false);
-            compEditor.pack();
+            if (featVal != null) { // avoid null to not get into trouble
+                compEditor.popUp(featKey, featVal, intrface, glcKey);
+                compEditor.setVisible(true);
+                compEditor.setResizable(false);
+                compEditor.pack();
+            }
         } else if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.DERIVED) {
             if (currentResolution != null) {
                 tblComps.getSelectionModel().clearSelection();
                 final ComponentEditor compEditor = ComponentEditor.getInstance(this);
                 featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
-                compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
-                compEditor.setVisible(true);
-                compEditor.setResizable(false);
-                compEditor.pack();
+                if (featVal != null) { // avoid null not to get into trouble
+                    compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
+                    compEditor.setVisible(true);
+                    compEditor.setResizable(false);
+                    compEditor.pack();
+                }
             }
         }
     }
@@ -2258,7 +2269,7 @@ public class GUI extends javax.swing.JFrame {
         tblActions.getTableHeader().setReorderingAllowed(false);
         tblActions.setRowSelectionAllowed(false);
         tblActions.setColumnSelectionAllowed(false);
-        tblActions.setCellSelectionEnabled(false);
+        tblActions.setCellSelectionEnabled(true);
         tblActions.setModel(actTblMdl);
 
         TableColumn propCol = tblActions.getColumn("Undo");
@@ -2274,7 +2285,7 @@ public class GUI extends javax.swing.JFrame {
         System.setProperty("sun.java2d.opengl", "true");
         System.setProperty("sun.java2d.d3d", "false");
         System.setProperty("sun.java2d.noddraw", "true");
-        
+
         FO2IELogger.init(args.length > 0 && args[0].equals("-debug"));
         cfg.readConfigFile();
 
@@ -2314,7 +2325,7 @@ public class GUI extends javax.swing.JFrame {
                 FlatLaf.setup(new DarculaLaf());
                 break;
         }
-        
+
         //</editor-fold>
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
