@@ -25,7 +25,9 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -37,6 +39,7 @@ import java.io.File;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
@@ -44,11 +47,15 @@ import java.util.TimerTask;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
@@ -208,6 +215,9 @@ public class GUI extends javax.swing.JFrame {
     public static final String ICON_FEAT_REMOVE = "remove_icon.png";
 
     public static final String ICON_ACTION_UNDO = "undo_icon.png";
+
+    public static final String ICON_MONITOR_ADD = "monitor_icon_add.png";
+    public static final String ICON_MONITOR_REM = "monitor_icon_rem.png";
 
     private File targetIniFile;
 
@@ -470,6 +480,8 @@ public class GUI extends javax.swing.JFrame {
         cmbBoxSection = new javax.swing.JComboBox<>();
         lblResolution = new javax.swing.JLabel();
         cmbBoxResolution = new javax.swing.JComboBox<>();
+        btnAddRes = new javax.swing.JButton();
+        btnRemRes = new javax.swing.JButton();
         btnTogAllRes = new javax.swing.JToggleButton();
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
@@ -606,7 +618,7 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().add(pnlFilePaths);
 
         pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
-        pnlIntrface.setLayout(new java.awt.GridLayout(3, 3, 2, 2));
+        pnlIntrface.setLayout(new java.awt.GridLayout(4, 2, 2, 2));
 
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
@@ -632,6 +644,30 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         pnlIntrface.add(cmbBoxResolution);
+
+        btnAddRes.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnAddRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon_add.png"))); // NOI18N
+        btnAddRes.setText("Add Resolution");
+        btnAddRes.setToolTipText("Add new resolution (as blank)");
+        btnAddRes.setIconTextGap(5);
+        btnAddRes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddResActionPerformed(evt);
+            }
+        });
+        pnlIntrface.add(btnAddRes);
+
+        btnRemRes.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnRemRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon_rem.png"))); // NOI18N
+        btnRemRes.setText("Remove Resolution");
+        btnRemRes.setToolTipText("Remove resolution (including settings)");
+        btnRemRes.setIconTextGap(5);
+        btnRemRes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemResActionPerformed(evt);
+            }
+        });
+        pnlIntrface.add(btnRemRes);
 
         btnTogAllRes.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnTogAllRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"))); // NOI18N
@@ -1057,9 +1093,17 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-09 at 03:22).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-09 at 07:31).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v2.0 OXYGEN:\n");
+            sb.append("\t- Add Gui Themes. Could be changed from the ini.\n");
+            sb.append("\t- Fix not loading interface (ini reader) when ignore errors.\n");
+            sb.append("\t- Fix Gui rendering glitches (due to higher OS and/or Java version).\n");
+            sb.append("\t- Fix Module task not building and throwing exceptions (for some interfaces).\n");
+            sb.append("\t- Fix Component editor not showing up (for some components).\n");
+            sb.append("\t- Add & Remove resolution features.\n");
             sb.append("\n");
             sb.append("Changelog since v1.6 NITRO:\n");
             sb.append("\t- Fixed not loading interface from the menu (resulting in exception).\n");
@@ -1134,7 +1178,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("through linking features/components and modifies only the .ini\n");
             sb.append("and is not an image editor itself.\n");
             sb.append("\n");
-            sb.append("Copyright © 2023\n");
+            sb.append("Copyright © 2025\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
@@ -1804,6 +1848,190 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_toolsRebuildActionPerformed
 
+    private void btnAddResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddResActionPerformed
+        // TODO add your handling code here:
+        // Create the input dialog
+        URL icon_url = getClass().getResource(RESOURCES_DIR + ICON_MONITOR_ADD);
+        if (icon_url == null) {
+            return;
+        }
+        ImageIcon icon = new ImageIcon(icon_url);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 2, 2));
+        JTextField widthField = new JTextField();
+        JTextField heightField = new JTextField();
+
+        panel.add(new JLabel("Width:"));
+        panel.add(widthField);
+        panel.add(new JLabel("Height:"));
+        panel.add(heightField);
+
+        int result = JOptionPane.showConfirmDialog(
+                GUI.this,
+                panel,
+                "Enter Resolution",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                icon
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            String widthText = widthField.getText().trim();
+            String heightText = heightField.getText().trim();
+
+            try {
+                int width = Integer.parseInt(widthText);
+                int height = Integer.parseInt(heightText);
+                List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
+                for (ResolutionPragma resPrag : customResolutions) {
+                    if (resPrag.getResolution().getWidth() == width && resPrag.getResolution().getHeight() == height) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Resolution already exists!",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+
+                        return;
+                    }
+                }
+                ResolutionPragma resolutionPragma = new ResolutionPragma(width, height);
+                customResolutions.add(resolutionPragma);
+                // Sorting by width, then by height
+                Collections.sort(intrface.getModifiedBinds().customResolutions, (o1, o2) -> {
+                    if (o1.getResolution().getWidth() != o2.getResolution().getWidth()) {
+                        return Integer.compare(o1.getResolution().getWidth(), o2.getResolution().getWidth()); // Compare by width
+                    } else {
+                        return Integer.compare(o1.getResolution().getHeight(), o2.getResolution().getHeight()); // Compare by height
+                    }
+                });
+                // Adjusting combo box with resolutions
+                final List<String> resStrs = new ArrayList<>();
+                for (ResolutionPragma resPrag : customResolutions) {
+                    String resStr = String.valueOf(resPrag.getResolution().getWidth()) + "x" + String.valueOf(resPrag.getResolution().getHeight());
+                    resStrs.add(resStr);
+                }
+                final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
+                this.cmbBoxResolution.setModel(resModel);
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "Added resolution: " + resolutionPragma.getResolution().toString(),
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Please enter valid numeric values for width and height.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }//GEN-LAST:event_btnAddResActionPerformed
+
+    private void btnRemResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemResActionPerformed
+        // Create the input dialog
+        URL icon_url = getClass().getResource(RESOURCES_DIR + ICON_MONITOR_REM);
+        if (icon_url == null) {
+            return;
+        }
+        ImageIcon icon = new ImageIcon(icon_url);
+
+        final List<String> resStrs = new ArrayList<>();
+        List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
+        for (ResolutionPragma resPrag : customResolutions) {
+            String resStr = resPrag.getResolution().getWidth() + "x" + resPrag.getResolution().getHeight();
+            resStrs.add(resStr);
+        }
+
+        // Create ComboBox for resolution selection
+        DefaultComboBoxModel<String> resModel = new DefaultComboBoxModel<>(resStrs.toArray(String[]::new));
+        JComboBox<String> resolutionComboBox = new JComboBox<>(resModel);
+
+        // Create a panel for the ComboBox and buttons
+        JPanel comboBoxPanel = new JPanel(new BorderLayout());
+        comboBoxPanel.add(new JLabel("Select a resolution to remove:"), BorderLayout.NORTH);
+        comboBoxPanel.add(resolutionComboBox, BorderLayout.CENTER);
+
+        int result = JOptionPane.showConfirmDialog(
+                GUI.this,
+                comboBoxPanel,
+                "Choose Resolution",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                icon
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedItem = (String) resolutionComboBox.getSelectedItem();
+            if (selectedItem == null) {
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "No resolution selected!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            String[] words = selectedItem.split("x");
+            int width = Integer.parseInt(words[0].trim());
+            int height = Integer.parseInt(words[1].trim());
+
+            // Remove resolution from customResolutions
+            boolean removed = customResolutions.removeIf(x -> x.getResolution().getWidth() == width && x.getResolution().getHeight() == height);
+
+            if (removed) {
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "Removed resolution: " + selectedItem,
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // Update the model after removal
+                resStrs.remove(selectedItem);
+                resModel.removeAllElements();
+                for (String resStr : resStrs) {
+                    resModel.addElement(resStr);
+                }
+
+                // apply to GUI combo box
+                this.cmbBoxResolution.setModel(new DefaultComboBoxModel<>(resStrs.toArray()));
+
+                // special case if removed is current resolution
+                // choose another one (take first)
+                if (currentResolution.toString().equals(selectedItem) && !customResolutions.isEmpty()) {
+                    currentResolution = customResolutions.get(0).getResolution();
+                    mdlRenderer.deselect();
+                    mdlRenderer.module.components.clear();
+                    initBaseFeaturePreview();
+                    initDerivedFeaturePreview();
+                    initComponentsPreview();
+                    workOnBuildComponents();
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "Failed to remove resolution!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+//        } else {
+//            JOptionPane.showMessageDialog(
+//                    GUI.this,
+//                    "Operation cancelled.",
+//                    "Cancelled",
+//                    JOptionPane.INFORMATION_MESSAGE
+//            );
+//        }
+    }//GEN-LAST:event_btnRemResActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1965,7 +2193,16 @@ public class GUI extends javax.swing.JFrame {
             if (currentResolution != null) {
                 tblComps.getSelectionModel().clearSelection();
                 final ComponentEditor compEditor = ComponentEditor.getInstance(this);
-                featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
+
+                List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
+                featVal = null;
+                for (ResolutionPragma resPrag : customResolutions) {
+                    if (resPrag.getResolution().equals(currentResolution)) {
+                        featVal = resPrag.getCustomFeatMap().get(featKey);
+                        break;
+                    }
+                }
+
                 if (featVal != null) { // avoid null not to get into trouble
                     compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
                     compEditor.setVisible(true);
@@ -2365,12 +2602,14 @@ public class GUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddFeat;
+    private javax.swing.JButton btnAddRes;
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;
     private javax.swing.JButton btnDeselect;
     private javax.swing.JButton btnLoad;
     private javax.swing.JButton btnMdlePreview;
+    private javax.swing.JButton btnRemRes;
     private javax.swing.JButton btnSave;
     private javax.swing.JToggleButton btnTogAllRes;
     private javax.swing.JComboBox<Object> cmbBoxResolution;
