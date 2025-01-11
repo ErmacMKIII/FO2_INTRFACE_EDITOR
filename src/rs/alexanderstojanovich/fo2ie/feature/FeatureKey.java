@@ -336,6 +336,16 @@ public interface FeatureKey {
         BarterCost1,
         BarterCost2,
         BarterCritter,
+        BarterFilter0,
+        BarterFilter1,
+        BarterFilter2,
+        BarterFilter3,
+        BarterFilter4,
+        BarterFilter5,
+        BarterFilter6,
+        BarterFilter7,
+        BarterFilter8,
+        BarterFilter9,
         BarterMain,
         BarterMainPic,
         BarterOffer,
@@ -399,6 +409,16 @@ public interface FeatureKey {
                 case BarterOffer:
                 case BarterCont1o:
                 case BarterCont2o:
+                case BarterFilter0:
+                case BarterFilter1:
+                case BarterFilter2:
+                case BarterFilter3:
+                case BarterFilter4:
+                case BarterFilter5:
+                case BarterFilter6:
+                case BarterFilter7:
+                case BarterFilter8:
+                case BarterFilter9:
                     return Type.PIC_POS;
                 case BarterCost1:
                 case BarterCost2:
@@ -425,33 +445,43 @@ public interface FeatureKey {
 
             switch (this) {
                 case BarterButton0:
+                case BarterFilter0:
                     result.add(BarterButtonPic0);
                     break;
                 case BarterButton1:
+                case BarterFilter1:
                     result.add(BarterButtonPic1);
                     break;
                 case BarterButton2:
+                case BarterFilter2:
                     result.add(BarterButtonPic2);
                     break;
                 case BarterButton3:
+                case BarterFilter3:
                     result.add(BarterButtonPic3);
                     break;
                 case BarterButton4:
+                case BarterFilter4:
                     result.add(BarterButtonPic4);
                     break;
                 case BarterButtonOpponent0:
+                case BarterFilter5:
                     result.add(BarterButtonPic0);
                     break;
                 case BarterButtonOpponent1:
+                case BarterFilter6:
                     result.add(BarterButtonPic1);
                     break;
                 case BarterButtonOpponent2:
+                case BarterFilter7:
                     result.add(BarterButtonPic2);
                     break;
                 case BarterButtonOpponent3:
+                case BarterFilter8:
                     result.add(BarterButtonPic3);
                     break;
                 case BarterButtonOpponent4:
+                case BarterFilter9:
                     result.add(BarterButtonPic4);
                     break;
                 case BarterChosen:
@@ -576,7 +606,17 @@ public interface FeatureKey {
                 BarterTalk,
                 BarterOffer,
                 BarterCont1o,
-                BarterCont2o
+                BarterCont2o,
+                BarterFilter0,
+                BarterFilter1,
+                BarterFilter2,
+                BarterFilter3,
+                BarterFilter4,
+                BarterFilter5,
+                BarterFilter6,
+                BarterFilter7,
+                BarterFilter8,
+                BarterFilter9
             };
         }
 
@@ -2605,6 +2645,7 @@ public interface FeatureKey {
     // Inventory
     public static enum Inventory implements FeatureKey {
         InvArmor,
+        InvHead,
         InvChosen,
         InvHeightItem,
         InvInv,
@@ -2648,6 +2689,7 @@ public interface FeatureKey {
                 case InvInv:
                 case InvChosen:
                 case InvArmor:
+                case InvHead:
                 case InvScrDn:
                 case InvScrUp:
                 case InvSlot1:
@@ -2672,6 +2714,7 @@ public interface FeatureKey {
 
             switch (this) {
                 case InvArmor:
+                case InvHead:
                 case InvChosen:
                 case InvSlot1:
                 case InvSlot2:
@@ -2743,6 +2786,7 @@ public interface FeatureKey {
                 InvInv,
                 InvChosen,
                 InvArmor,
+                InvHead,
                 InvScrDn,
                 InvScrUp,
                 InvSlot1,
@@ -3844,6 +3888,16 @@ public interface FeatureKey {
     public static enum PickUp implements FeatureKey {
         PupCont1,
         PupCont2,
+        PupFilerLeft0,
+        PupFilerLeft1,
+        PupFilerLeft2,
+        PupFilerLeft3,
+        PupFilerLeft4,
+        PupFilerRight0,
+        PupFilerRight1,
+        PupFilerRight2,
+        PupFilerRight3,
+        PupFilerRight4,
         PupHeightCont1,
         PupHeightCont2,
         PupInfo,
@@ -3857,6 +3911,8 @@ public interface FeatureKey {
         PupNextCritRightPicDn,
         PupOk,
         PupOkPicDn,
+        PupPutAll,
+        PupPutAllPic,
         PupScrDw1,
         PupScrDw1PicDn,
         PupScrDw1PicOff,
@@ -3895,6 +3951,7 @@ public interface FeatureKey {
                 case PupScrUp2PicOff:
                 case PupTAPicDn:
                 case PupOkPicDn:
+                case PupPutAllPic:
                     return Type.PIC;
                 case PupMain:
                 case PupNextCritLeft:
@@ -3906,6 +3963,7 @@ public interface FeatureKey {
                 case PupCont1:
                 case PupCont2:
                 case PupOk:
+                case PupPutAll:
                 case PupTakeAll:
                 case PupInfo:
                     return Type.PIC_POS;
@@ -3962,6 +4020,9 @@ public interface FeatureKey {
                     break;
                 case PupTakeAll:
                     result.add(PupTAPicDn);
+                    break;
+                case PupPutAll:
+                    result.add(PupPutAllPic);
                     break;
                 case PupInfo:
                     break;
@@ -4025,6 +4086,7 @@ public interface FeatureKey {
                 PupCont2,
                 PupOk,
                 PupTakeAll,
+                PupPutAll,
                 PupInfo
             };
         }
@@ -4067,6 +4129,12 @@ public interface FeatureKey {
         RadioBroadcastRecv4PicDn,
         RadioBroadcastRecv5,
         RadioBroadcastRecv5PicDn,
+        RadioBroadcastRecvDial,
+        RadioBroadcastRecvDialPic1,
+        RadioBroadcastRecvDialPic2,
+        RadioBroadcastRecvDialPic3,
+        RadioBroadcastRecvDialPic4,
+        RadioBroadcastRecvDialPic5,
         RadioBroadcastRecvPicDn,
         RadioBroadcastRecvText,
         RadioBroadcastSend,
@@ -4080,6 +4148,12 @@ public interface FeatureKey {
         RadioBroadcastSend4PicDn,
         RadioBroadcastSend5,
         RadioBroadcastSend5PicDn,
+        RadioBroadcastSendDial,
+        RadioBroadcastSendDialPic1,
+        RadioBroadcastSendDialPic2,
+        RadioBroadcastSendDialPic3,
+        RadioBroadcastSendDialPic4,
+        RadioBroadcastSendDialPic5,
         RadioBroadcastSendPicDn,
         RadioBroadcastSendText,
         RadioChannel,
@@ -4111,6 +4185,16 @@ public interface FeatureKey {
                 case RadioBroadcastSend4PicDn:
                 case RadioBroadcastSend5PicDn:
                 case RadioBroadcastSendPicDn:
+                case RadioBroadcastRecvDialPic1:
+                case RadioBroadcastRecvDialPic2:
+                case RadioBroadcastRecvDialPic3:
+                case RadioBroadcastRecvDialPic4:
+                case RadioBroadcastRecvDialPic5:
+                case RadioBroadcastSendDialPic1:
+                case RadioBroadcastSendDialPic2:
+                case RadioBroadcastSendDialPic3:
+                case RadioBroadcastSendDialPic4:
+                case RadioBroadcastSendDialPic5:
                 case RadioMainPic:
                 case RadioRefreshPicDn:
                     return Type.PIC;
@@ -4120,12 +4204,14 @@ public interface FeatureKey {
                 case RadioBroadcastRecv3:
                 case RadioBroadcastRecv4:
                 case RadioBroadcastRecv5:
+                case RadioBroadcastRecvDial:
                 case RadioBroadcastSend:
                 case RadioBroadcastSend1:
                 case RadioBroadcastSend2:
                 case RadioBroadcastSend3:
                 case RadioBroadcastSend4:
                 case RadioBroadcastSend5:
+                case RadioBroadcastSendDial:
                 case RadioMain:
                 case RadioRefresh:
                     return Type.PIC_POS;
@@ -4197,6 +4283,20 @@ public interface FeatureKey {
                 case RadioRefresh:
                     result.add(RadioRefreshPicDn);
                     break;
+                case RadioBroadcastRecvDial:
+                    result.add(RadioBroadcastRecvDialPic1);
+                    result.add(RadioBroadcastRecvDialPic2);
+                    result.add(RadioBroadcastRecvDialPic3);
+                    result.add(RadioBroadcastRecvDialPic4);
+                    result.add(RadioBroadcastRecvDialPic5);
+                    break;
+                case RadioBroadcastSendDial:
+                    result.add(RadioBroadcastSendDialPic1);
+                    result.add(RadioBroadcastSendDialPic2);
+                    result.add(RadioBroadcastSendDialPic3);
+                    result.add(RadioBroadcastSendDialPic4);
+                    result.add(RadioBroadcastSendDialPic5);
+                    break;
             }
 
             return result;
@@ -4238,8 +4338,17 @@ public interface FeatureKey {
                 RadioBroadcastSend5PicDn,
                 RadioBroadcastSendPicDn,
                 RadioMainPic,
-                RadioRefreshPicDn
-            };
+                RadioRefreshPicDn,
+                RadioBroadcastRecvDialPic1,
+                RadioBroadcastRecvDialPic2,
+                RadioBroadcastRecvDialPic3,
+                RadioBroadcastRecvDialPic4,
+                RadioBroadcastRecvDialPic5,
+                RadioBroadcastSendDialPic1,
+                RadioBroadcastSendDialPic2,
+                RadioBroadcastSendDialPic3,
+                RadioBroadcastSendDialPic4,
+                RadioBroadcastSendDialPic5,};
         }
 
         @Override
@@ -4258,7 +4367,9 @@ public interface FeatureKey {
                 RadioBroadcastSend4,
                 RadioBroadcastSend5,
                 RadioMain,
-                RadioRefresh
+                RadioRefresh,
+                RadioBroadcastRecvDial,
+                RadioBroadcastSendDial
             };
         }
 

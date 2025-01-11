@@ -1093,7 +1093,7 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-09 at 07:31).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-12 at 00:11).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1104,6 +1104,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("\t- Fix Module task not building and throwing exceptions (for some interfaces).\n");
             sb.append("\t- Fix Component editor not showing up (for some components).\n");
             sb.append("\t- Add & Remove resolution features.\n");
+            sb.append("\t- Add/Fix compability with FOnline: Reloaded.\n");
             sb.append("\n");
             sb.append("Changelog since v1.6 NITRO:\n");
             sb.append("\t- Fixed not loading interface from the menu (resulting in exception).\n");

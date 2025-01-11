@@ -98,7 +98,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public void buildAllRes() throws IOException {
+    public void buildAllRes() throws IOException, Exception {
         float oldProgress = 0.0f, progress = 0.0f;
 
         module.components.clear();
@@ -422,7 +422,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public void buildTargetRes(Resolution resolution) throws IOException {
+    public void buildTargetRes(Resolution resolution) throws IOException, Exception {
         float oldProgress = 0.0f, progress = 0.0f;
 
         module.components.clear();
