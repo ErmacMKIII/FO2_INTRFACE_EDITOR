@@ -1550,6 +1550,23 @@ public interface FeatureKey {
         FixButtonPic3,
         FixButtonPic4,
         FixButtonPic5,
+        FixCntUpPicDn,
+        FixCntUp,
+        FixCntDnPicDn,
+        FixCntDn,
+        FixCntValue,
+        FixFilterPicAllDn,
+        FixFilterAll,
+        FixFilterPicWeaponsDn,
+        FixFilterWeapons,
+        FixFilterPicArmorsDn,
+        FixFilterArmors,
+        FixFilterPicAmmoDn,
+        FixFilterAmmo,
+        FixFilterPicDrugsDn,
+        FixFilterDrugs,
+        FixFilterPicMiscDn,
+        FixFilterMisc,
         FixDone,
         FixDonePicDn,
         FixDow,
@@ -1587,6 +1604,14 @@ public interface FeatureKey {
                 case FixScrDnPicDn:
                 case FixScrUpPicDn:
                 case FixUpPic:
+                case FixCntUpPicDn:
+                case FixCntDnPicDn:
+                case FixFilterPicAllDn:
+                case FixFilterPicAmmoDn:
+                case FixFilterPicArmorsDn:
+                case FixFilterPicDrugsDn:
+                case FixFilterPicWeaponsDn:
+                case FixFilterPicMiscDn:
                     return Type.PIC;
                 case FixButton1:
                 case FixButton2:
@@ -1600,7 +1625,16 @@ public interface FeatureKey {
                 case FixScrDn:
                 case FixScrUp:
                 case FixUp:
+                case FixCntDn:
+                case FixCntUp:
+                case FixFilterAll:
+                case FixFilterAmmo:
+                case FixFilterArmors:
+                case FixFilterDrugs:
+                case FixFilterWeapons:
+                case FixFilterMisc:
                     return Type.PIC_POS;
+                case FixCntValue:
                 case FixNum:
                 case FixWin:
                     return Type.TXT;
@@ -1654,6 +1688,30 @@ public interface FeatureKey {
                 case FixUp:
                     result.add(FixUpPic);
                     break;
+                case FixFilterAll:
+                    result.add(FixFilterPicAllDn);
+                    break;
+                case FixFilterAmmo:
+                    result.add(FixFilterPicAmmoDn);
+                    break;
+                case FixFilterArmors:
+                    result.add(FixFilterPicArmorsDn);
+                    break;
+                case FixFilterDrugs:
+                    result.add(FixFilterPicDrugsDn);
+                    break;
+                case FixFilterWeapons:
+                    result.add(FixFilterPicWeaponsDn);
+                    break;
+                case FixFilterMisc:
+                    result.add(FixFilterPicMiscDn);
+                    break;
+                case FixCntDn:
+                    result.add(FixCntDnPicDn);
+                    break;
+                case FixCntUp:
+                    result.add(FixCntUpPicDn);
+                    break;
             }
 
             return result;
@@ -1693,7 +1751,17 @@ public interface FeatureKey {
                 FixMainPic,
                 FixScrDnPicDn,
                 FixScrUpPicDn,
-                FixUpPic
+                FixUpPic,
+                FixCntUpPicDn,
+                FixCntDnPicDn,
+                FixFilterPicAllDn,
+                FixFilterPicAmmoDn,
+                FixFilterPicArmorsDn,
+                FixFilterPicDrugsDn,
+                FixFilterPicWeaponsDn,
+                FixFilterPicMiscDn,
+                FixCntDnPicDn,
+                FixCntUpPicDn
             };
         }
 
@@ -1711,13 +1779,21 @@ public interface FeatureKey {
                 FixMain,
                 FixScrDn,
                 FixScrUp,
-                FixUp
+                FixUp,
+                FixCntUp,
+                FixCntDn,
+                FixFilterAll,
+                FixFilterAmmo,
+                FixFilterArmors,
+                FixFilterDrugs,
+                FixFilterWeapons,
+                FixFilterMisc
             };
         }
 
         @Override
         public FeatureKey[] getTextValues() {
-            return new FeatureKey[]{FixNum, FixWin};
+            return new FeatureKey[]{FixNum, FixWin, FixCntValue};
         }
 
         @Override
