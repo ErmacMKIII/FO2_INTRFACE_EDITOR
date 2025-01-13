@@ -27,14 +27,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
-import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.GLColor;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.FileUtils;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 
 /**
  *
@@ -169,15 +172,35 @@ public class Intrface {
      * @return initialization ok status
      */
     public OperationResult readIniFile() {
-        FO2IELogger.reportInfo("Loading ini..", null);
-        File inDir = Configuration.getInstance().getInDir();
-        final File iniFile = new File(inDir.getPath() + File.separator + config.getDefaultIni());
+        FO2IELogger.reportInfo("Loading ini...", null);
 
-        if (!iniFile.exists()) {
+        // Get the input directory
+        File inDir = config.getInDir();
+
+        // Ensure the directory exists
+        if (!inDir.exists() || !inDir.isDirectory()) {
             FO2IELogger.reportInfo("Loading ini finished!", null);
-            FO2IELogger.reportInfo("Loading ini resulted in error!", null);
+            FO2IELogger.reportInfo("Loading ini resulted in error: Directory does not exist!", null);
             return OperationResult.INVALID;
         }
+
+        // Convert wildcard pattern to regex
+        final Pattern iniFileWildcard = FileUtils.wildcardToRegex(config.getDefaultIni());
+
+        // Find matching files
+        File[] matchingFiles = inDir.listFiles((dir, name) -> iniFileWildcard.matcher(name).matches());
+
+        // Check if any matching files are found
+        if (matchingFiles == null || matchingFiles.length == 0) {
+            FO2IELogger.reportInfo("Loading ini finished!", null);
+            FO2IELogger.reportInfo("Loading ini resulted in error: No matching files found!", null);
+            return OperationResult.INVALID;
+        }
+
+        // Log success and proceed with processing if necessary
+        final File iniFile = matchingFiles[0];
+        // Backwards so writting ini file works!
+        GUI.setIniFileName(iniFile.getName());
 
         OperationResult result = OperationResult.INIT;
 

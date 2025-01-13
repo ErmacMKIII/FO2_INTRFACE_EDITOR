@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -86,12 +87,15 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.FileUtils;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class GUI extends javax.swing.JFrame {
+
+    protected static String iniFileName = "";
 
     public static enum Mode {
         ALL_RES, TARGET_RES
@@ -1064,7 +1068,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void saveFromButton() {
         if (intrface.isInitialized()) {
-            final File file = new File(cfg.getOutDir().getPath() + File.separator + cfg.getDefaultIni());
+            final File file = new File(cfg.getOutDir().getPath() + File.separator + iniFileName);
             boolean ok = intrface.writeIniFile(file);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "App successfully saved ini of your new interface!", "Interface Save", JOptionPane.INFORMATION_MESSAGE);
@@ -1093,11 +1097,12 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-12 at 06:03).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-13 at 10:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v2.0 OXYGEN:\n");
+            sb.append("\t- Ini File Name supports wildcards (e.g. *.ini for both 'default.ini' (FOnline2) and 'faction.ini' (FOnline:Reloaded).\n");
             sb.append("\t- Add Gui Themes. Could be changed from the ini.\n");
             sb.append("\t- Fix not loading interface (ini reader) when ignore errors.\n");
             sb.append("\t- Fix Gui rendering glitches (due to higher OS and/or Java version).\n");
@@ -1769,6 +1774,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
+        if (cmbBoxResolution.getItemCount() == 0) {
+            return;
+        }
+
         String[] things = cmbBoxResolution.getSelectedItem().toString().split("x");
         currentResolution = new Resolution(Integer.parseInt(things[0]), Integer.parseInt(things[1]));
         if (currentResolution != cmbBoxSection.getSelectedItem()) {
@@ -2045,9 +2054,11 @@ public class GUI extends javax.swing.JFrame {
                         File[] files = buildTree(selectedFile);
                         if (files != null) {
                             boolean iniFound = false;
+                            final Pattern iniFileWildcard = FileUtils.wildcardToRegex(cfg.getDefaultIni());
                             for (File file : files) {
-                                if (file.getAbsolutePath().contains(cfg.getDefaultIni())) {
+                                if (iniFileWildcard.matcher(file.getName()).matches()) {
                                     cfg.setInDir(file.getParentFile());
+                                    iniFileName = file.getName();
                                     iniFound = true;
                                     break;
                                 }
@@ -2599,6 +2610,10 @@ public class GUI extends javax.swing.JFrame {
 
     public static float getProgress() {
         return progress;
+    }
+
+    public static void setIniFileName(String iniFileName) {
+        GUI.iniFileName = iniFileName;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

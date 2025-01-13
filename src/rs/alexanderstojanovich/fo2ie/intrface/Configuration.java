@@ -48,9 +48,9 @@ public class Configuration {
     private String theme = "darcula";
 
     private boolean keepAspectRatio = false;
-    private String defaultIni = "default.ini";
+    private String defaultIni = "*.ini";
 
-    private boolean ignoreErrors = false;
+    private boolean ignoreErrors = true;
 
     private static Configuration instance;
 
