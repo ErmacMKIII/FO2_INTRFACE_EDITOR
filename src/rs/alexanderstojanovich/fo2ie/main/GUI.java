@@ -1102,7 +1102,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("Changelog since v2.0 OXYGEN:\n");
-            sb.append("\t- Interface Ini fileName supports wildcards (e.g. *.ini for both 'default.ini' - FOnline2 and 'faction.ini' - FOnline:Reloaded).\n");
+            sb.append("\t- Interface Ini filename supports wildcards (e.g. *.ini for both 'default.ini' - FOnline2 and 'faction.ini' - FOnline:Reloaded).\n");
             sb.append("\t- Add Gui Themes. Could be changed from the ini.\n");
             sb.append("\t- Fix not loading interface (ini reader) when ignore errors.\n");
             sb.append("\t- Fix Gui rendering glitches (due to higher OS and/or Java version).\n");
