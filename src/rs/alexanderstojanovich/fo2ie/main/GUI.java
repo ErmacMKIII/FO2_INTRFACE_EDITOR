@@ -16,12 +16,18 @@
  */
 package rs.alexanderstojanovich.fo2ie.main;
 
+import com.bulenkov.darcula.DarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -33,26 +39,32 @@ import java.io.File;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
@@ -75,12 +87,15 @@ import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent.Inheritance;
 import rs.alexanderstojanovich.fo2ie.ogl.Text;
 import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.FileUtils;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class GUI extends javax.swing.JFrame {
+
+    protected static String iniFileName = "";
 
     public static enum Mode {
         ALL_RES, TARGET_RES
@@ -204,6 +219,9 @@ public class GUI extends javax.swing.JFrame {
     public static final String ICON_FEAT_REMOVE = "remove_icon.png";
 
     public static final String ICON_ACTION_UNDO = "undo_icon.png";
+
+    public static final String ICON_MONITOR_ADD = "monitor_icon_add.png";
+    public static final String ICON_MONITOR_REM = "monitor_icon_rem.png";
 
     private File targetIniFile;
 
@@ -466,6 +484,8 @@ public class GUI extends javax.swing.JFrame {
         cmbBoxSection = new javax.swing.JComboBox<>();
         lblResolution = new javax.swing.JLabel();
         cmbBoxResolution = new javax.swing.JComboBox<>();
+        btnAddRes = new javax.swing.JButton();
+        btnRemRes = new javax.swing.JButton();
         btnTogAllRes = new javax.swing.JToggleButton();
         btnMdlePreview = new javax.swing.JButton();
         pnlTable = new javax.swing.JPanel();
@@ -512,7 +532,7 @@ public class GUI extends javax.swing.JFrame {
         fileChooserIniSave.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("FOnline2 S3 Interface Editor - NITRO");
+        setTitle("FOnline2 S3 Interface Editor - OXYGEN");
         setMinimumSize(new java.awt.Dimension(800, 600));
         setPreferredSize(new java.awt.Dimension(800, 600));
         setSize(new java.awt.Dimension(800, 600));
@@ -602,7 +622,7 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().add(pnlFilePaths);
 
         pnlIntrface.setBorder(javax.swing.BorderFactory.createTitledBorder("Interface"));
-        pnlIntrface.setLayout(new java.awt.GridLayout(3, 3, 2, 2));
+        pnlIntrface.setLayout(new java.awt.GridLayout(4, 2, 2, 2));
 
         lblSection.setText("Section:");
         pnlIntrface.add(lblSection);
@@ -628,6 +648,30 @@ public class GUI extends javax.swing.JFrame {
             }
         });
         pnlIntrface.add(cmbBoxResolution);
+
+        btnAddRes.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnAddRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon_add.png"))); // NOI18N
+        btnAddRes.setText("Add Resolution");
+        btnAddRes.setToolTipText("Add new resolution (as blank)");
+        btnAddRes.setIconTextGap(5);
+        btnAddRes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddResActionPerformed(evt);
+            }
+        });
+        pnlIntrface.add(btnAddRes);
+
+        btnRemRes.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnRemRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon_rem.png"))); // NOI18N
+        btnRemRes.setText("Remove Resolution");
+        btnRemRes.setToolTipText("Remove resolution (including settings)");
+        btnRemRes.setIconTextGap(5);
+        btnRemRes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemResActionPerformed(evt);
+            }
+        });
+        pnlIntrface.add(btnRemRes);
 
         btnTogAllRes.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         btnTogAllRes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/fo2ie/res/monitor_icon.png"))); // NOI18N
@@ -708,8 +752,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblBaseFeats.setCellSelectionEnabled(true);
         tblBaseFeats.setRowHeight(28);
-        tblBaseFeats.setRowSelectionAllowed(false);
+        tblBaseFeats.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblBaseFeats.setShowGrid(true);
         tblBaseFeats.getTableHeader().setResizingAllowed(false);
         tblBaseFeats.getTableHeader().setReorderingAllowed(false);
         sbBaseFeatures.setViewportView(tblBaseFeats);
@@ -729,8 +775,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblDerivedFeats.setCellSelectionEnabled(true);
         tblDerivedFeats.setRowHeight(28);
-        tblDerivedFeats.setRowSelectionAllowed(false);
+        tblDerivedFeats.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblDerivedFeats.setShowGrid(true);
         tblDerivedFeats.getTableHeader().setResizingAllowed(false);
         tblDerivedFeats.getTableHeader().setReorderingAllowed(false);
         sbDerivedFeatures.setViewportView(tblDerivedFeats);
@@ -750,8 +798,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblComps.setCellSelectionEnabled(true);
         tblComps.setRowHeight(28);
-        tblComps.setRowSelectionAllowed(false);
+        tblComps.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblComps.setShowGrid(true);
         tblComps.getTableHeader().setResizingAllowed(false);
         tblComps.getTableHeader().setReorderingAllowed(false);
         sbComps.setViewportView(tblComps);
@@ -771,8 +821,10 @@ public class GUI extends javax.swing.JFrame {
 
             }
         ));
+        tblActions.setCellSelectionEnabled(true);
         tblActions.setRowHeight(28);
-        tblActions.setRowSelectionAllowed(false);
+        tblActions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblActions.setShowGrid(true);
         tblActions.getTableHeader().setResizingAllowed(false);
         tblActions.getTableHeader().setReorderingAllowed(false);
         sbActions.setViewportView(tblActions);
@@ -955,9 +1007,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void loadFromButton() {
-        boolean ok = intrface.readIniFile();
-        if (ok) {
-            if (intrface.getErrorNum() == 0) {
+        Intrface.OperationResult result = intrface.readIniFile();
+        if (result != Intrface.OperationResult.INVALID) {
+            if (result != Intrface.OperationResult.ERR) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
                 final List<String> resStrs = new ArrayList<>();
                 List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
@@ -967,7 +1019,7 @@ public class GUI extends javax.swing.JFrame {
                 }
                 final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
                 this.cmbBoxResolution.setModel(resModel);
-            } else if (cfg.isIgnoreErrors()) {
+            } else if (result == Intrface.OperationResult.WARN) {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
@@ -985,9 +1037,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     private void loadFromMenu() {
-        boolean ok = intrface.readIniFile(targetIniFile);
-        if (ok) {
-            if (intrface.getErrorNum() == 0) {
+        Intrface.OperationResult result = intrface.readIniFile(targetIniFile);
+        if (result != Intrface.OperationResult.INVALID) {
+            if (result != Intrface.OperationResult.ERR) {
                 JOptionPane.showMessageDialog(this, "App successfully loaded desired interface!", "Interface Load", JOptionPane.INFORMATION_MESSAGE);
                 final List<String> resStrs = new ArrayList<>();
                 List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
@@ -997,7 +1049,7 @@ public class GUI extends javax.swing.JFrame {
                 }
                 final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
                 this.cmbBoxResolution.setModel(resModel);
-            } else if (cfg.isIgnoreErrors()) {
+            } else if (result == Intrface.OperationResult.WARN) {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors (ignored by user)!", "Syntax Errors", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "App detected syntax errors!", "Syntax errors", JOptionPane.ERROR_MESSAGE);
@@ -1016,7 +1068,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void saveFromButton() {
         if (intrface.isInitialized()) {
-            final File file = new File(cfg.getOutDir().getPath() + File.separator + cfg.getDefaultIni());
+            final File file = new File(cfg.getOutDir().getPath() + File.separator + iniFileName);
             boolean ok = intrface.writeIniFile(file);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "App successfully saved ini of your new interface!", "Interface Save", JOptionPane.INFORMATION_MESSAGE);
@@ -1045,9 +1097,19 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.6 - NITRO (PUBLIC BUILD reviewed on 2023-12-26 at 13:45).\n");
+            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-13 at 10:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Changelog since v2.0 OXYGEN:\n");
+            sb.append("\t- Ini File Name supports wildcards (e.g. *.ini for both 'default.ini' (FOnline2) and 'faction.ini' (FOnline:Reloaded).\n");
+            sb.append("\t- Add Gui Themes. Could be changed from the ini.\n");
+            sb.append("\t- Fix not loading interface (ini reader) when ignore errors.\n");
+            sb.append("\t- Fix Gui rendering glitches (due to higher OS and/or Java version).\n");
+            sb.append("\t- Fix Module task not building and throwing exceptions (for some interfaces).\n");
+            sb.append("\t- Fix Component editor not showing up (for some components).\n");
+            sb.append("\t- Add & Remove resolution features.\n");
+            sb.append("\t- Add/Fix compability with FOnline: Reloaded.\n");
             sb.append("\n");
             sb.append("Changelog since v1.6 NITRO:\n");
             sb.append("\t- Fixed not loading interface from the menu (resulting in exception).\n");
@@ -1122,7 +1184,7 @@ public class GUI extends javax.swing.JFrame {
             sb.append("through linking features/components and modifies only the .ini\n");
             sb.append("and is not an image editor itself.\n");
             sb.append("\n");
-            sb.append("Copyright © 2023\n");
+            sb.append("Copyright © 2025\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
@@ -1712,6 +1774,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void cmbBoxSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbBoxSectionActionPerformed
         // TODO add your handling code here:
+        if (cmbBoxResolution.getItemCount() == 0) {
+            return;
+        }
+
         String[] things = cmbBoxResolution.getSelectedItem().toString().split("x");
         currentResolution = new Resolution(Integer.parseInt(things[0]), Integer.parseInt(things[1]));
         if (currentResolution != cmbBoxSection.getSelectedItem()) {
@@ -1792,6 +1858,190 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_toolsRebuildActionPerformed
 
+    private void btnAddResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddResActionPerformed
+        // TODO add your handling code here:
+        // Create the input dialog
+        URL icon_url = getClass().getResource(RESOURCES_DIR + ICON_MONITOR_ADD);
+        if (icon_url == null) {
+            return;
+        }
+        ImageIcon icon = new ImageIcon(icon_url);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 2, 2));
+        JTextField widthField = new JTextField();
+        JTextField heightField = new JTextField();
+
+        panel.add(new JLabel("Width:"));
+        panel.add(widthField);
+        panel.add(new JLabel("Height:"));
+        panel.add(heightField);
+
+        int result = JOptionPane.showConfirmDialog(
+                GUI.this,
+                panel,
+                "Enter Resolution",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                icon
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+
+            String widthText = widthField.getText().trim();
+            String heightText = heightField.getText().trim();
+
+            try {
+                int width = Integer.parseInt(widthText);
+                int height = Integer.parseInt(heightText);
+                List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
+                for (ResolutionPragma resPrag : customResolutions) {
+                    if (resPrag.getResolution().getWidth() == width && resPrag.getResolution().getHeight() == height) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Resolution already exists!",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+
+                        return;
+                    }
+                }
+                ResolutionPragma resolutionPragma = new ResolutionPragma(width, height);
+                customResolutions.add(resolutionPragma);
+                // Sorting by width, then by height
+                Collections.sort(intrface.getModifiedBinds().customResolutions, (o1, o2) -> {
+                    if (o1.getResolution().getWidth() != o2.getResolution().getWidth()) {
+                        return Integer.compare(o1.getResolution().getWidth(), o2.getResolution().getWidth()); // Compare by width
+                    } else {
+                        return Integer.compare(o1.getResolution().getHeight(), o2.getResolution().getHeight()); // Compare by height
+                    }
+                });
+                // Adjusting combo box with resolutions
+                final List<String> resStrs = new ArrayList<>();
+                for (ResolutionPragma resPrag : customResolutions) {
+                    String resStr = String.valueOf(resPrag.getResolution().getWidth()) + "x" + String.valueOf(resPrag.getResolution().getHeight());
+                    resStrs.add(resStr);
+                }
+                final DefaultComboBoxModel<Object> resModel = new DefaultComboBoxModel<>(resStrs.toArray());
+                this.cmbBoxResolution.setModel(resModel);
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "Added resolution: " + resolutionPragma.getResolution().toString(),
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Please enter valid numeric values for width and height.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }//GEN-LAST:event_btnAddResActionPerformed
+
+    private void btnRemResActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemResActionPerformed
+        // Create the input dialog
+        URL icon_url = getClass().getResource(RESOURCES_DIR + ICON_MONITOR_REM);
+        if (icon_url == null) {
+            return;
+        }
+        ImageIcon icon = new ImageIcon(icon_url);
+
+        final List<String> resStrs = new ArrayList<>();
+        List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
+        for (ResolutionPragma resPrag : customResolutions) {
+            String resStr = resPrag.getResolution().getWidth() + "x" + resPrag.getResolution().getHeight();
+            resStrs.add(resStr);
+        }
+
+        // Create ComboBox for resolution selection
+        DefaultComboBoxModel<String> resModel = new DefaultComboBoxModel<>(resStrs.toArray(String[]::new));
+        JComboBox<String> resolutionComboBox = new JComboBox<>(resModel);
+
+        // Create a panel for the ComboBox and buttons
+        JPanel comboBoxPanel = new JPanel(new BorderLayout());
+        comboBoxPanel.add(new JLabel("Select a resolution to remove:"), BorderLayout.NORTH);
+        comboBoxPanel.add(resolutionComboBox, BorderLayout.CENTER);
+
+        int result = JOptionPane.showConfirmDialog(
+                GUI.this,
+                comboBoxPanel,
+                "Choose Resolution",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                icon
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedItem = (String) resolutionComboBox.getSelectedItem();
+            if (selectedItem == null) {
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "No resolution selected!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            String[] words = selectedItem.split("x");
+            int width = Integer.parseInt(words[0].trim());
+            int height = Integer.parseInt(words[1].trim());
+
+            // Remove resolution from customResolutions
+            boolean removed = customResolutions.removeIf(x -> x.getResolution().getWidth() == width && x.getResolution().getHeight() == height);
+
+            if (removed) {
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "Removed resolution: " + selectedItem,
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // Update the model after removal
+                resStrs.remove(selectedItem);
+                resModel.removeAllElements();
+                for (String resStr : resStrs) {
+                    resModel.addElement(resStr);
+                }
+
+                // apply to GUI combo box
+                this.cmbBoxResolution.setModel(new DefaultComboBoxModel<>(resStrs.toArray()));
+
+                // special case if removed is current resolution
+                // choose another one (take first)
+                if (currentResolution.toString().equals(selectedItem) && !customResolutions.isEmpty()) {
+                    currentResolution = customResolutions.get(0).getResolution();
+                    mdlRenderer.deselect();
+                    mdlRenderer.module.components.clear();
+                    initBaseFeaturePreview();
+                    initDerivedFeaturePreview();
+                    initComponentsPreview();
+                    workOnBuildComponents();
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        GUI.this,
+                        "Failed to remove resolution!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+//        } else {
+//            JOptionPane.showMessageDialog(
+//                    GUI.this,
+//                    "Operation cancelled.",
+//                    "Cancelled",
+//                    JOptionPane.INFORMATION_MESSAGE
+//            );
+//        }
+    }//GEN-LAST:event_btnRemResActionPerformed
+
     private void fileInOpen() {
         int returnVal = fileChooserDirInput.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1804,9 +2054,11 @@ public class GUI extends javax.swing.JFrame {
                         File[] files = buildTree(selectedFile);
                         if (files != null) {
                             boolean iniFound = false;
+                            final Pattern iniFileWildcard = FileUtils.wildcardToRegex(cfg.getDefaultIni());
                             for (File file : files) {
-                                if (file.getAbsolutePath().contains(cfg.getDefaultIni())) {
+                                if (iniFileWildcard.matcher(file.getName()).matches()) {
                                     cfg.setInDir(file.getParentFile());
+                                    iniFileName = file.getName();
                                     iniFound = true;
                                     break;
                                 }
@@ -1943,19 +2195,32 @@ public class GUI extends javax.swing.JFrame {
             tblComps.getSelectionModel().clearSelection();
             final ComponentEditor compEditor = ComponentEditor.getInstance(this);
             featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
-            compEditor.popUp(featKey, featVal, intrface, glcKey);
-            compEditor.setVisible(true);
-            compEditor.setResizable(false);
-            compEditor.pack();
+            if (featVal != null) { // avoid null to not get into trouble
+                compEditor.popUp(featKey, featVal, intrface, glcKey);
+                compEditor.setVisible(true);
+                compEditor.setResizable(false);
+                compEditor.pack();
+            }
         } else if (glcKey != null && glcKey.getInheritance() == GLComponent.Inheritance.DERIVED) {
             if (currentResolution != null) {
                 tblComps.getSelectionModel().clearSelection();
                 final ComponentEditor compEditor = ComponentEditor.getInstance(this);
-                featVal = intrface.getModifiedBinds().getCommonFeatMap().get(featKey);
-                compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
-                compEditor.setVisible(true);
-                compEditor.setResizable(false);
-                compEditor.pack();
+
+                List<ResolutionPragma> customResolutions = intrface.getModifiedBinds().customResolutions;
+                featVal = null;
+                for (ResolutionPragma resPrag : customResolutions) {
+                    if (resPrag.getResolution().equals(currentResolution)) {
+                        featVal = resPrag.getCustomFeatMap().get(featKey);
+                        break;
+                    }
+                }
+
+                if (featVal != null) { // avoid null not to get into trouble
+                    compEditor.popUp(featKey, featVal, intrface, currentResolution, glcKey);
+                    compEditor.setVisible(true);
+                    compEditor.setResizable(false);
+                    compEditor.pack();
+                }
             }
         }
     }
@@ -2134,16 +2399,29 @@ public class GUI extends javax.swing.JFrame {
     }
 
     public synchronized void updateDisplayActionLog() {
+        if (tblActions == null || !(tblActions.getModel() instanceof DefaultTableModel)) {
+            System.err.println("Table or model is not initialized.");
+            return;
+        }
+
         DefaultTableModel defTblActMdl = (DefaultTableModel) tblActions.getModel();
+
         for (ModificationIfc action : Actions) {
+            if (action == null || action.getUniqueId() == null) {
+                continue;
+            }
+
             ModificationIfc actionTarg = null;
             int rowTarg = -1;
-            for (int row = 0; row < tblActions.getRowCount(); row++) {
-                Object uuid = defTblActMdl.getValueAt(row, 0);
-                if (action.getUniqueId().equals(uuid)) {
-                    actionTarg = action;
-                    rowTarg = row;
-                    break;
+
+            for (int row = 0; row < defTblActMdl.getRowCount(); row++) {
+                if (row >= 0 && defTblActMdl.getColumnCount() > 0) {
+                    Object uuid = defTblActMdl.getValueAt(row, 0);
+                    if (uuid != null && action.getUniqueId().equals(uuid)) {
+                        actionTarg = action;
+                        rowTarg = row;
+                        break;
+                    }
                 }
             }
 
@@ -2156,10 +2434,8 @@ public class GUI extends javax.swing.JFrame {
                     actionTarg.getModifiedValueFormatted()
                 };
 
-                int col = 0;
-                for (Object obj : objs) {
-                    defTblActMdl.setValueAt(obj, rowTarg, col);
-                    col++;
+                for (int col = 0; col < objs.length; col++) {
+                    defTblActMdl.setValueAt(objs[col], rowTarg, col);
                 }
             } else {
                 Object[] objs = {
@@ -2242,7 +2518,7 @@ public class GUI extends javax.swing.JFrame {
         tblActions.getTableHeader().setReorderingAllowed(false);
         tblActions.setRowSelectionAllowed(false);
         tblActions.setColumnSelectionAllowed(false);
-        tblActions.setCellSelectionEnabled(false);
+        tblActions.setCellSelectionEnabled(true);
         tblActions.setModel(actTblMdl);
 
         TableColumn propCol = tblActions.getColumn("Undo");
@@ -2254,6 +2530,11 @@ public class GUI extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        // avoid rendering glitches
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.d3d", "false");
+        System.setProperty("sun.java2d.noddraw", "true");
+
         FO2IELogger.init(args.length > 0 && args[0].equals("-debug"));
         cfg.readConfigFile();
 
@@ -2276,11 +2557,24 @@ public class GUI extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
-            UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            FO2IELogger.reportError(ex.getMessage(), ex);
+        // Set Look and feel for Swing GUI App
+        String guiTheme = cfg.getTheme();
+        switch (guiTheme) {
+            case "light":
+                FlatLightLaf.setup();
+                break;
+            case "dark":
+                FlatDarkLaf.setup();
+                break;
+            case "default":
+            case "metal":
+                FlatDarkLaf.setup(new MetalLookAndFeel());
+                break;
+            case "darcula":
+                FlatLaf.setup(new DarculaLaf());
+                break;
         }
+
         //</editor-fold>
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
@@ -2318,14 +2612,20 @@ public class GUI extends javax.swing.JFrame {
         return progress;
     }
 
+    public static void setIniFileName(String iniFileName) {
+        GUI.iniFileName = iniFileName;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddFeat;
+    private javax.swing.JButton btnAddRes;
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnChooseInPath;
     private javax.swing.JButton btnChoosePathOut;
     private javax.swing.JButton btnDeselect;
     private javax.swing.JButton btnLoad;
     private javax.swing.JButton btnMdlePreview;
+    private javax.swing.JButton btnRemRes;
     private javax.swing.JButton btnSave;
     private javax.swing.JToggleButton btnTogAllRes;
     private javax.swing.JComboBox<Object> cmbBoxResolution;

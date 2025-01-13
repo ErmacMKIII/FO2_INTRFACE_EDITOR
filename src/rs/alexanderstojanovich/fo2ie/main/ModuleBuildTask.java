@@ -98,7 +98,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public void buildAllRes() throws IOException {
+    public void buildAllRes() throws IOException, Exception {
         float oldProgress = 0.0f, progress = 0.0f;
 
         module.components.clear();
@@ -132,9 +132,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && intrface.getModifiedBinds().commonFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) intrface.getModifiedBinds().commonFeatMap.get(mainPicKey);
-                mainPicVal.loadImages();
-                int mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
-                int mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
+                int mainPicWidth = Math.round(modeWidth * modeScaleXYFactor.getKey());
+                int mainPicHeight = Math.round(modeHeight * modeScaleXYFactor.getValue());
+                if (mainPicVal.loadImages()) { // if loaded is okey we got images otherwise it is null
+                    mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
+                    mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
+                }
+
                 xOffset -= mainPicWidth / 2.0f;
                 yOffset -= mainPicHeight / 2.0f;
 
@@ -418,7 +422,7 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
      * @throws java.io.IOException if building the module fails due to missing
      * image
      */
-    public void buildTargetRes(Resolution resolution) throws IOException {
+    public void buildTargetRes(Resolution resolution) throws IOException, Exception {
         float oldProgress = 0.0f, progress = 0.0f;
 
         module.components.clear();
@@ -467,9 +471,13 @@ public class ModuleBuildTask extends SwingWorker<Object, Object> {
             // if main picture exists (and in most cases it does apart from LMenu (known as pop-up menu)
             if (mainPicKey != null && resFeatMap.containsKey(mainPicKey)) {
                 ImageWrapper mainPicVal = (ImageWrapper) resFeatMap.get(mainPicKey);
-                mainPicVal.loadImages();
-                int mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
-                int mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
+                int mainPicWidth = Math.round(modeWidth * modeScaleXYFactor.getKey());
+                int mainPicHeight = Math.round(modeHeight * modeScaleXYFactor.getValue());
+                if (mainPicVal.loadImages()) { // if loaded is okey we got images otherwise it is null
+                    mainPicWidth = Math.round(mainPicVal.getImages()[0].getWidth() * modeScaleXYFactor.getKey());
+                    mainPicHeight = Math.round(mainPicVal.getImages()[0].getHeight() * modeScaleXYFactor.getValue());
+                }
+
                 xOffset -= mainPicWidth / 2.0f;
                 yOffset -= mainPicHeight / 2.0f;
 

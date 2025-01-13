@@ -45,11 +45,12 @@ public class Configuration {
     private Color hintCol = Color.ORANGE;
     private Color canvasCol = Color.BLUE;
     private int textureSize = 1024;
+    private String theme = "darcula";
 
     private boolean keepAspectRatio = false;
-    private String defaultIni = "default.ini";
+    private String defaultIni = "*.ini";
 
-    private boolean ignoreErrors = false;
+    private boolean ignoreErrors = true;
 
     private static Configuration instance;
 
@@ -141,6 +142,9 @@ public class Configuration {
                             case "IgnoreErrors":
                                 ignoreErrors = Boolean.parseBoolean(words[1]);
                                 break;
+                            case "Theme":
+                                theme = words[1].toLowerCase();
+                                break;
                         }
                     }
                 }
@@ -185,6 +189,8 @@ public class Configuration {
             pw.println("AnimationTicks = " + animationTicks);
             pw.println("KeepAspectRatio = " + keepAspectRatio);
             pw.println("IgnoreErrors = " + ignoreErrors);
+            pw.println();
+            pw.println("Theme = " + theme);
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } finally {
@@ -293,6 +299,10 @@ public class Configuration {
 
     public Color getCanvasCol() {
         return canvasCol;
+    }
+
+    public String getTheme() {
+        return theme;
     }
 
 }

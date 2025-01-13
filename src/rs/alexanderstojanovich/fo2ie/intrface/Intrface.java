@@ -27,14 +27,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureKey;
 import rs.alexanderstojanovich.fo2ie.feature.FeatureValue;
 import rs.alexanderstojanovich.fo2ie.intrface.Section.SectionName;
-import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
-import rs.alexanderstojanovich.fo2ie.util.GLColor;
+import rs.alexanderstojanovich.fo2ie.main.GUI;
 import rs.alexanderstojanovich.fo2ie.modification.ModificationIfc;
 import rs.alexanderstojanovich.fo2ie.ogl.GLComponent;
+import rs.alexanderstojanovich.fo2ie.util.FO2IELogger;
+import rs.alexanderstojanovich.fo2ie.util.FileUtils;
+import rs.alexanderstojanovich.fo2ie.util.GLColor;
 
 /**
  *
@@ -59,7 +62,41 @@ public class Intrface {
      * resolution - loading from pragmas}
      */
     public static enum ReadMode {
-        STD, RES
+        /**
+         * Read common section (STANDARD)
+         */
+        STD,
+        /**
+         * Read custom resolution setting (RESOLUTION)
+         */
+        RES
+    }
+
+    /**
+     * Result of the read/write operation of 'default.ini' / 'faction.ini'.
+     */
+    public static enum OperationResult {
+        /**
+         * Initial value of operation result. Read/Write Operation has not
+         * started yet.
+         */
+        INIT,
+        /**
+         * Occurs when paths are invalid.
+         */
+        INVALID,
+        /**
+         * Operation is successful without any errors
+         */
+        OK,
+        /**
+         * Operation resulted in errors. Interface won't load.
+         */
+        ERR,
+        /**
+         * Operation resulted in errors but interface will load.
+         */
+        WARN
     }
 
     protected boolean initialized = false;
@@ -134,18 +171,38 @@ public class Intrface {
      *
      * @return initialization ok status
      */
-    public boolean readIniFile() {
-        boolean ok = false;
+    public OperationResult readIniFile() {
+        FO2IELogger.reportInfo("Loading ini...", null);
 
-        FO2IELogger.reportInfo("Loading ini..", null);
-        File inDir = Configuration.getInstance().getInDir();
-        final File iniFile = new File(inDir.getPath() + File.separator + config.getDefaultIni());
+        // Get the input directory
+        File inDir = config.getInDir();
 
-        if (!iniFile.exists()) {
+        // Ensure the directory exists
+        if (!inDir.exists() || !inDir.isDirectory()) {
             FO2IELogger.reportInfo("Loading ini finished!", null);
-            FO2IELogger.reportInfo("Loading ini resulted in error!", null);
-            return ok;
+            FO2IELogger.reportInfo("Loading ini resulted in error: Directory does not exist!", null);
+            return OperationResult.INVALID;
         }
+
+        // Convert wildcard pattern to regex
+        final Pattern iniFileWildcard = FileUtils.wildcardToRegex(config.getDefaultIni());
+
+        // Find matching files
+        File[] matchingFiles = inDir.listFiles((dir, name) -> iniFileWildcard.matcher(name).matches());
+
+        // Check if any matching files are found
+        if (matchingFiles == null || matchingFiles.length == 0) {
+            FO2IELogger.reportInfo("Loading ini finished!", null);
+            FO2IELogger.reportInfo("Loading ini resulted in error: No matching files found!", null);
+            return OperationResult.INVALID;
+        }
+
+        // Log success and proceed with processing if necessary
+        final File iniFile = matchingFiles[0];
+        // Backwards so writting ini file works!
+        GUI.setIniFileName(iniFile.getName());
+
+        OperationResult result = OperationResult.INIT;
 
         // set standard (default) readMode
         readMode = ReadMode.STD;
@@ -194,19 +251,22 @@ public class Intrface {
                     } else if (line.contains("=")) {
                         String[] words = line.split("=");
                         words[0] = words[0].trim();
-                        words[1] = words[1].trim();
-
                         FeatureKey fk = FeatureKey.valueOf(words[0]);
                         if (fk == null) {
                             errorNum++;
                             errStrMsg.append(lineNum).append(": @").append(words[0]).append("\n");
                             FO2IELogger.reportError(lineNum + ":" + " @" + words[0], null);
                         }
-                        FeatureValue fv = FeatureValue.valueOf(words[1]);
-                        if (fv == null) {
-                            errorNum++;
-                            errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
-                            FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
+
+                        FeatureValue fv = null;
+                        if (words.length > 1) {
+                            words[1] = words[1].trim();
+                            fv = FeatureValue.valueOf(words[1]);
+                            if (fv == null) {
+                                errorNum++;
+                                errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
+                                FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
+                            }
                         }
 
                         if (fk != null && fv != null) {
@@ -232,7 +292,14 @@ public class Intrface {
             FO2IELogger.reportInfo("Total lines: " + lineNum, null);
             FO2IELogger.reportInfo("Total errors: " + errorNum, null);
 
-            ok = true;
+            // Decision logic for result
+            if (errorNum == 0) {
+                result = OperationResult.OK;
+            } else if (config.isIgnoreErrors()) {
+                result = OperationResult.WARN;
+            } else {
+                result = OperationResult.ERR;
+            }
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } catch (IOException ex) {
@@ -248,16 +315,16 @@ public class Intrface {
         }
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
-        if (ok && errorNum == 0) {
+        if (result != OperationResult.ERR) {
             originalBinds.copyTo(modifiedBinds, false);
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
         }
 
-        initialized = ok;
+        initialized = (result == OperationResult.OK) || (result == OperationResult.WARN);
 
-        return ok;
+        return result;
     }
 
     /**
@@ -267,14 +334,14 @@ public class Intrface {
      * @param iniFile ini file of the interface
      * @return initialization ok status
      */
-    public boolean readIniFile(File iniFile) {
-        boolean ok = false;
-
+    public OperationResult readIniFile(File iniFile) {
         if (!iniFile.exists()) {
             FO2IELogger.reportInfo("Loading ini finished!", null);
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
-            return ok;
+            return OperationResult.INVALID;
         }
+
+        OperationResult result = OperationResult.INIT;
 
         // set standard (default) readMode
         readMode = ReadMode.STD;
@@ -325,19 +392,22 @@ public class Intrface {
                     } else if (line.contains("=")) {
                         String[] words = line.split("=");
                         words[0] = words[0].trim();
-                        words[1] = words[1].trim();
-
                         FeatureKey fk = FeatureKey.valueOf(words[0]);
                         if (fk == null) {
                             errorNum++;
                             errStrMsg.append(lineNum).append(": @").append(words[0]).append("\n");
                             FO2IELogger.reportError(lineNum + ":" + " @" + words[0], null);
                         }
-                        FeatureValue fv = FeatureValue.valueOf(words[1]);
-                        if (fv == null) {
-                            errorNum++;
-                            errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
-                            FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
+
+                        FeatureValue fv = null;
+                        if (words.length > 1) {
+                            words[1] = words[1].trim();
+                            fv = FeatureValue.valueOf(words[1]);
+                            if (fv == null) {
+                                errorNum++;
+                                errStrMsg.append(lineNum).append(": @").append(words[1]).append("\n");
+                                FO2IELogger.reportError(lineNum + ":" + " @" + words[1], null);
+                            }
                         }
 
                         if (fk != null && fv != null) {
@@ -363,7 +433,14 @@ public class Intrface {
             FO2IELogger.reportInfo("Total lines: " + lineNum, null);
             FO2IELogger.reportInfo("Total errors: " + errorNum, null);
 
-            ok = true;
+            // Decision logic for result
+            if (errorNum == 0) {
+                result = OperationResult.OK;
+            } else if (config.isIgnoreErrors()) {
+                result = OperationResult.WARN;
+            } else {
+                result = OperationResult.ERR;
+            }
         } catch (FileNotFoundException ex) {
             FO2IELogger.reportError(ex.getMessage(), ex);
         } catch (IOException ex) {
@@ -379,16 +456,16 @@ public class Intrface {
         }
 
         FO2IELogger.reportInfo("Loading ini finished!", null);
-        if (ok && errorNum == 0) {
+        if (result != OperationResult.ERR) {
             originalBinds.copyTo(modifiedBinds, false);
             FO2IELogger.reportInfo("Ini has been loaded succefully!", null);
         } else {
             FO2IELogger.reportInfo("Loading ini resulted in error!", null);
         }
 
-        initialized = ok;
+        initialized = (result == OperationResult.OK) || (result == OperationResult.WARN);
 
-        return ok;
+        return result;
     }
 
     /**
