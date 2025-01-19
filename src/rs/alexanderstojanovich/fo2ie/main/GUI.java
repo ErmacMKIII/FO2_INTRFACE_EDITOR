@@ -1097,11 +1097,12 @@ public class GUI extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v2.0 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-13 at 22:23).\n");
+            sb.append("VERSION v2.1 - OXYGEN (PUBLIC BUILD reviewed on 2025-01-19 at 02:29).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
-            sb.append("Changelog since v2.0 OXYGEN:\n");
+            sb.append("Changelog since v2.0/v2.1 OXYGEN:\n");
+            sb.append("\t- Fix missing 'FixAll' (v2.1) in FixBoy segment.\n");
             sb.append("\t- Interface Ini filename supports wildcards (e.g. *.ini for both 'default.ini' - FOnline2 and 'faction.ini' - FOnline:Reloaded).\n");
             sb.append("\t- Add Gui Themes. Could be changed from the ini.\n");
             sb.append("\t- Fix not loading interface (ini reader) when ignore errors.\n");
