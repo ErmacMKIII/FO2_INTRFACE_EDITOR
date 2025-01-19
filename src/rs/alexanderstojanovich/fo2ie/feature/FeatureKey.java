@@ -1540,6 +1540,8 @@ public interface FeatureKey {
 
     // Fix-boy
     public static enum FixBoy implements FeatureKey {
+        FixFixAllPicDn,
+        FixFixAll,
         FixButton1,
         FixButton2,
         FixButton3,
@@ -1612,6 +1614,7 @@ public interface FeatureKey {
                 case FixFilterPicDrugsDn:
                 case FixFilterPicWeaponsDn:
                 case FixFilterPicMiscDn:
+                case FixFixAllPicDn:
                     return Type.PIC;
                 case FixButton1:
                 case FixButton2:
@@ -1633,6 +1636,7 @@ public interface FeatureKey {
                 case FixFilterDrugs:
                 case FixFilterWeapons:
                 case FixFilterMisc:
+                case FixFixAll:
                     return Type.PIC_POS;
                 case FixCntValue:
                 case FixNum:
@@ -1712,6 +1716,9 @@ public interface FeatureKey {
                 case FixCntUp:
                     result.add(FixCntUpPicDn);
                     break;
+                case FixFixAll:
+                    result.add(FixFixAllPicDn);
+                    break;
             }
 
             return result;
@@ -1761,7 +1768,8 @@ public interface FeatureKey {
                 FixFilterPicWeaponsDn,
                 FixFilterPicMiscDn,
                 FixCntDnPicDn,
-                FixCntUpPicDn
+                FixCntUpPicDn,
+                FixFixAllPicDn
             };
         }
 
@@ -1787,7 +1795,8 @@ public interface FeatureKey {
                 FixFilterArmors,
                 FixFilterDrugs,
                 FixFilterWeapons,
-                FixFilterMisc
+                FixFilterMisc,
+                FixFixAll
             };
         }
 
